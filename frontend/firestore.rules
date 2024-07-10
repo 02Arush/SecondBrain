@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default rule to deny all reads and writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Allow read and write operations on the 'users' collection
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+  }
+}
