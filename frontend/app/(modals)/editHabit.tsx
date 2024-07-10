@@ -19,6 +19,13 @@ import { router, useFocusEffect } from "expo-router";
 import { isAnonymous } from "@/constants/AuthConstants";
 import { AuthContext } from "@/contexts/authContext";
 import { getUserDataFromEmail } from "@/api/db_ops";
+import {
+  filterTextToDecimal,
+  filterTextToInteger,
+  getDateFromSimpleDate,
+} from "@/api/types_and_utils";
+import DatePicker from "@/components/DatePicker";
+import { SimpleDate } from "@/api/types_and_utils";
 
 const editHabit = () => {
   const route = useRouteInfo();
@@ -32,9 +39,11 @@ const editHabit = () => {
   const [changeQty, setChangeQty] = useState("1");
   const { email, setEmail } = useContext(AuthContext);
   const todayDate = new Date();
-  const [incDay, setIncDay] = useState(todayDate.getDay());
-  const [incMonth, setIncMonth] = useState(todayDate.getMonth());
-  const [incYear, setIncYear] = useState(todayDate.getFullYear());
+  const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>({
+    day: todayDate.getDate(),
+    month: todayDate.getMonth() + 1, // The plus 1 is here because getMonth() is 0-indexed (i.e July will output 6, but we want it to be 7)
+    year: todayDate.getFullYear(),
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -86,7 +95,14 @@ const editHabit = () => {
       const changeAmount = incrementSelected
         ? Number(changeQty)
         : -1 * Number(changeQty);
-      thisHabit.logItem(new Date(), changeAmount);
+
+      // First: Check if simple date is valid date
+      const updatedDate = getDateFromSimpleDate(dateToUpdate);
+      if (updatedDate) {
+        thisHabit.logItem(updatedDate, changeAmount);
+      } else {
+        alert("Error: Invalid Date. Enter Date in Format: MM/DD/YYYY");
+      }
 
       const response = await updateHabitObject(thisHabit.getJSON(), email);
       if (response.error) {
@@ -114,14 +130,6 @@ const editHabit = () => {
   const [incrementSelected, setIncrementSelected] = useState(true);
   const handleSetIncrement = (increment: boolean) => {
     setIncrementSelected(increment);
-  };
-
-  const filterTextToInteger = (text: string) => {
-    return Number(text.replace(/[^0-9]/gi, ""));
-  };
-
-  const filterTextToDecimal = (text: string) => {
-    return Number(text.replace(/[^0-9.]/gi, "").replace(/(\..*)\./g, "$1"));
   };
 
   return (
@@ -167,42 +175,7 @@ const editHabit = () => {
           <Text>{thisHabit.getUnit()}</Text>
         </View>
         <View style={styles.row}>
-          <Text>On</Text>
-          <TextInput
-            contentStyle={{ padding: 0 }}
-            dense
-            maxLength={2}
-            style={{ ...styles.denseInput, width: "20%" }}
-            value={String(incDay)}
-            onChangeText={(text) => {
-              const day = filterTextToInteger(text);
-              setIncDay(day);
-            }}
-          />
-          <Text>/</Text>
-          <TextInput
-            contentStyle={{ padding: 0, textAlign: "center" }}
-            dense
-            maxLength={2}
-            style={{ ...styles.denseInput, width: "20%" }}
-            value={String(incMonth)}
-            onChangeText={(text) => {
-              const month = filterTextToInteger(text);
-              setIncMonth(month);
-            }}
-          />
-          <Text>/</Text>
-          <TextInput
-            value={String(incYear)}
-            contentStyle={{ padding: 0, margin: 0, textAlign: "center" }}
-            dense
-            maxLength={4}
-            style={styles.denseInput}
-            onChangeText={(text) => {
-              const year = filterTextToInteger(text);
-              setIncYear(year);
-            }}
-          />
+          <DatePicker date={dateToUpdate} setDate={setDateToUpdate} />
         </View>
 
         <View
@@ -256,7 +229,6 @@ const styles = StyleSheet.create({
   },
 
   row: {
-    // borderWidth: 1,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
