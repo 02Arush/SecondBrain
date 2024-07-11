@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // Paths
 const distDir = path.join(__dirname, 'dist'); // Adjust this if your build directory is different
@@ -10,8 +11,8 @@ const assetsDestDir = path.join(distDir, 'assets', 'images');
 
 // Add manifest.json
 const manifestContent = {
-  "short_name": "Fasthabit",
-  "name": "Fasthabit",
+  "short_name": "SecondBrain",
+  "name": "SecondBrain",
   "icons": [
     {
       "src": "favicon.ico",
@@ -38,14 +39,35 @@ const manifestContent = {
 fs.writeFileSync(manifestPath, JSON.stringify(manifestContent, null, 2));
 console.log('manifest.json added.');
 
-// Modify index.html to include manifest.json
+// Modify index.html to include manifest.json and service worker registration
 let htmlContent = fs.readFileSync(htmlFilePath, 'utf8');
 const manifestLink = '<link rel="manifest" href="/manifest.json">';
+const serviceWorkerScript = `
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(error) {
+          console.log('ServiceWorker registration failed: ', error);
+        });
+      });
+    }
+  </script>
+`;
+
 if (!htmlContent.includes(manifestLink)) {
-  htmlContent = htmlContent.replace('</head>', `${manifestLink}</head>`);
+  htmlContent = htmlContent.replace('</head>', `${manifestLink}
+  </head>`);
 }
+
+if (!htmlContent.includes(serviceWorkerScript.trim())) {
+  htmlContent = htmlContent.replace('</body>', `${serviceWorkerScript}
+  </body>`);
+}
+
 fs.writeFileSync(htmlFilePath, htmlContent, 'utf8');
-console.log('index.html modified to include manifest.json.');
+console.log('index.html modified to include manifest.json and service worker registration.');
 
 // Function to copy a directory recursively
 function copyDirectorySync(src, dest) {
@@ -70,3 +92,21 @@ function copyDirectorySync(src, dest) {
 // Copy assets directory
 copyDirectorySync(assetsSrcDir, assetsDestDir);
 console.log('Assets copied to dist directory.');
+
+// Run Workbox CLI wizard to create workbox-config.js
+try {
+  execSync('npx workbox-cli wizard', { stdio: 'inherit' });
+} catch (error) {
+  console.error('Error running Workbox CLI wizard:', error);
+  process.exit(1);
+}
+
+// Generate service worker using Workbox config
+try {
+  execSync('npx workbox-cli generateSW workbox-config.js', { stdio: 'inherit' });
+} catch (error) {
+  console.error('Error generating service worker with Workbox:', error);
+  process.exit(1);
+}
+
+console.log('Service worker generated successfully.');
