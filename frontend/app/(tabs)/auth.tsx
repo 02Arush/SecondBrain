@@ -65,6 +65,11 @@ export default function auth() {
     alert("NOT YET IMPLEMENTED");
   };
 
+  const handleShowConfirmPasswordModal = () => {
+    setLoginPassword("");
+    setShowingConfirmPassModal(true);
+  };
+
   const handleDeleteAccount = async () => {
     // Show a pop up to confirm the password:
     const res = await deleteAccount(email, loginPassword);
@@ -159,12 +164,48 @@ export default function auth() {
               <View style={{ width: "100%", alignItems: "center" }}>
                 <Text>Signed in as: {email}</Text>
                 <Button onPress={handleLogOut}>Sign Out</Button>
-                {/* Handle Delete Account Here */}
+                <Button onPress={handleShowConfirmPasswordModal}>
+                  Delete Account
+                </Button>
               </View>
             </>
           )}
         </View>
       </SafeAreaView>
+      {showingConfirmPasswordModal && (
+        <>
+          <OutlineModal>
+            <View style={{ margin: 20 }}>
+              <Text>
+                Confirm Your Password for {email} to delete your account
+              </Text>
+              <TextInput
+                style={{ marginVertical: 6 }}
+                value={loginPassword}
+                onChangeText={setLoginPassword}
+              />
+              <View style={{ flexDirection: "column", alignItems: "center" }}>
+                <Button
+                  style={styles.delCancelButtons}
+                  mode="contained"
+                  onPress={() => {
+                    setShowingConfirmPassModal(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  style={styles.delCancelButtons}
+                  mode="text"
+                  onPress={handleDeleteAccount}
+                >
+                  Submit
+                </Button>
+              </View>
+            </View>
+          </OutlineModal>
+        </>
+      )}
     </KeyboardAvoidingView>
   );
 }

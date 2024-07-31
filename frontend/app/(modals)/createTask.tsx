@@ -58,113 +58,129 @@ const createTask = () => {
     }
   };
 
-  return (
-    <SafeAreaView style={styles.pageContainer}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-        style={styles.contentContainer}
-      >
-        <TextInput
-          label={"name"}
-          value={taskName}
-          onChangeText={(text) => {
-            setTaskName(text);
-          }}
-          style={{ marginVertical: 4 }}
-        />
-        <TextInput
-          label={"description"}
-          value={taskDescription}
-          onChangeText={(text) => {
-            setTaskDescription(text);
-          }}
-          style={{ marginVertical: 4 }}
-        />
+  const handleCreateTask = () => {
+    // validate task data and information like date etc.
+    // API call to create a task
 
-        <Button
-          disabled={deadlineEnabled !== "checked"}
-          onPress={handleEditDeadline}
-          mode="text"
-          style={{ marginVertical: 4 }}
-        >
-          {displayedDeadline}
-        </Button>
-        <View>
-          <Text>Importance: {importance}</Text>
-          <Slider
-            style={{ width: 225, height: 40 }}
-            minimumValue={0}
-            maximumValue={10}
-            value={importance}
-            onValueChange={(value) => {
-              setimportance(value);
+    
+  };
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      style={{
+        ...styles.pageContainer,
+        backgroundColor: theme.colors.background,
+      }}
+    >
+      <SafeAreaView>
+        <View style={styles.contentContainer}>
+          <TextInput
+            label={"name"}
+            value={taskName}
+            onChangeText={(text) => {
+              setTaskName(text);
             }}
-            step={1}
-            minimumTrackTintColor={theme.colors.onBackground}
-            maximumTrackTintColor={theme.colors.onBackground}
-            thumbTintColor={theme.colors.primary}
+            style={{ marginVertical: 4 }}
           />
-          <View
-            style={{ justifyContent: "space-between", flexDirection: "row" }}
-          >
-            <HelperText type="info">1 (low)</HelperText>
-            <HelperText type="info">10 (high)</HelperText>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-      <OutlineModal showing={showingDeadlineModal}>
-        <Surface
-          style={{
-            width: 350,
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              width: "100%",
-              backgroundColor: "rgba(0, 0, 0, 0.3)",
+          <TextInput
+            label={"description"}
+            value={taskDescription}
+            onChangeText={(text) => {
+              setTaskDescription(text);
             }}
+            style={{ marginVertical: 4 }}
+          />
+
+          <Button
+            disabled={deadlineEnabled !== "checked"}
+            onPress={handleEditDeadline}
+            mode="text"
+            style={{ marginVertical: 4 }}
           >
-            <Text style={{ marginLeft: 20 }} variant="bodyLarge">
-              Select a deadline date
-            </Text>
-            <IconButton
-              icon="close"
-              onPress={() => {
-                setShowingDeadlineModal(false);
+            {displayedDeadline}
+          </Button>
+          <View>
+            <Text>Importance: {importance}</Text>
+            <Slider
+              style={{ width: "100%", height: 40 }}
+              minimumValue={1}
+              maximumValue={10}
+              value={importance}
+              onValueChange={(value) => {
+                setimportance(value);
               }}
+              step={1}
+              minimumTrackTintColor={theme.colors.onBackground}
+              maximumTrackTintColor={theme.colors.onBackground}
+              thumbTintColor={theme.colors.primary}
             />
-          </View>
-          <View style={{ marginVertical: 20 }}>
-            <DatePicker date={deadline} setDate={setDeadline} />
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "flex-end",
-              width: "100%",
-            }}
-          >
-            <Button style={{ margin: 4 }} onPress={handleClearDeadline}>
-              Clear Deadline
-            </Button>
-            <Button
-              style={{ margin: 4 }}
-              mode="contained"
-              onPress={handleConfirmDeadline}
+            <View
+              style={{ justifyContent: "space-between", flexDirection: "row" }}
             >
-              Confirm Deadline
-            </Button>
+              <HelperText type="info">1 (low)</HelperText>
+              <HelperText type="info">10 (high)</HelperText>
+            </View>
           </View>
-        </Surface>
-      </OutlineModal>
-    </SafeAreaView>
+          <Button mode="contained" onPress={handleCreateTask}>
+            Create Task
+          </Button>
+
+          <OutlineModal showing={showingDeadlineModal}>
+            <Surface
+              style={{
+                width: 350,
+                flexDirection: "column",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "100%",
+                  backgroundColor: "rgba(0, 0, 0, 0.3)",
+                }}
+              >
+                <Text style={{ marginLeft: 20 }} variant="bodyLarge">
+                  Select a deadline date
+                </Text>
+                <IconButton
+                  icon="close"
+                  onPress={() => {
+                    setShowingDeadlineModal(false);
+                  }}
+                />
+              </View>
+              <View style={{ marginVertical: 20 }}>
+                <DatePicker date={deadline} setDate={setDeadline} />
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                  width: "100%",
+                }}
+              >
+                <Button style={{ margin: 4 }} onPress={handleClearDeadline}>
+                  Clear Deadline
+                </Button>
+                <Button
+                  style={{ margin: 4 }}
+                  mode="contained"
+                  onPress={handleConfirmDeadline}
+                >
+                  Confirm Deadline
+                </Button>
+              </View>
+            </Surface>
+          </OutlineModal>
+        </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -172,14 +188,13 @@ export default createTask;
 
 const styles = StyleSheet.create({
   pageContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
 
   contentContainer: {
-    width: 320,
-    flexDirection: "column",
-    alignItems: "center",
+    width: 350,
   },
 });

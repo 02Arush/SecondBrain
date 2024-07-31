@@ -1,4 +1,10 @@
-import { StyleSheet, View } from "react-native";
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import React, { useCallback, useContext, useState } from "react";
 import { Text, useTheme, TextInput, Button } from "react-native-paper";
 import {
@@ -9,7 +15,7 @@ import {
 import { router, useFocusEffect } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
 import OutlineModal from "@/components/OutlineModal";
-import { isAnonymous } from "@/constants/AuthConstants";
+import { isAnonymous } from "@/constants/constants";
 import { retrieveLocalHabitList } from "@/api/storage";
 import Habit from "@/api/habit";
 
@@ -18,6 +24,7 @@ const register = () => {
   useFocusEffect(
     useCallback(() => {
       setShowingLocalStorageSyncModal(false);
+
     }, [])
   );
 
@@ -74,83 +81,101 @@ const register = () => {
       }
     }
 
-    router.replace("/(tabs)/");
+    router.replace("/(tabs)");
   };
 
   return (
-    <View
-      style={{ backgroundColor: theme.colors.background, ...styles.container }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      style={{
+        ...styles.pageContainer,
+        backgroundColor: theme.colors.background,
+      }}
     >
-      {/* && !isAnonymous(email) */}
-      <OutlineModal showing={showingLocalStorageSyncModal}>
-        <View style={{ padding: 10 }}>
-          <Text>
-            <b>Email Successfully Registered: </b>
-            {email}
-            <br />
-            Would you like to sync the locally stored habits/tasks to the new
-            account?
-          </Text>
-          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+      <SafeAreaView>
+        <View style={styles.contentContainer}>
+          <View>
+            <Text variant="headlineSmall" style={styles.rowElt}>
+              Create An Account
+            </Text>
+            <TextInput
+              value={emailTxt}
+              onChangeText={setEmailTxt}
+              style={styles.rowElt}
+              placeholder="email"
+            />
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              style={styles.rowElt}
+              placeholder="password"
+              secureTextEntry
+            />
+            <TextInput
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              style={styles.rowElt}
+              placeholder="confirm password"
+              secureTextEntry
+            />
             <Button
-              onPress={() => {
-                navigateHomeScreen(true);
-              }}
+              style={styles.rowElt}
+              mode="contained"
+              onPress={handleRegister}
             >
-              Yes
-            </Button>
-            <Button
-              onPress={() => {
-                navigateHomeScreen(false);
-              }}
-            >
-              No
+              Create Account
             </Button>
           </View>
+          <OutlineModal showing={showingLocalStorageSyncModal}>
+            <View style={{ padding: 10, flexDirection: "column" }}>
+              <Text>
+                Email Successfully Registered: 
+                <Text style={{fontWeight: "bold"}}>{email}</Text>
+              </Text>
+              <Text style={{marginLeft: 4}}>
+                Would you like to sync the locally stored habits/tasks to the
+                new account?
+              </Text>
+              <View style={{ flexDirection: "row", justifyContent: "center" }}>
+                <Button
+                  onPress={() => {
+                    navigateHomeScreen(true);
+                  }}
+                >
+                  Yes
+                </Button>
+                <Button
+                  onPress={() => {
+                    navigateHomeScreen(false);
+                  }}
+                >
+                  No
+                </Button>
+              </View>
+            </View>
+          </OutlineModal>
         </View>
-      </OutlineModal>
-      <View>
-        <Text variant="headlineSmall" style={styles.rowElt}>
-          Create An Account
-        </Text>
-        <TextInput
-          value={emailTxt}
-          onChangeText={setEmailTxt}
-          style={styles.rowElt}
-          placeholder="email"
-        />
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          style={styles.rowElt}
-          placeholder="password"
-          secureTextEntry
-        />
-        <TextInput
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          style={styles.rowElt}
-          placeholder="confirm password"
-          secureTextEntry
-        />
-        <Button style={styles.rowElt} mode="contained" onPress={handleRegister}>
-          Create Account
-        </Button>
-      </View>
-    </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
 export default register;
 
 const styles = StyleSheet.create({
-  container: {
+  pageContainer: {
+    flexDirection: "column",
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
+  },
+
+  contentContainer: {
+    width: 350,
   },
 
   rowElt: {
-    marginVertical: 2,
+    marginVertical: 8,
   },
 });
