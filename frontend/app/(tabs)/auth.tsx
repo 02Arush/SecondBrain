@@ -1,4 +1,10 @@
-import { StyleSheet, View } from "react-native";
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { Text, TextInput, useTheme, Surface, Button } from "react-native-paper";
 import { useContext, useEffect, useState } from "react";
 import { router } from "expo-router";
@@ -9,7 +15,7 @@ import {
   logOut,
 } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
-import constants, { isAnonymous } from "@/constants/AuthConstants";
+import constants, { isAnonymous } from "@/constants/constants";
 import ModalScreen from "../modal";
 import OutlineModal from "@/components/OutlineModal";
 
@@ -21,7 +27,12 @@ export default function auth() {
     useState(false);
 
   const handleLogin = async () => {
-    alert("Attempting login");
+    // check if email or password are not null
+    if (loginEmail.length === 0 || loginPassword.length === 0) {
+      alert("Please ensure email and password input fields are completed");
+      return;
+    }
+
     const res = await attemptLogin(loginEmail, loginPassword);
     if (res.error) {
       alert(res.error);
@@ -50,6 +61,10 @@ export default function auth() {
     router.push("/(modals)/register");
   };
 
+  const handleForgotPassword = () => {
+    alert("NOT YET IMPLEMENTED");
+  };
+
   const handleDeleteAccount = async () => {
     // Show a pop up to confirm the password:
     const res = await deleteAccount(email, loginPassword);
@@ -66,89 +81,111 @@ export default function auth() {
 
   const theme = useTheme();
   return (
-    <View
-      style={{ backgroundColor: theme.colors.background, ...styles.container }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      style={{
+        ...styles.pageContainer,
+        backgroundColor: theme.colors.background,
+      }}
     >
-      {isAnonymous(email) ? (
-        <>
-          <View>
-            <Text variant="headlineSmall">Log In</Text>
-            <TextInput
-              style={{ marginVertical: 4 }}
-              placeholder="email"
-              value={loginEmail}
-              onChangeText={(text) => setLoginEmail(text)}
-            />
-            <TextInput
-              style={{ marginVertical: 4 }}
-              placeholder="password"
-              value={loginPassword}
-              onChangeText={(text) => setLoginPassword(text)}
-              secureTextEntry
-            />
-            <Button mode="contained" onPress={handleLogin}>
-              Log In
-            </Button>
-            <Button mode="text" onPress={handleRegister}>
-              I don't have an account
-            </Button>
-          </View>
-        </>
-      ) : (
-        <>
-          <Text>Signed In as {email}</Text>
-          <Button onPress={handleLogOut}>Log Out</Button>
-          <Button
-            onPress={() => {
-              setShowingConfirmPassModal(true);
-            }}
-          >
-            Delete Account
-          </Button>
-        </>
-      )}
-      {showingConfirmPasswordModal && (
-        <>
-          <OutlineModal>
-            <View style={{ margin: 20 }}>
-              <Text>
-                Confirm Your Password for {email} to delete your account
-              </Text>
-              <TextInput
-                style={{marginVertical: 6}}
-                value={loginPassword}
-                onChangeText={setLoginPassword}
-              />
-              <View style={{flexDirection: "column", alignItems: "center"}}>
-                <Button
-                  style={styles.delCancelButtons}
-                  mode="contained"
-                  onPress={() => {setShowingConfirmPassModal(false)}}
+      <SafeAreaView>
+        <View style={styles.contentContainer}>
+          {isAnonymous(email) ? (
+            <>
+              <View
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexDirection: "column",
+                }}
+              >
+                <View
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "flex-start",
+                  }}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  style={styles.delCancelButtons}
-                  mode="text"
-                  onPress={handleDeleteAccount}
+                  <Text variant="headlineLarge">Log In</Text>
+                </View>
+                <TextInput
+                  placeholder="Email"
+                  value={loginEmail}
+                  onChangeText={setLoginEmail}
+                  style={styles.textInput}
+                />
+                <TextInput
+                  placeholder="Password"
+                  value={loginPassword}
+                  onChangeText={setLoginPassword}
+                  style={styles.textInput}
+                />
+                <View
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                  }}
                 >
-                  Submit
-                </Button>
+                  <Button compact mode="text" onPress={handleForgotPassword}>
+                    Forgot Password
+                  </Button>
+                </View>
+
+                <View style={{ marginTop: 20, width: "100%" }}>
+                  <Button
+                    compact
+                    style={{ marginVertical: 4 }}
+                    mode="contained"
+                    onPress={handleLogin}
+                  >
+                    Log In
+                  </Button>
+                  <Button
+                    onPress={handleRegister}
+                    compact
+                    style={{ marginVertical: 4 }}
+                    mode="outlined"
+                  >
+                    Sign Up
+                  </Button>
+                </View>
               </View>
-            </View>
-          </OutlineModal>
-        </>
-      )}
-    </View>
+            </>
+          ) : (
+            <>
+              <View style={{ width: "100%", alignItems: "center" }}>
+                <Text>Signed in as: {email}</Text>
+                <Button onPress={handleLogOut}>Sign Out</Button>
+                {/* Handle Delete Account Here */}
+              </View>
+            </>
+          )}
+        </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  pageContainer: {
+    flexDirection: "column",
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
   },
+
+  contentContainer: {
+    width: 350,
+  },
+
+  textInput: {
+    marginVertical: 4,
+    width: "100%",
+  },
+
   title: {
     fontSize: 20,
     fontWeight: "bold",

@@ -14,7 +14,7 @@ import { AuthContext } from "@/contexts/authContext";
 import { retrieveLocalHabitList } from "./../../api/storage";
 import { addHabit as createHabit } from "@/api/db_ops";
 
-import { isAnonymous } from "@/constants/AuthConstants";
+import { isAnonymous } from "@/constants/constants";
 
 const addHabit = () => {
   const [habitName, setHabitName] = useState("");
@@ -66,7 +66,7 @@ const addHabit = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <Surface style={styles.contentContainer}>
+        <View style={styles.contentContainer}>
           <TextInput
             label="Habit Name"
             value={habitName}
@@ -93,7 +93,7 @@ const addHabit = () => {
           >
             Submit
           </Button>
-        </Surface>
+        </View>
       </KeyboardAvoidingView>
     </ScrollView>
   );

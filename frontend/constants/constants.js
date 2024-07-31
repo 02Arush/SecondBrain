@@ -1,6 +1,7 @@
 
 const constants = {
-    ANONYMOUS: "Anonymous"
+    ANONYMOUS: "Anonymous",
+    NO_TASK_DEADLINE: "No Deadline"
 }
 
 export const isAnonymous = (email) => {

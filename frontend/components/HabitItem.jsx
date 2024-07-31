@@ -2,9 +2,10 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Button, Icon, IconButton, Text } from "react-native-paper";
 import { router, useRouter } from "expo-router";
-import { Surface } from "react-native-paper";
+// import { } from "react-native-paper";
 import { retrieveData } from "@/api/storage";
-const HabitItem = ({ name, dailyCount, totalCount }) => {
+import { CustomSurface as Surface} from "@/components/CustomSurface";
+const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
   const router = useRouter();
 
   function handleEditHabit() {
@@ -28,7 +29,7 @@ const HabitItem = ({ name, dailyCount, totalCount }) => {
       </View>
       <View style={styles.actionSection}>
         <Text>Today: {dailyCount} </Text>
-        <Text>Total: {totalCount}</Text>
+        <Text>Week: {sevenDayCount}</Text>
         <IconButton icon="pencil" size={16} onPress={handleEditHabit} />
         <IconButton icon="chart-box" size={16} onPress={handleViewGraph} />
       </View>

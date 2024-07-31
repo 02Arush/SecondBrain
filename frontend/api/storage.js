@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Habit from './habit';
-import { isAnonymous } from '@/constants/AuthConstants';
+import { isAnonymous } from '@/constants/constants';
 import { getUserDataFromEmail, updateUserHabitList } from './db_ops';
 
 // Function to store data

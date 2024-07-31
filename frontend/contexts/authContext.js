@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { getSignedInUser } from '@/api/db_ops';
-import constants from '@/constants/AuthConstants';
+import constants from '@/constants/constants';
 
 const AuthContext = createContext();
 

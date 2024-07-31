@@ -6,14 +6,13 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, setPersistence, getReactNativePersistence, initializeAuth, deleteUser } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore'
+import { addDoc, getFirestore } from 'firebase/firestore'
 import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
-import { storeData, retrieveData } from "./storage";
-import constants from "@/constants/AuthConstants";
 import Habit from "./habit";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { retrieveLocalHabitList } from "./storage";
 import { Platform } from "react-native";
+import Task from "./task";
 
 
 const firebaseConfig = {
@@ -112,8 +111,6 @@ export const logOut = async () => {
     } catch (err) {
         return { error: err.message }
     }
-
-
 }
 
 export const getUserDataFromEmail = async (email) => {
@@ -229,14 +226,34 @@ export const removeHabit = (username, habitItem) => {
 
 }
 
-export const addTodo = (username, todoItem) => {
+export const createTask = async (email, task) => {
+    if (!(task instanceof Task)) {
+        return { error: "task provided is not a Task object: Type " + typeof task };
+    }
 
-}
+    try {
+        // first, create the task with the taskID into firebase database
+        const taskDocRef = await addDoc(db, "tasks", {
+            taskName: task.getName(),
+            description: task.getDescription(),
+            priority: task.getPriority(),
+            deadline: task.getDeadline(),
+            sharedUsers: task.getSharedUsers()
+        })
 
-export const completeTodo = (username, todoItem) => {
+        const taskID = taskDocRef.id
 
-}
+        // Add document to with key = taskID 
+        const docRef = doc(db, "users", email, "tasks", taskID);
+        await addDoc(docRef, {
+            userPriority: task.getPriority(), // each user gets their own individual task priority
+        })
 
-export const deleteTodo = (username, todoItem) => {
+        // TODO LATER:
 
+        // FOR USER'S EMAIL IN SHARED USERS, ADD TO SUBCOLLECTION PENDING_TASK_INVITES
+
+    } catch (err) {
+        return { error: err.code, message: err.message }
+    }
 }

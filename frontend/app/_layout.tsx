@@ -45,9 +45,19 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+const customDarkTheme = {
+  ...MD3DarkTheme,
+
+  colors: {
+    ...MD3DarkTheme.colors,
+    background: "#000000",
+    surface: "#0F0F0F",
+  },
+};
+
 function RootLayoutNav() {
   const scheme = useColorScheme();
-  const theme = scheme === "dark" ? MD3DarkTheme : MD3LightTheme;
+  const theme = scheme === "dark" ? customDarkTheme : MD3LightTheme;
   const style = createNavStyle(theme);
 
   return (
@@ -96,6 +106,14 @@ function RootLayoutNav() {
             options={{
               presentation: "modal",
               title: "Create Account",
+            }}
+          />
+
+          <Stack.Screen
+            name="(modals)/createTask"
+            options={{
+              presentation: "modal",
+              title: "Create Task",
             }}
           />
         </Stack>

@@ -1,4 +1,3 @@
-import { retrieveData } from "./storage";
 
 export default class Habit {
 
@@ -111,7 +110,6 @@ export default class Habit {
         let newListIdx = 0;
 
         for (let i = 0; i < primaryList.length; i++) {
-            alert(JSON.stringify(primaryList[i]));
             let currHabit = Habit.parseHabit(primaryList[i]);
             let currName = currHabit.getName();
             let currUnit = currHabit.getUnit();
@@ -145,14 +143,13 @@ export default class Habit {
         return this.activityLog.get(dateString) || 0; // Returns int or 0 if not found
     }
 
-    getCountFromDateRange(startDate: string, endDate: string) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+    getCountFromDateRange(startDate: Date, endDate: Date) {
+
         let sum = 0;
 
         for (let [date, count] of this.activityLog) {
             const current = new Date(date);
-            if (current >= start && current <= end) {
+            if (current >= startDate && current <= endDate) {
                 sum += count;
             }
         }
@@ -249,38 +246,12 @@ export default class Habit {
         return sum / days;
     }
 
-    getCountPast7Days(mode: "total" | "average" = "total") {
+    getCountPastXDays(numDays: number, mode: "total" | "average" = "total") {
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(endDate.getDate() - 7);
-        const total = this.getCountFromDateRange(startDate.toDateString(), endDate.toDateString());
-        return mode === "average" ? this.calculateAverage(total, 7) : total;
-    }
-
-    getCountPast30Days(mode: "total" | "average" = "total") {
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(endDate.getDate() - 30);
-        const total = this.getCountFromDateRange(startDate.toDateString(), endDate.toDateString());
-        return mode === "average" ? this.calculateAverage(total, 30) : total;
-    }
-
-    getCountPast6Months(mode: "total" | "average" = "total") {
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setMonth(endDate.getMonth() - 6);
-        const total = this.getCountFromDateRange(startDate.toDateString(), endDate.toDateString());
-        const days = (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
-        return mode === "average" ? this.calculateAverage(total, days) : total;
-    }
-
-    getCountPastYear(mode: "total" | "average" = "total") {
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setFullYear(endDate.getFullYear() - 1);
-        const total = this.getCountFromDateRange(startDate.toDateString(), endDate.toDateString());
-        const days = (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
-        return mode === "average" ? this.calculateAverage(total, days) : total;
+        startDate.setDate(endDate.getDate() - numDays - 1);  // Today is included, and day
+        const total = this.getCountFromDateRange(startDate, endDate);
+        return mode === "average" ? this.calculateAverage(total, numDays) : total;
     }
 
 }

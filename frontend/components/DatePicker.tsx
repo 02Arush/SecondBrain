@@ -2,7 +2,6 @@ import { StyleSheet, View } from "react-native";
 import React from "react";
 import { TextInput, Text } from "react-native-paper";
 import { filterTextToInteger } from "@/api/types_and_utils";
-
 import { SimpleDate } from "@/api/types_and_utils";
 
 type propTypes = {
@@ -14,13 +13,16 @@ const DatePicker = ({ date, setDate }: propTypes) => {
   // FORMAT: MONTH/DAY/YEAR
 
   // Debating: Day Month Year vs Month Day year
+
+  const MMDDWidth = 65;
+
   return (
     <View style={styles.container}>
       <TextInput
         contentStyle={{ padding: 0 }}
         dense
         maxLength={2}
-        style={{ ...styles.denseInput, width: "20%" }}
+        style={{ ...styles.denseInput, width: MMDDWidth }}
         value={String(date.month)}
         onChangeText={(text) => {
           // update month
@@ -34,7 +36,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
         contentStyle={{ padding: 0, textAlign: "center" }}
         dense
         maxLength={2}
-        style={{ ...styles.denseInput, width: "20%" }}
+        style={{ ...styles.denseInput, width: MMDDWidth }}
         value={String(date.day)}
         onChangeText={(text) => {
           const day = filterTextToInteger(text);
@@ -49,7 +51,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
         contentStyle={{ padding: 0, margin: 0, textAlign: "center" }}
         dense
         maxLength={4}
-        style={styles.denseInput}
+        style={{ ...styles.denseInput, width: 80 }}
         onChangeText={(text) => {
           const year = filterTextToInteger(text);
           const newSimpleDate: SimpleDate = { ...date, year: year };
@@ -67,16 +69,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    maxWidth: 310,
+    borderColor: "white",
   },
-
   denseInput: {
-    marginHorizontal: 4,
+    marginHorizontal: 2,
     textAlign: "center",
-    width: "25%",
     height: 24,
-    marginVertical: 4,
-    padding: 0,
-    margin: 0,
   },
 });

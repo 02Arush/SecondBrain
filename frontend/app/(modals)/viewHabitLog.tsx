@@ -6,7 +6,7 @@ import Habit from "@/api/habit";
 import { retrieveHabitObject } from "@/api/storage";
 import { Surface, DataTable, Text, useTheme } from "react-native-paper";
 import { AuthContext } from "@/contexts/authContext";
-import { isAnonymous } from "@/constants/AuthConstants";
+import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { useFocusEffect } from "expo-router";
 import { limitStringLength } from "@/api/types_and_utils";
@@ -76,37 +76,37 @@ const viewHabitLog = () => {
           <DataTable.Row>
             <DataTable.Cell>Past 7 Days</DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPast7Days("total"))}
+              {roundToTwoDecimals(habit.getCountPastXDays(7, "total"))}
             </DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPast7Days("average"))}
+              {roundToTwoDecimals(habit.getCountPastXDays(7, "average"))}
             </DataTable.Cell>
           </DataTable.Row>
           <DataTable.Row>
             <DataTable.Cell>Past 30 Days</DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPast30Days("total"))}
+              {roundToTwoDecimals(habit.getCountPastXDays(30, "total"))}
             </DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPast30Days("average"))}
+              {roundToTwoDecimals(habit.getCountPastXDays(30, "average"))}
             </DataTable.Cell>
           </DataTable.Row>
           <DataTable.Row>
             <DataTable.Cell>Past 6 Months</DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPast6Months("total"))}
+              {roundToTwoDecimals(habit.getCountPastXDays((Math.floor(365/2)), "total"))}
             </DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPast6Months("average"))}
+              {roundToTwoDecimals(habit.getCountPastXDays(Math.floor(365/2), "average"))}
             </DataTable.Cell>
           </DataTable.Row>
           <DataTable.Row>
             <DataTable.Cell>Past Year</DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPastYear("total"))}
+              {roundToTwoDecimals(habit.getCountPastXDays(365, "total"))}
             </DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPastYear("average"))}
+              {roundToTwoDecimals(habit.getCountPastXDays(365, "average"))}
             </DataTable.Cell>
           </DataTable.Row>
           <DataTable.Row>

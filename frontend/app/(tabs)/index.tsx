@@ -12,7 +12,7 @@ import {
 } from "@/api/storage";
 import { getSignedInUser, getUserDataFromEmail } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
-import { isAnonymous } from "@/constants/AuthConstants";
+import { isAnonymous } from "@/constants/constants";
 
 export default function TabOneScreen() {
   const theme = useTheme();
@@ -41,7 +41,6 @@ export default function TabOneScreen() {
     }, [email])
   );
 
-
   function handleAddHabit() {
     router.push("/addHabit");
   }
@@ -68,7 +67,7 @@ export default function TabOneScreen() {
                 key={index}
                 name={habitObject.getName()}
                 dailyCount={habitObject.getTodayCount()}
-                totalCount={habitObject.getTotalCount()}
+                totalCount={habitObject.getCountPastXDays(7, "total")}
               />
             );
           })}

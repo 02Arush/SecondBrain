@@ -16,7 +16,7 @@ import {
   deleteHabitObject,
 } from "@/api/storage";
 import { router, useFocusEffect } from "expo-router";
-import { isAnonymous } from "@/constants/AuthConstants";
+import { isAnonymous } from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import {

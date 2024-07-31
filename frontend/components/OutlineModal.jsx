@@ -1,14 +1,18 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, KeyboardAvoidingView, Platform } from "react-native";
 import React from "react";
-import { Surface } from "react-native-paper";
+import { CustomSurface as Surface } from "@/components/CustomSurface";
 
 const OutlineModal = ({ children, showing = true }) => {
   return (
     <>
       {showing && (
-        <View style={styles.container}>
-          <Surface style={{maxWidth: 350}}>{children}</Surface>
-        </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+          style={styles.container}
+        >
+          <Surface style={styles.innerContainer}>{children}</Surface>
+        </KeyboardAvoidingView>
       )}
     </>
   );
@@ -31,7 +35,6 @@ const styles = StyleSheet.create({
 
   innerContainer: {
     width: 350,
-    padding: 10,
-    backgroundColor: "white", // Ensure background color is set for Surface
+    backgroundColor: "red",
   },
 });
