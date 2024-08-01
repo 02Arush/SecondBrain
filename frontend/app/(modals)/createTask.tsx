@@ -1,5 +1,5 @@
 import { StyleSheet, View, SafeAreaView } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import {
   Checkbox,
@@ -18,9 +18,14 @@ import { getDateFromSimpleDate } from "@/api/types_and_utils";
 import Slider from "@react-native-community/slider";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
 type checkedState = "checked" | "unchecked" | "indeterminate";
+import Task from "@/api/task";
+import { createTask as createTaskDB } from "@/api/db_ops";
+import { AuthContext } from "@/contexts/authContext";
+import { router } from "expo-router";
 
 const createTask = () => {
   const theme = useTheme();
+  const { email } = useContext(AuthContext);
   const [taskName, setTaskName] = useState<string>("");
   const [taskDescription, setTaskDescription] = useState<string>("");
   const todayDate = new Date();
@@ -58,17 +63,42 @@ const createTask = () => {
     }
   };
 
-  const handleCreateTask = () => {
+  const handleCreateTask = async () => {
     // validate task data and information like date etc.
     // API call to create a task
 
-    
+    const taskDeadline: Date | null =
+      displayedDeadline.localeCompare(constants.NO_TASK_DEADLINE) === 0
+        ? null
+        : getDateFromSimpleDate(deadline);
+
+    const newTask = new Task(
+      undefined,
+      taskName,
+      taskDescription,
+      taskDeadline,
+      importance
+    );
+
+    if (typeof email === "string") {
+      newTask.addSharedUser({ email: email, permission: "admin" });
+    } else {
+      alert("Error: email is not a string");
+    }
+
+    const res = await createTaskDB(email, newTask);
+    if (res.ok) {
+      alert("Task Added Successfully");
+      router.replace("/tasks")
+    } else {
+      alert(res.error);
+    }
   };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 30 : 20}
       style={{
         ...styles.pageContainer,
         backgroundColor: theme.colors.background,
@@ -123,7 +153,11 @@ const createTask = () => {
               <HelperText type="info">10 (high)</HelperText>
             </View>
           </View>
-          <Button mode="contained" onPress={handleCreateTask}>
+          <Button
+            mode="contained"
+            style={{ marginTop: 8 }}
+            onPress={handleCreateTask}
+          >
             Create Task
           </Button>
 

@@ -24,7 +24,6 @@ const register = () => {
   useFocusEffect(
     useCallback(() => {
       setShowingLocalStorageSyncModal(false);
-
     }, [])
   );
 
@@ -56,7 +55,9 @@ const register = () => {
     if (syncData) {
       const localHabitList = await retrieveLocalHabitList();
       const remoteUserData = await getUserDataFromEmail(email);
-      const remoteHabitList = JSON.parse(remoteUserData["habitList"]);
+      const remoteHabitList = Array.isArray(remoteUserData["habitList"])
+        ? remoteUserData["habitList"]
+        : JSON.parse(remoteUserData["habitList"]);
 
       let response;
       if (Array.isArray(remoteHabitList)) {
@@ -130,10 +131,10 @@ const register = () => {
           <OutlineModal showing={showingLocalStorageSyncModal}>
             <View style={{ padding: 10, flexDirection: "column" }}>
               <Text>
-                Email Successfully Registered: 
-                <Text style={{fontWeight: "bold"}}>{email}</Text>
+                Email Successfully Registered:
+                <Text style={{ fontWeight: "bold" }}>{email}</Text>
               </Text>
-              <Text style={{marginLeft: 4}}>
+              <Text style={{ marginLeft: 4 }}>
                 Would you like to sync the locally stored habits/tasks to the
                 new account?
               </Text>

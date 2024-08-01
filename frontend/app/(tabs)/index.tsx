@@ -24,7 +24,9 @@ export default function TabOneScreen() {
       const fetchData = async () => {
         if (!isAnonymous(email)) {
           const userData = await getUserDataFromEmail(email);
-          const habitList = JSON.parse(userData["habitList"]);
+          const habitList = Array.isArray(userData["habitList"])
+            ? userData["habitList"]
+            : JSON.parse(userData["habitList"]);
           setHabits(habitList);
         } else {
           const habitData = await retrieveLocalHabitList();

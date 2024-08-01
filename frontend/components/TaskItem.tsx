@@ -3,23 +3,41 @@ import React from "react";
 import { Text, IconButton } from "react-native-paper";
 import constants from "@/constants/constants";
 import { CustomSurface as Surface } from "./CustomSurface";
+
+type propTypes = {
+  taskID: number;
+  taskName: string;
+  displayedDeadline: string;
+  userImportance: Number | null;
+};
+
 const TaskItem = ({
+  taskID,
   taskName = "NULL",
-  deadline = constants.NO_TASK_DEADLINE,
-  userPriority = "NULL",
-}) => {
+  displayedDeadline,
+  userImportance,
+}: propTypes) => {
+  displayedDeadline = constants.NO_TASK_DEADLINE ? "N/A" : displayedDeadline;
+
+  const handleCompleteTask = async () => {
+    
+
+  };
+
+  const handleEditTask = async () => {};
+
   return (
     <Surface style={styles.taskItemContainer}>
       <View style={styles.leftItems}>
-        <IconButton icon="circle-outline" />
+        <IconButton icon="circle-outline" onPress={handleCompleteTask} />
         <Text>{taskName}</Text>
       </View>
       <View style={styles.rightItems}>
         <View>
-          <Text variant="bodySmall">Deadline: {deadline}</Text>
-          <Text>Priority: {userPriority}</Text>
+          <Text variant="bodySmall">Deadline: {displayedDeadline}</Text>
+          <Text>Importance: {userImportance?.toString()}</Text>
         </View>
-        <IconButton icon="dots-horizontal" />
+        <IconButton icon="dots-horizontal" onPress={handleEditTask} />
       </View>
     </Surface>
   );

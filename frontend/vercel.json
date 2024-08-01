@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx expo export -p web && npx workbox-cli generateSW workbox-config.js && node postbuild.js",
+  "buildCommand": "npx expo export --platform web && npx workbox-cli generateSW workbox-config.js && node postbuild.js",
   "outputDirectory": "dist",
   "devCommand": "expo",
   "cleanUrls": true,

@@ -24,7 +24,9 @@ const viewHabitLog = () => {
         let habitList = null;
         if (!isAnonymous(email)) {
           const userData = await getUserDataFromEmail(email);
-          habitList = JSON.parse(userData["habitList"]);
+          habitList = Array.isArray(userData["habitList"])
+            ? userData["habitList"]
+            : JSON.parse(userData["habitList"]);
         }
 
         const currHabit = await retrieveHabitObject(habitName, habitList);
@@ -94,10 +96,14 @@ const viewHabitLog = () => {
           <DataTable.Row>
             <DataTable.Cell>Past 6 Months</DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPastXDays((Math.floor(365/2)), "total"))}
+              {roundToTwoDecimals(
+                habit.getCountPastXDays(Math.floor(365 / 2), "total")
+              )}
             </DataTable.Cell>
             <DataTable.Cell>
-              {roundToTwoDecimals(habit.getCountPastXDays(Math.floor(365/2), "average"))}
+              {roundToTwoDecimals(
+                habit.getCountPastXDays(Math.floor(365 / 2), "average")
+              )}
             </DataTable.Cell>
           </DataTable.Row>
           <DataTable.Row>

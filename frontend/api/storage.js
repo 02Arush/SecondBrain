@@ -52,7 +52,9 @@ export const updateHabitObject = async (habitJSONObject, email) => {
     if (!isAnonymous(email)) {
         try {
             const userData = await getUserDataFromEmail(email);
-            habitList = JSON.parse(userData["habitList"]);
+            const habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
+
+
             const newHabitList = Habit.updateHabitInHabitList(habit, habitList);
             const response = await updateUserHabitList(email, newHabitList);
             if (response.error) {
@@ -129,7 +131,7 @@ export const deleteHabitObject = async (habitJSONObject, email) => {
         try {
 
             const userData = await getUserDataFromEmail(email);
-            habitList = JSON.parse(userData["habitList"]);
+            habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
 
             if (!Array.isArray(habitList)) {
                 throw new Error("habitList is not an array. habitList: " + typeof habitList)

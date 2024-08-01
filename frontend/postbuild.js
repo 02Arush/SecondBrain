@@ -2,8 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+// Automatically set root directory to 'dist'
+const rootDir = 'dist';
+
 // Paths
-const distDir = path.join(__dirname, 'dist'); // Adjust this if your build directory is different
+const distDir = path.join(__dirname, rootDir); // Adjust this if your build directory is different
 const manifestPath = path.join(distDir, 'manifest.json');
 const htmlFilePath = path.join(distDir, 'index.html');
 const assetsSrcDir = path.join(__dirname, 'assets', 'images');
@@ -92,14 +95,6 @@ function copyDirectorySync(src, dest) {
 // Copy assets directory
 copyDirectorySync(assetsSrcDir, assetsDestDir);
 console.log('Assets copied to dist directory.');
-
-// Run Workbox CLI wizard to create workbox-config.js
-try {
-  execSync('npx workbox-cli wizard', { stdio: 'inherit' });
-} catch (error) {
-  console.error('Error running Workbox CLI wizard:', error);
-  process.exit(1);
-}
 
 // Generate service worker using Workbox config
 try {

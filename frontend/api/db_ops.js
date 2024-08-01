@@ -6,13 +6,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, setPersistence, getReactNativePersistence, initializeAuth, deleteUser } from 'firebase/auth';
-import { addDoc, getFirestore } from 'firebase/firestore'
+import { addDoc, getDocs, getFirestore, query, where } from 'firebase/firestore'
 import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
 import Habit from "./habit";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { retrieveLocalHabitList } from "./storage";
 import { Platform } from "react-native";
 import Task from "./task";
+import { isAnonymous } from "@/constants/constants";
 
 
 const firebaseConfig = {
@@ -63,8 +64,7 @@ export const registerAccount = async (email, password) => {
 
         // Add dummy data to firestore
         await setDoc(doc(db, 'users', user.email), {
-            habitList: JSON.stringify([]),
-            taskList: JSON.stringify([]) // TASK LIST NOT YET IMPLEMENTED
+            habitList: [],
         })
 
         return { status: 200, message: "User Successfully Registered", email: user.email }
@@ -137,14 +137,15 @@ export const addHabit = async (email, habitName, habitUnit) => {
         if (docSnap.exists()) {
 
             const data = docSnap.data();
-            let habitList = JSON.parse(data["habitList"]);
 
+
+            const habitList = Array.isArray(data["habitList"]) ? data["habitList"] : JSON.parse(data["habitList"]);
             const habitExists = Habit.habitExistsInList(habitName, habitList);
 
             if (!habitExists) {
                 habitList.push(new Habit(habitName, habitUnit).getJSON());
                 await setDoc(docRef, {
-                    habitList: JSON.stringify(habitList)
+                    "habitList": habitList
                 }, { merge: true })
 
                 return { success: true, message: "Habit Successfully Updated" }
@@ -177,10 +178,9 @@ export const updateUserHabitList = async (email, habitList) => {
         const docRef = doc(db, "users", email);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-            const data = docSnap.data();
 
-            setDoc(docRef, {
-                "habitList": JSON.stringify(habitList)
+            await setDoc(docRef, {
+                "habitList": habitList
             }, { merge: true })
 
             return { ok: true }
@@ -227,32 +227,98 @@ export const removeHabit = (username, habitItem) => {
 }
 
 export const createTask = async (email, task) => {
+    if (isAnonymous(email)) {
+        return { error: "Not signed in: Anonymous user cannot create tasks" };
+    }
+
     if (!(task instanceof Task)) {
-        return { error: "task provided is not a Task object: Type " + typeof task };
+        return { error: "Task provided is not a Task object. Type: " + typeof task };
     }
 
     try {
-        // first, create the task with the taskID into firebase database
-        const taskDocRef = await addDoc(db, "tasks", {
+
+        const taskDocRef = await addDoc(collection(db, "tasks"), {
             taskName: task.getName(),
             description: task.getDescription(),
-            priority: task.getPriority(),
+            importance: task.getImportance(),
             deadline: task.getDeadline(),
+            completed: task.getCompleted(),
             sharedUsers: task.getSharedUsers()
-        })
+        });
 
-        const taskID = taskDocRef.id
 
-        // Add document to with key = taskID 
+        const taskID = taskDocRef.id;
+        // Add document to user-specific subcollection with the key = taskID
         const docRef = doc(db, "users", email, "tasks", taskID);
-        await addDoc(docRef, {
-            userPriority: task.getPriority(), // each user gets their own individual task priority
-        })
+        await setDoc(docRef, {
+            userPriority: task.getImportance(),
+        });
+        return { ok: true };
 
-        // TODO LATER:
+    } catch (err) {
+        return { error: err.code, message: err.message };
+    }
+};
 
-        // FOR USER'S EMAIL IN SHARED USERS, ADD TO SUBCOLLECTION PENDING_TASK_INVITES
 
+
+/**
+ * @param {string} email - user's email
+ * @param {boolean | undefined} completed - if completed is true, it gets all completed tasks. if completed is false, it gets task documents where completed=false || completed=null
+ * 
+ */
+
+// WORK IN PROGRESS
+export const getTasksForUser = async (email, completed) => {
+    if (typeof email !== "string") return { error: "Email must be of type string: type " + typeof email }
+    if (isAnonymous(email)) return { error: "Anonymous email has no tasks" };
+    if (completed !== undefined && typeof completed !== "boolean") return { error: "completed field must be boolean or undefined. Type: " + typeof completed };
+
+    completed = true;
+    try {
+
+        let tasksQuery;
+        let nullCompletedQuery = null;
+        const tasksCollection = collection(db, "users", email, "tasks")
+        // If we are looking for all tasks, ignore the completed field and look all tasks
+        if (completed === undefined) {
+            tasksQuery = query(tasksCollection);
+        } else {
+
+            // document either has "completed" field or does not have completed field. If document does not have completed field, we are supposed to assume it is incomplete.
+            tasksQuery = query(tasksCollection, where("completed", "==", completed));
+            if (!completed) {
+                nullCompletedQuery = query(tasksCollection, where("completed", "==", null));
+            }
+        }
+        const querySnap = await getDocs(tasksQuery);
+        let remainingIncompleteDocsSnap = null
+        if (nullCompletedQuery) {
+            // nullCompletedQuery can only be true if completed parameter is defined and false
+            // this exists in order to check for documents that do not have a completed field, and to assume they are INCOMPLETE
+            remainingIncompleteDocsSnap = await getDocs(nullCompletedQuery);
+        }
+
+        let taskIDs = querySnap.docs.map(doc => doc.id);
+        if (remainingIncompleteDocsSnap) {
+            // get the ID of every single other incomplete doc and add it to taskIDs
+            remainingIncompleteDocsSnap.docs.forEach(doc => taskIDs.push(doc.id))
+        }
+
+        let taskList = [];
+        for (let id of taskIDs) {
+            const taskDocRef = doc(db, "tasks", id);
+            const taskSnap = await getDoc(taskDocRef);
+            if (taskSnap.exists()) {
+                const taskData = taskSnap.data();
+                const task = Task.fromObject(taskData, id)
+                taskList.push(task);
+            }
+        }
+
+        // now: for each document in DOC ID, get the task object for it
+
+        return { taskList: taskList }
     } catch (err) {
         return { error: err.code, message: err.message }
     }

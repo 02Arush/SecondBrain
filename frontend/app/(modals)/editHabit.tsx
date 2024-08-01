@@ -53,7 +53,8 @@ const editHabit = () => {
         if (!isAnonymous(email)) {
           // get the habit unit
           const userData = await getUserDataFromEmail(email);
-          const habitList = JSON.parse(userData["habitList"]);
+          const habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
+          
           const habitObject = await retrieveHabitObject(habitName, habitList);
           if (habitObject instanceof Habit) {
             setThisHabit(habitObject);
