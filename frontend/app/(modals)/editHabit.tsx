@@ -1,12 +1,11 @@
 import { StyleSheet, View, TouchableOpacity } from "react-native";
-import React, { useState, useContext, useCallback } from "react";
+import React, { useState, useContext, useCallback, useEffect } from "react";
 import { useRouteInfo } from "expo-router/build/hooks";
 import Habit, { HabitJSON } from "@/api/habit";
 import {
   Text,
   IconButton,
   TextInput,
-  Surface,
   Button,
   useTheme,
 } from "react-native-paper";
@@ -19,6 +18,7 @@ import { router, useFocusEffect } from "expo-router";
 import { isAnonymous } from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { getUserDataFromEmail } from "@/api/db_ops";
+import { CustomSurface as Surface } from "@/components/CustomSurface";
 import {
   filterTextToDecimal,
   filterTextToInteger,
@@ -26,6 +26,9 @@ import {
 } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import { SimpleDate } from "@/api/types_and_utils";
+import OptionalGoal from "@/components/OptionalGoal";
+import { HabitGoal } from "@/api/habit";
+import OutlineModal from "@/components/OutlineModal";
 
 const editHabit = () => {
   const route = useRouteInfo();
@@ -44,6 +47,13 @@ const editHabit = () => {
     month: todayDate.getMonth() + 1, // The plus 1 is here because getMonth() is 0-indexed (i.e July will output 6, but we want it to be 7)
     year: todayDate.getFullYear(),
   });
+  const [incrementSelected, setIncrementSelected] = useState(true);
+  const [showingEditModal, setShowingEditModal] = useState(false);
+
+  const [newHabitName, setNewHabitName] = useState("");
+  const [newUnit, setNewUnit] = useState("");
+  const [goal, setGoal] = useState<HabitGoal | null>(thisHabit.getGoal());
+  const [newGoal, setNewGoal] = useState<HabitGoal | null>(thisHabit.getGoal());
 
   useFocusEffect(
     useCallback(() => {
@@ -53,16 +63,20 @@ const editHabit = () => {
         if (!isAnonymous(email)) {
           // get the habit unit
           const userData = await getUserDataFromEmail(email);
-          const habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
-          
+          const habitList = Array.isArray(userData["habitList"])
+            ? userData["habitList"]
+            : JSON.parse(userData["habitList"]);
+
           const habitObject = await retrieveHabitObject(habitName, habitList);
           if (habitObject instanceof Habit) {
             setThisHabit(habitObject);
+            setGoal(habitObject.getGoal());
           }
         } else {
           const currHabit = await retrieveHabitObject(habitName);
           if (currHabit instanceof Habit) {
             setThisHabit(currHabit);
+            setGoal(currHabit.getGoal());
           } else {
             alert(currHabit.error);
           }
@@ -72,26 +86,9 @@ const editHabit = () => {
     }, [email])
   );
 
-  interface ToggleButtonProps {
-    name: string;
-    isSelected: boolean;
-    onPress: any;
-  }
-  const ToggleButton = ({ name, isSelected, onPress }: ToggleButtonProps) => {
-    return (
-      <TouchableOpacity onPress={onPress} style={{ ...styles.select }}>
-        <Text
-          style={{
-            textDecorationLine: isSelected ? "underline" : "none",
-          }}
-        >
-          {name}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+  // useEffect(() => {}, [thisHabit, goal]);
 
-  const handleSubmit = async () => {
+  const handleSubmitIncrement = async () => {
     try {
       const changeAmount = incrementSelected
         ? Number(changeQty)
@@ -125,12 +122,35 @@ const editHabit = () => {
     }
   };
 
-  const handleRenameHabit = () => {
-    alert("Not yet enabled");
+  const handleEditHabitDetails = () => {
+    setShowingEditModal(true);
   };
-  const [incrementSelected, setIncrementSelected] = useState(true);
+
+  const handleEditChangeQty = (text: string) => {
+    const filteredText = filterTextToInteger(text);
+    setChangeQty(filteredText.toString());
+  };
+
   const handleSetIncrement = (increment: boolean) => {
     setIncrementSelected(increment);
+  };
+
+  const handleCancel = () => {
+    setShowingEditModal(false);
+  };
+
+  const handleSubmitChanges = async () => {
+    thisHabit.setUnit(newUnit.length > 0 ? newUnit : thisHabit.getUnit());
+    thisHabit.setGoal(newGoal);
+    const response = await updateHabitObject(thisHabit.getJSON(), email);
+    if (response.error) {
+      alert(response.error);
+    } else {
+      // The following setters assist in refreshing the page
+      setGoal(newGoal);
+      setThisHabit(thisHabit);
+      setShowingEditModal(false);
+    }
   };
 
   return (
@@ -141,68 +161,88 @@ const editHabit = () => {
       }}
     >
       <Surface style={styles.contentContainer}>
-        <View style={styles.row}>
-          <Text variant="titleLarge">{habitName}</Text>
-          <IconButton icon="pencil" onPress={handleRenameHabit} />
+        <View
+          style={{
+            ...styles.row,
+            justifyContent: "space-between",
+            marginBottom: 4,
+          }}
+        >
+          <View>
+            <Text variant="bodyLarge">{thisHabit.getName()}</Text>
+            <Text>
+              <Text style={{ fontWeight: "bold" }}>Goal: </Text>
+              {`${goal ? goal : "N/A"}`}
+            </Text>
+          </View>
+          <IconButton icon="pencil" onPress={handleEditHabitDetails} />
         </View>
         <View style={styles.row}>
-          <ToggleButton
-            name="Increment"
-            isSelected={incrementSelected}
-            onPress={() => {
-              handleSetIncrement(true);
-            }}
+          <IconButton
+            icon={
+              incrementSelected ? "plus-circle-outline" : "minus-circle-outline"
+            }
+            onPress={() => handleSetIncrement(!incrementSelected)}
+            style={{ margin: 0 }}
           />
-          <ToggleButton
-            name="Decrement"
-            isSelected={!incrementSelected}
-            onPress={() => {
-              handleSetIncrement(false);
-            }}
-          />
-        </View>
-        <View style={styles.row}>
           <Text>By </Text>
           <TextInput
-            contentStyle={{ padding: 0 }}
-            dense
             style={styles.denseInput}
             value={changeQty}
-            onChangeText={(text) => {
-              const filteredText = filterTextToDecimal(text);
-              setChangeQty(String(filteredText));
-            }}
+            onChangeText={handleEditChangeQty}
           />
           <Text>{thisHabit.getUnit()}</Text>
         </View>
         <View style={styles.row}>
           <DatePicker date={dateToUpdate} setDate={setDateToUpdate} />
         </View>
-
-        <View
-          style={{
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Button
-            style={styles.rowBtnStyle}
-            mode="contained"
-            onPress={handleSubmit}
-          >
-            Submit
-          </Button>
-          <Button
-            textColor={theme.colors.error}
-            style={styles.rowBtnStyle}
-            mode="outlined"
-            onPress={handleDelete}
-          >
-            Delete Habit
-          </Button>
+        <View style={{ ...styles.row, justifyContent: "flex-end" }}>
+          <Button onPress={handleSubmitIncrement}>Submit</Button>
         </View>
       </Surface>
+
+      {/* EDIT HABIT DETAILS MODAL */}
+      <OutlineModal showing={showingEditModal}>
+        <View style={{ padding: 28 }}>
+          <TextInput
+            disabled
+            placeholder={habitName}
+            label={"New Habit Name"}
+            value={newHabitName}
+            onChangeText={setNewHabitName}
+          />
+          <TextInput
+            placeholder={thisHabit.getUnit()}
+            label={"New Habit Unit"}
+            value={newUnit}
+            onChangeText={setNewUnit}
+          />
+          <OptionalGoal
+            goal={newGoal}
+            setGoal={setNewGoal}
+            unit={newUnit.length !== 0 ? newUnit : thisHabit.getUnit()}
+          />
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              mode="text"
+              textColor={theme.colors.error}
+              onPress={handleDelete}
+            >
+              Delete
+            </Button>
+            <View style={{ flexDirection: "row" }}>
+              <Button  onPress={handleCancel}>Cancel</Button>
+              <Button style={{zIndex: 0, position: "relative"}} onPress={handleSubmitChanges}>Submit Changes</Button>
+            </View>
+          </View>
+        </View>
+      </OutlineModal>
     </View>
   );
 };
@@ -218,8 +258,10 @@ const styles = StyleSheet.create({
 
   contentContainer: {
     width: 350,
-    paddingVertical: 50,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     borderRadius: 8,
+    flexDirection: "column",
   },
 
   buttonAndLabel: {
@@ -231,9 +273,9 @@ const styles = StyleSheet.create({
 
   row: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
-    marginVertical: 5,
+    marginVertical: 4,
   },
 
   select: {

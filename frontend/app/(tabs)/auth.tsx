@@ -123,6 +123,7 @@ export default function auth() {
                 />
                 <TextInput
                   placeholder="Password"
+                  secureTextEntry
                   value={loginPassword}
                   onChangeText={setLoginPassword}
                   style={styles.textInput}
@@ -183,6 +184,7 @@ export default function auth() {
                 style={{ marginVertical: 6 }}
                 value={loginPassword}
                 onChangeText={setLoginPassword}
+                secureTextEntry
               />
               <View style={{ flexDirection: "column", alignItems: "center" }}>
                 <Button

@@ -62,7 +62,6 @@ export default function TabLayout() {
         options={{
           title: "Tasks",
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
-          href: null,
         }}
       />
       <Tabs.Screen

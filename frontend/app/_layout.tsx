@@ -45,19 +45,29 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+const customLightTheme = {
+  ...MD3LightTheme,
+
+  colors: {
+    ...MD3LightTheme.colors,
+    tertiary: "#2b8a3e",
+  },
+};
+
 const customDarkTheme = {
   ...MD3DarkTheme,
 
   colors: {
     ...MD3DarkTheme.colors,
     background: "#000000",
-    surface: "#0F0F0F",
+    surface: "rgb(28, 28, 30)",
+    tertiary: "#2f9e44",
   },
 };
 
 function RootLayoutNav() {
   const scheme = useColorScheme();
-  const theme = scheme === "dark" ? customDarkTheme : MD3LightTheme;
+  const theme = scheme === "dark" ? customDarkTheme : customLightTheme;
   const style = createNavStyle(theme);
 
   return (
@@ -77,43 +87,50 @@ function RootLayoutNav() {
               headerShown: false,
             }}
           />
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
           <Stack.Screen
             name="(modals)/addHabit"
             options={{
-              presentation: "modal",
               title: "Create Habit",
+              headerBackTitle: "Home",
             }}
           />
           <Stack.Screen
             name="(modals)/editHabit"
-            options={{ presentation: "modal", title: "Update Habit" }}
+            options={{ title: "Update Habit", headerBackTitle: "Home" }}
           />
           <Stack.Screen
             name="(modals)/viewHabitLog"
-            options={{ presentation: "modal", title: "Habit Log" }}
+            options={{ title: "Habit Log", headerBackTitle: "Home" }}
           />
           <Stack.Screen
             name="(modals)/deleteAll"
             options={{
-              presentation: "modal",
               title: "Clear All?",
+              headerBackTitle: "Home",
             }}
           />
 
           <Stack.Screen
             name="(modals)/register"
             options={{
-              presentation: "modal",
               title: "Create Account",
+              headerBackTitle: "Home",
             }}
           />
 
           <Stack.Screen
             name="(modals)/createTask"
             options={{
-              presentation: "modal",
               title: "Create Task",
+              headerBackTitle: "Home",
+            }}
+          />
+
+          <Stack.Screen
+            name="(modals)/taskDetails"
+            options={{
+              title: "Task Details",
+              headerBackTitle: "Home",
             }}
           />
         </Stack>

@@ -6,21 +6,34 @@ import {
   ScrollView,
 } from "react-native";
 import React, { useState, useCallback, useContext } from "react";
-import { Surface, TextInput, Button } from "react-native-paper";
+import { Surface, TextInput, Text, Button, Checkbox } from "react-native-paper";
 import { router, useFocusEffect } from "expo-router";
-import { storeData, retrieveData } from "./../../api/storage";
-import Habit from "./../../api/habit";
+import { updateLocalStorageHabits } from "../../api/storage";
+import Habit from "../../api/habit";
 import { AuthContext } from "@/contexts/authContext";
-import { retrieveLocalHabitList } from "./../../api/storage";
+import { retrieveLocalHabitList } from "../../api/storage";
 import { addHabit as createHabit } from "@/api/db_ops";
-
+import Select from "@/components/Select";
+import { stringToTimeFrame, timeFrame } from "@/api/types_and_utils";
 import { isAnonymous } from "@/constants/constants";
-
+import { filterTextToInteger } from "@/api/types_and_utils";
+import { HabitGoal } from "../../api/habit";
+import OptionalGoal from "@/components/OptionalGoal";
 const addHabit = () => {
   const [habitName, setHabitName] = useState("");
   const [unit, setUnit] = useState("");
   const { email, setEmail } = useContext(AuthContext);
+  const [timeFrameSelectVisible, setTimeFrameSelectVisible] = useState(false);
+  const [goalChecked, setGoalChecked] = useState<"checked" | "unchecked">(
+    "checked"
+  );
 
+  const [goalNumber, setGoalNumber] = useState<number>(1);
+  const [goalTimeFrameCount, setGoalTimeFrameCount] = useState<number>(1);
+  const [goalTimeFrame, setGoalTimeFrame] = useState<string>("Day");
+  const [goal, setGoal] = useState<HabitGoal | null>(
+    new HabitGoal(1, unit, 1, "day")
+  );
   // If signed in:
   // get signed in user's habit list from firebase
   // append new habit to that list
@@ -34,30 +47,44 @@ const addHabit = () => {
       return;
     }
 
+    let habitGoal;
+    if (goalChecked === "checked") {
+      const timeFrame: timeFrame = stringToTimeFrame(goalTimeFrame) || "day";
+      habitGoal = new HabitGoal(
+        goalNumber,
+        trimmedUnit,
+        goalTimeFrameCount,
+        timeFrame
+      );
+    }
+
     if (!isAnonymous(email)) {
-      const res = await createHabit(email, trimmedHabitName, trimmedUnit);
+      const res = await createHabit(
+        email,
+        trimmedHabitName,
+        trimmedUnit,
+        habitGoal
+      );
       if (res.success) {
         router.replace("/");
       } else {
-        alert("Error: " + res.error);
+        alert("Error: " + res.error + " message: " + res.message);
       }
     } else {
-      await updateLocalStorageHabits(trimmedHabitName, trimmedUnit);
+      const res = await updateLocalStorageHabits(trimmedHabitName, trimmedUnit);
+      if (res.error) {
+        alert(res.error);
+      }
     }
   };
 
-  async function updateLocalStorageHabits(habitName: string, unit: string) {
-    const habitDataList = await retrieveLocalHabitList();
-    const habitExists = Habit.habitExistsInList(habitName, habitDataList);
-
-    if (!habitExists) {
-      habitDataList.push(new Habit(habitName, unit).getJSON());
-      await storeData("habitList", JSON.stringify(habitDataList));
-      router.replace("/");
+  const toggleGoalChecked = () => {
+    if (goalChecked === "checked") {
+      setGoalChecked("unchecked");
     } else {
-      alert("Habit Already Exists");
+      setGoalChecked("checked");
     }
-  }
+  };
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -86,6 +113,7 @@ const addHabit = () => {
             }}
             style={styles.textInput}
           />
+          <OptionalGoal goal={goal} setGoal={setGoal} unit={unit} />
           <Button
             mode="contained"
             onPress={handleSubmitHabit}
@@ -117,5 +145,11 @@ const styles = StyleSheet.create({
   textInput: {
     marginVertical: 4,
     width: "100%",
+  },
+
+  denseInput: {
+    marginHorizontal: 2,
+    textAlign: "center",
+    height: 24,
   },
 });

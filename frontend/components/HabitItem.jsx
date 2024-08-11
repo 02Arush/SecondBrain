@@ -2,8 +2,6 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Button, Icon, IconButton, Text } from "react-native-paper";
 import { router, useRouter } from "expo-router";
-// import { } from "react-native-paper";
-import { retrieveData } from "@/api/storage";
 import { CustomSurface as Surface} from "@/components/CustomSurface";
 const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
   const router = useRouter();
@@ -44,7 +42,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "100%",
     marginVertical: 4,
-    borderRadius: 4,
   },
 
   nameSection: {

@@ -1,43 +1,80 @@
 import { StyleSheet, View } from "react-native";
-import React from "react";
-import { Text, IconButton } from "react-native-paper";
+import React, { useContext, useEffect } from "react";
+import { Text, IconButton, useTheme } from "react-native-paper";
 import constants from "@/constants/constants";
 import { CustomSurface as Surface } from "./CustomSurface";
+import { completeTask } from "@/api/db_ops";
+import { router } from "expo-router";
+import { AuthContext } from "@/contexts/authContext";
 
 type propTypes = {
-  taskID: number;
+  taskID: string;
   taskName: string;
-  displayedDeadline: string;
+  deadline: Date | null;
   userImportance: Number | null;
+  onComplete: Function;
+  completed?: boolean;
 };
 
 const TaskItem = ({
   taskID,
   taskName = "NULL",
-  displayedDeadline,
+  deadline,
   userImportance,
+  onComplete,
+  completed = false,
 }: propTypes) => {
-  displayedDeadline = constants.NO_TASK_DEADLINE ? "N/A" : displayedDeadline;
+  const customDateFormat = (date: Date): string => {
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const handleCompleteTask = async () => {
-    
-
+    const day = days[date.getDay()];
+    const dayOfMonth = date.getDate();
+    const month = date.getMonth() + 1; // Because months are 0 indexed
+    const year = date.getFullYear() % 100; // Last 2 digits of year
+    return `${day} ${month}/${dayOfMonth}/${year}`;
   };
 
-  const handleEditTask = async () => {};
+  const displayedDeadline =
+    deadline == null ? "N/A" : customDateFormat(deadline);
+  const handleCompleteTask = async () => {
+    if (!completed) {
+      onComplete();
+    } else {
+      // Handle what happens if we click the button of a completed task
+    }
+  };
+
+  const handleShowTaskDetails = async () => {
+    router.push({
+      pathname: "/(modals)/taskDetails",
+      params: {
+        taskID: taskID,
+      },
+    });
+  };
+
+  const theme = useTheme();
 
   return (
     <Surface style={styles.taskItemContainer}>
       <View style={styles.leftItems}>
-        <IconButton icon="circle-outline" onPress={handleCompleteTask} />
+        <IconButton
+          iconColor={
+            completed ? theme.colors.tertiary : theme.colors.onBackground
+          }
+          icon={completed ? "check-circle-outline" : "circle-outline"}
+          onPress={handleCompleteTask}
+          size={20}
+          style={{ padding: 0, margin: 0, marginRight: -2 }}
+        />
         <Text>{taskName}</Text>
       </View>
       <View style={styles.rightItems}>
         <View>
-          <Text variant="bodySmall">Deadline: {displayedDeadline}</Text>
+          <Text variant="bodySmall">Due: {displayedDeadline}</Text>
           <Text>Importance: {userImportance?.toString()}</Text>
         </View>
-        <IconButton icon="dots-horizontal" onPress={handleEditTask} />
+        <IconButton icon="dots-horizontal" onPress={handleShowTaskDetails} />
       </View>
     </Surface>
   );
@@ -58,11 +95,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
+    flex: 1,
+    marginRight: 2,
   },
 
   rightItems: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "center",
+    marginLeft: 2,
+    flex: 1,
   },
 });

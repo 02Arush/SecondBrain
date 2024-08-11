@@ -6,25 +6,43 @@ import { router, useFocusEffect } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
 import { getTasksForUser } from "@/api/db_ops";
 import Task from "@/api/task";
+import { completeTask } from "@/api/db_ops";
 
 const tasks = () => {
   const theme = useTheme();
   const { email } = useContext(AuthContext);
 
   const [taskList, setTaskList] = useState<Array<Task>>([]);
+  const [viewingCompletedTasks, setViewingCompletedTasks] = useState(false);
+
+  // HERE: REMOVE THE SPECIFIED TASK WITH THE TASK ID FROM TASK_LIST
+  const handleCompleteTask = async (taskID: string) => {
+    const res = await completeTask(email, taskID);
+    if (res.error) {
+      alert(res.error);
+    } else {
+      const newTaskList = taskList.filter((task: Task) => {
+        return task.getTaskID() !== taskID;
+      });
+      setTaskList(newTaskList);
+    }
+  };
+
+  const handleLoadTasks = async (completed: boolean = false) => {
+    const res = await getTasksForUser(email, completed);
+    if (res.taskList) {
+      setTaskList(res.taskList);
+      setViewingCompletedTasks(completed);
+    } else if (res.error) {
+      alert(res.error);
+    } else {
+      alert("TASKS: RESPONSE ERROR");
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-      (async () => {
-        const res = await getTasksForUser(email, false);
-        if (res.taskList) {
-          setTaskList(res.taskList);
-        } else if (res.error) {
-          alert(res.error);
-        } else {
-          alert("TASKS: RESPONSE ERROR");
-        }
-      })();
+      handleLoadTasks();
     }, [email])
   );
 
@@ -32,9 +50,13 @@ const tasks = () => {
     router.navigate("/(modals)/createTask");
   };
 
-  const handleFilter = () => {};
+  const handleFilter = () => {
+    alert("Not Implemented Yet");
+  };
 
-  const handleChart = () => {};
+  const handleChart = () => {
+    alert("Not Implemented Yet");
+  };
 
   return (
     <SafeAreaView
@@ -47,22 +69,40 @@ const tasks = () => {
         <View style={styles.topActivities}>
           <View>
             {/* TODO: LATER MOVE INVITES TO ACCOUNT PAGE */}
-            <IconButton icon="email-plus" />
+            <IconButton icon="filter-variant" onPress={handleFilter} />
           </View>
           <View style={styles.topRightActivities}>
-            <IconButton icon="filter-variant" onPress={handleFilter} />
+            <IconButton
+              icon="check-circle-outline"
+              iconColor={
+                viewingCompletedTasks
+                  ? theme.colors.tertiary
+                  : theme.colors.onBackground
+              }
+              onPress={() => {
+                if (viewingCompletedTasks) {
+                  handleLoadTasks(false);
+                } else {
+                  handleLoadTasks(true);
+                }
+              }}
+            />
             <IconButton icon="chart-scatter-plot" onPress={handleChart} />
           </View>
         </View>
         <ScrollView style={styles.taskList}>
-          {taskList.map((task: Task) => {
+          {taskList.map((task: Task, index) => {
             return (
               <TaskItem
                 taskID={task.getTaskID()}
-                key={task.getTaskID()}
+                key={index}
                 taskName={task.getName()}
                 userImportance={task.getImportance()}
-                displayedDeadline={task.getDeadline()}
+                deadline={task.getDeadline()}
+                onComplete={() => {
+                  handleCompleteTask(task.getTaskID());
+                }}
+                completed={task.getCompleted()}
               />
             );
           })}
@@ -76,11 +116,6 @@ const tasks = () => {
             Create Task
           </Button>
         </View>
-        {/* <Text>Filter Task By Priority/Deadline + Visualize Option X-Axis: Days-Til-Deadline, Y-Axis: Priority</Text>
-        <Text>View Tasks Based on their filters</Text>
-        <Text>Create Task, which takes you to a task builder screen</Text>
-        <Text>View Archived Tasks</Text>
-        <Text>View Task Invites</Text> */}
       </View>
     </SafeAreaView>
   );
@@ -97,11 +132,9 @@ const styles = StyleSheet.create({
 
   contentContainer: {
     width: 350,
-    borderWidth: 1,
   },
 
   topActivities: {
-    borderWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -111,9 +144,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
 
-  taskList: {
-    borderWidth: 1,
-  },
+  taskList: {},
 
   createTaskButton: {
     height: 75,

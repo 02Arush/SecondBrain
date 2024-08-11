@@ -1,39 +1,61 @@
 
+
+import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter } from "./types_and_utils";
+
+
+export interface HabitJSON {
+    "habitName": string,
+    "unit": string | null,
+    "activityLog": { [key: string]: number },
+    "goal"?: habitGoal
+}
+
 export default class Habit {
 
     private habitName: string;
     private activityLog: Map<string, number>;
     private unit: string;
+    private goal: HabitGoal | null = null;
 
-    constructor(name: string, unit: string, activityLog: Map<string, number> = new Map<string, number>()) {
+
+    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal) {
         this.habitName = name;
         this.unit = unit;
         this.activityLog = activityLog;
+        if (goal) this.goal = goal
     }
 
-    static parseHabit(json: HabitJSON | string) {
-        let habitName: string;
-        let unit: string;
-        let activityLogData: { [key: string]: number } | Map<string, number>;
 
 
-        if (typeof json === "string") {
-            const habitJSON = JSON.parse(json);
-            habitName = habitJSON.habitName;
-            unit = habitJSON.unit;
-            activityLogData = habitJSON.activityLog;
-        } else {
-            habitName = json.habitName;
-            unit = json.unit || "units";
-            activityLogData = json.activityLog;
+    static parseHabit = (json: HabitJSON | string) => {
+
+        let habitJSON: HabitJSON;
+        switch (typeof json) {
+            case "string": {
+                habitJSON = JSON.parse(json);
+                break;
+            } case "object": {
+                habitJSON = json;
+                break;
+            } default: {
+                throw new Error("Unsupported type of json " + typeof json)
+            }
         }
 
+        const habitName = habitJSON.habitName;
+        const unit = habitJSON.unit || undefined
+        const activityLogData = habitJSON.activityLog;
+
+
         // Convert activityLogData to a Map if it is not already one
-        let activityLog = activityLogData instanceof Map
+        const activityLog = activityLogData instanceof Map
             ? activityLogData
             : new Map<string, number>(Object.entries(activityLogData));
 
-        return new Habit(habitName, unit, activityLog);
+        const goal = habitJSON.goal
+        const parsedHabitGoal = goal ? HabitGoal.parseJSON(goal) : undefined;
+
+        return new Habit(habitName, unit, activityLog, parsedHabitGoal);
     }
 
     static habitExistsInList(habitName: string, habitList: Array<any>) {
@@ -134,6 +156,7 @@ export default class Habit {
         return listWithoutDuplicates;
     }
 
+
     getTodayCount() {
         return this.activityLog.get(new Date().toDateString()) || 0;
     }
@@ -197,6 +220,10 @@ export default class Habit {
         return this.unit;
     }
 
+    setUnit(unit: string) {
+        this.unit = unit;
+    }
+
     getName() {
         return this.habitName;
     }
@@ -207,12 +234,19 @@ export default class Habit {
         this.activityLog.set(dateString, currentCount + count);
     }
 
-    getJSON() {
-        return {
+    getJSON(): HabitJSON {
+
+        const habitJSON: HabitJSON = {
             "habitName": this.habitName,
             "unit": this.unit,
-            "activityLog": Object.fromEntries(this.activityLog)
+            "activityLog": Object.fromEntries(this.activityLog),
         }
+
+        if (this.goal) {
+            habitJSON["goal"] = this.goal.JSON()
+        }
+
+        return habitJSON
     }
 
     getJSONString() {
@@ -242,22 +276,132 @@ export default class Habit {
         this.activityLog.set(dateKey, currCount + quantity);
     }
 
-    private calculateAverage(sum: number, days: number) {
-        return sum / days;
-    }
 
-    getCountPastXDays(numDays: number, mode: "total" | "average" = "total") {
+    /**
+     * @returns {number} - Either: total count of occurences of habit during span of numDays, or average count per day over span of numDays
+     */
+    getCountPastXDays(numDays: number, mode: "total" | "average" = "total"): number {
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(endDate.getDate() - numDays - 1);  // Today is included, and day
+        startDate.setDate(endDate.getDate() - numDays);  // Today is included, and day
         const total = this.getCountFromDateRange(startDate, endDate);
         return mode === "average" ? this.calculateAverage(total, numDays) : total;
     }
 
+    getCountOverTimeFrame(timeFrameCount: number, timeFrameLabel: timeFrame, mode: "total" | "average" = "total"): number {
+        const elapsedDays = timeFrameCount * timeFrameConverter[timeFrameLabel];
+        const count = this.getCountPastXDays(elapsedDays, mode);
+        return count;
+    }
+
+    getCountForGoalTimeFrame(): null | number {
+        if (!this.goal) return null;
+        const timeframeDays: number = this.goal.getGoalDurationDays();
+        const countForGoalTimeFrame = this.getCountPastXDays(timeframeDays)
+        return countForGoalTimeFrame;
+    }
+
+    countToGoalRatio(): number | null {
+        if (!this.goal) return null;
+        const desiredGoalCount = this.goal.getGoalNumber();
+        const countForGoalTimeFrame = this.getCountForGoalTimeFrame();
+        if (!countForGoalTimeFrame) return null;
+        return countForGoalTimeFrame / desiredGoalCount;
+    }
+
+    setGoal(goal: HabitGoal | null) {
+        this.goal = goal
+    }
+
+    getGoal(): HabitGoal | null {
+        return this.goal;
+    }
+
+    clearGoal() {
+        this.goal = null;
+    }
+
+    getAveragePerTimeFrameOverTimeFrame(windowTimeFrameCount: number, windowTimeFrameLabel: timeFrame, totalTimeFrameCount: number, totalTimeFrameLabel: timeFrame): number | null {
+        const elapsedDays = totalTimeFrameCount * timeFrameConverter[totalTimeFrameLabel];
+        const windowSizeInDays = windowTimeFrameCount * timeFrameConverter[windowTimeFrameLabel];
+        const averagePerDay = this.getCountPastXDays(elapsedDays, "average");
+
+        if (windowSizeInDays > elapsedDays) {
+            return null;
+        }
+
+        return windowSizeInDays * averagePerDay;
+    }
+
+    getAveragePerTimeFrameAllTime(windowTimeFrameCount: number, windowTimeFrameLabel: timeFrame): number | null {
+        const windowSizeInDays = windowTimeFrameCount * timeFrameConverter[windowTimeFrameLabel];
+        const averagePerDayAllTime = this.getTotalCount("average");
+        return windowSizeInDays * averagePerDayAllTime;
+    }
+
+    private calculateAverage(sum: number, days: number) {
+        return sum / days;
+    }
+
 }
 
-export interface HabitJSON {
-    "habitName": string,
-    "unit": string | null,
-    "activityLog": { [key: string]: number }
+
+export class HabitGoal {
+    private goalNumber: number
+    private unit: string
+    private timeFrameCount: number
+    private timeFrameLabel: timeFrame
+
+    constructor(goalNumber: number, unit: string, timeFrameCount: number, timeFrameLabel: timeFrame) {
+        this.goalNumber = goalNumber
+        this.unit = unit;
+        this.timeFrameCount = timeFrameCount;
+        this.timeFrameLabel = timeFrameLabel;
+    }
+
+
+
+    JSON(): habitGoal {
+        return {
+            "goalNumber": this.goalNumber,
+            "unit": this.unit,
+            "timeFrameCount": this.timeFrameCount,
+            "timeFrameLabel": this.timeFrameLabel
+        }
+    }
+
+    static parseJSON(json: habitGoal): HabitGoal {
+
+        const timeFrameLabel = stringToTimeFrame(json.timeFrameLabel);
+        if (timeFrameLabel) {
+            return new HabitGoal(json.goalNumber, json.unit, json.timeFrameCount, timeFrameLabel);
+        } else {
+            throw new Error("Invalid JSON " + JSON.stringify(json));
+        }
+    }
+
+    getGoalNumber(): number {
+        return this.goalNumber;
+    }
+
+    getGoalDurationDays(): number {
+        return this.timeFrameCount * timeFrameConverter[this.timeFrameLabel];
+    }
+
+    toString(): string {
+        return `${this.goalNumber} ${this.unit} per ${this.timeFrameCount} ${this.timeFrameLabel}`
+    }
+
+    getUnit(): string {
+        return this.unit;
+    }
+
+    getTimeFrameLabel(): timeFrame {
+        return this.timeFrameLabel;
+    }
+
+    getTimeFrameCount(): number {
+        return this.timeFrameCount;
+    }
 }
+

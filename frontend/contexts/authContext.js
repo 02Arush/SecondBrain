@@ -18,7 +18,7 @@ const AuthProvider = ({ children }) => {
         };
 
         fetchSignedInUser();
-    }, []); 
+    }, []);
 
     return (
         <AuthContext.Provider value={{ email, setEmail }}>

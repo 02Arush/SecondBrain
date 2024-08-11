@@ -10,10 +10,10 @@ import { addDoc, getDocs, getFirestore, query, where } from 'firebase/firestore'
 import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
 import Habit from "./habit";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import { retrieveLocalHabitList } from "./storage";
 import { Platform } from "react-native";
 import Task from "./task";
 import { isAnonymous } from "@/constants/constants";
+import { HabitGoal } from "./habit";
 
 
 const firebaseConfig = {
@@ -130,10 +130,15 @@ export const getUserDataFromEmail = async (email) => {
 }
 
 
-export const addHabit = async (email, habitName, habitUnit) => {
+/**
+ *
+ * 
+ */
+export const addHabit = async (email, habitName, habitUnit, habitGoal) => {
     try {
         const docRef = doc(db, "users", email);
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
 
             const data = docSnap.data();
@@ -143,7 +148,11 @@ export const addHabit = async (email, habitName, habitUnit) => {
             const habitExists = Habit.habitExistsInList(habitName, habitList);
 
             if (!habitExists) {
-                habitList.push(new Habit(habitName, habitUnit).getJSON());
+                const newHabit = new Habit(habitName, habitUnit);
+                if (habitGoal) {
+                    newHabit.setGoal(habitGoal);
+                }
+                habitList.push(newHabit.getJSON());
                 await setDoc(docRef, {
                     "habitList": habitList
                 }, { merge: true })
@@ -215,6 +224,7 @@ export const deleteAccount = async (email, password) => {
         await deleteUser(user);
         // Remove from Firestore
         const docRef = doc(db, "users", email);
+        // TODO: DELETE USER'S TASK COLLECTIN AS WELL
         await deleteDoc(docRef);
         return { ok: true, message: `User deleted: ${email}` };
     } catch (err) {
@@ -266,59 +276,123 @@ export const createTask = async (email, task) => {
  * @param {string} email - user's email
  * @param {boolean | undefined} completed - if completed is true, it gets all completed tasks. if completed is false, it gets task documents where completed=false || completed=null
  * 
+ * 
  */
 
 // WORK IN PROGRESS
+// FUTURE IMPLEMENTATION: IF A TASK ID FROM USER'S TASK COLLECTION IS NOT FOUND IN THE MAIN TASK COLLECTION, REMOVE IT FROM USER'S TASK COLLECTION AND PROCEED
 export const getTasksForUser = async (email, completed) => {
     if (typeof email !== "string") return { error: "Email must be of type string: type " + typeof email }
-    if (isAnonymous(email)) return { error: "Anonymous email has no tasks" };
     if (completed !== undefined && typeof completed !== "boolean") return { error: "completed field must be boolean or undefined. Type: " + typeof completed };
 
-    completed = true;
     try {
 
         let tasksQuery;
-        let nullCompletedQuery = null;
-        const tasksCollection = collection(db, "users", email, "tasks")
-        // If we are looking for all tasks, ignore the completed field and look all tasks
-        if (completed === undefined) {
-            tasksQuery = query(tasksCollection);
-        } else {
-
-            // document either has "completed" field or does not have completed field. If document does not have completed field, we are supposed to assume it is incomplete.
-            tasksQuery = query(tasksCollection, where("completed", "==", completed));
-            if (!completed) {
-                nullCompletedQuery = query(tasksCollection, where("completed", "==", null));
-            }
-        }
-        const querySnap = await getDocs(tasksQuery);
-        let remainingIncompleteDocsSnap = null
-        if (nullCompletedQuery) {
-            // nullCompletedQuery can only be true if completed parameter is defined and false
-            // this exists in order to check for documents that do not have a completed field, and to assume they are INCOMPLETE
-            remainingIncompleteDocsSnap = await getDocs(nullCompletedQuery);
-        }
-
+        const userTaskIDs = collection(db, "users", email, "tasks")
+        tasksQuery = query(userTaskIDs);
+        const querySnap = await getDocs(tasksQuery)
         let taskIDs = querySnap.docs.map(doc => doc.id);
-        if (remainingIncompleteDocsSnap) {
-            // get the ID of every single other incomplete doc and add it to taskIDs
-            remainingIncompleteDocsSnap.docs.forEach(doc => taskIDs.push(doc.id))
-        }
 
-        let taskList = [];
-        for (let id of taskIDs) {
-            const taskDocRef = doc(db, "tasks", id);
-            const taskSnap = await getDoc(taskDocRef);
-            if (taskSnap.exists()) {
-                const taskData = taskSnap.data();
-                const task = Task.fromObject(taskData, id)
-                taskList.push(task);
+
+        /**
+         * This nested function is necessary because typescript has trouble respecting the "filter" in javascript files so I have to
+         * explicitly put it into a function and use JSDoc to confirm the type
+         * @param {Array} taskIDs -
+         * @returns {Promise<Array<Task>>} - Array of tasks
+         */
+        const getTaskList = async () => {
+            let taskList = await Promise.all(taskIDs.map(async (id) => {
+
+                const task = await getTaskItem(email, id);
+                if (task instanceof Task) {
+                    const taskCompleted = task.getCompleted();
+                    if (completed !== undefined && typeof completed == "boolean") {
+                        if (completed === true && taskCompleted === true) return task
+                        if (completed === false && taskCompleted === false || isNaN(taskCompleted)) return task;
+                        return null;
+                    } else {
+                        return task
+                    }
+                } else {
+                    return null;
+                }
+            }))
+
+            taskList = taskList.filter(task => task !== null && task instanceof Task);
+            return taskList;
+
+        }
+        return { taskList: await getTaskList() }
+    } catch (err) {
+        return { error: err.code, message: err.message }
+    }
+}
+
+
+/**
+ * @param {string} email 
+ * @param {string} taskID 
+ * @returns {Promise<Task | {error} >} 
+ */
+export const getTaskItem = async (email, taskID) => {
+    try {
+        const taskCollection = collection(db, "tasks");
+        const docRef = doc(taskCollection, taskID);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const task = Task.fromObject(data, taskID);
+            if (task) {
+                return task;
+            } else {
+                return { error: "Task Object Could Not be Parsed " + JSON.stringify(data) }
             }
+        } else {
+            return { error: "Task ID Does Not Exist in Tasks Collection" }
         }
 
-        // now: for each document in DOC ID, get the task object for it
+    } catch (err) {
+        return { error: err.code }
+    }
+}
 
-        return { taskList: taskList }
+
+// FUTURE IMPLEMENTATION:
+// IF USER IS ADMIN, SET TASK AS COMPLETED FOR ALL USERS
+// IF USER IS STANDARD, USER ONLY SETS COMPLETED FOR SELF
+
+// CURRENT IMPLEMENTATION: ANY USER CAN DECIDE TO CHECK A TASK AS COMPLETED
+export const completeTask = async (email, taskID) => {
+    try {
+        const taskDocRef = doc(db, "tasks", taskID);
+        await setDoc(taskDocRef, {
+            completed: true
+        }, { merge: true })
+
+        return { ok: true }
+
+    } catch (err) {
+        return { error: err.code, message: err.message }
+    }
+}
+
+// Currently: any user that a task is shared with can permanently delete a task
+// FUTURE IMPLEMENTATION: DELETE DOCUMENT FOR ALL SHARED USERS
+export const deleteTask = async (email, taskID) => {
+    try {
+        // delete task from user's task collection
+        const userTaskCollection = collection(db, "users", email, "tasks");
+        const docInUserTasks = doc(userTaskCollection, taskID);
+
+        // also delete task from tasks collection
+        const taskCollection = collection(db, "tasks");
+        const docInTasks = doc(taskCollection, taskID);
+
+        const delFromUser = await deleteDoc(docInUserTasks);
+        const delFromTasks = await deleteDoc(docInTasks);
+
+        return { error: false }
+
     } catch (err) {
         return { error: err.code, message: err.message }
     }

@@ -44,7 +44,7 @@ export default function TabOneScreen() {
   );
 
   function handleAddHabit() {
-    router.push("/addHabit");
+    router.push("/(modals)/addHabit");
   }
 
   return (

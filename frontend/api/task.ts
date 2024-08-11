@@ -6,7 +6,7 @@ type TaskUser = {
 }
 
 export default class Task {
-    private taskID: number
+    private taskID: string
     private name: string
     private description: string
     private deadline: Date | null
@@ -14,14 +14,19 @@ export default class Task {
     private sharedUsers: TaskUser[] = []
     private completed: boolean = false;
 
-    static fromObject(taskObject: any, id: number) {
-        const taskDeadline: Date | null = taskObject.deadline === constants.NO_TASK_DEADLINE ? null : new Date(taskObject.deadline);
+    static fromObject(taskObject: any, id: string) {
+
+        if (taskObject === undefined || taskObject === null) {
+            return null;
+        }
+
+        const taskDeadline: Date | null = taskObject.deadline ? new Date(taskObject.deadline.toDate()) : null;
         const sharedUsers: TaskUser[] = taskObject.sharedUsers;
         const task = new Task(id, taskObject.taskName, taskObject.description, taskDeadline, taskObject.importance, taskObject.completed, sharedUsers);
         return task;
     }
 
-    constructor(taskID: number = -1, name: string, description: string = "", deadline: Date | null = null, importance: number | null = null, completed: boolean = false, sharedUsers?: TaskUser[],) {
+    constructor(taskID: string = "-1", name: string, description: string = "", deadline: Date | null = null, importance: number | null = null, completed: boolean = false, sharedUsers?: TaskUser[],) {
 
         this.taskID = taskID;
         this.name = name.length === 0 ? "Unnamed Task" : name;
@@ -58,11 +63,9 @@ export default class Task {
         }
     }
 
-    getDeadline() {
-        if (!this.deadline) return "NO_DEADLINE"
-        return this.deadline.toDateString()
+    getDeadline(): Date | null {
+        return this.deadline
     }
-
 
     getSharedUsers() {
         return this.sharedUsers;
@@ -73,21 +76,17 @@ export default class Task {
 
     }
 
-    getTaskID() {
+    getTaskID(): string {
         return this.taskID;
     }
 
-    getCompleted() {
+    getCompleted(): boolean {
         return this.completed;
     }
 
     setCompleted(completed: boolean) {
         this.completed = completed;
     }
-
-
-
-
 
 }
 

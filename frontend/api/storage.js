@@ -48,7 +48,6 @@ export const updateHabitObject = async (habitJSONObject, email) => {
     }
 
     let habitList;
-
     if (!isAnonymous(email)) {
         try {
             const userData = await getUserDataFromEmail(email);
@@ -178,5 +177,28 @@ export const retrieveLocalHabitList = async () => {
         }
     } catch (e) {
         return [];
+    }
+}
+
+/**
+ * 
+ * @param {string} habitName 
+ * @param {string} unit 
+ */
+export async function updateLocalStorageHabits(habitName, unit) {
+    const habitDataList = await retrieveLocalHabitList();
+    const habitExists = Habit.habitExistsInList(habitName, habitDataList);
+
+    if (!habitExists) {
+        habitDataList.push(new Habit(habitName, unit).getJSON());
+        const res = await storeData("habitList", JSON.stringify(habitDataList));
+        router.replace("/");
+        if (res.error) {
+            return { error: res.error }
+        }
+        return { error: false }
+    } else {
+        alert("Habit Already Exists");
+        return { error: "Habit Already Exists" }
     }
 }
