@@ -55,7 +55,6 @@ const taskDetails = () => {
             <Text variant={"displayLarge"}>WORK IN PROGRESS</Text>
             <Text>{task.getName()}</Text>
             <Text>{task.getDescription()}</Text>
-            {/*  */}
             <Button onPress={handleDeleteTask}>Delete Task Permanently</Button>
           </>
         )}

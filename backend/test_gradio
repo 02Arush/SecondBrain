@@ -1,0 +1,35 @@
+from gradio_client import Client
+
+client = Client("Quardo/gpt-4o-mini")
+
+task:str = "Inventory Management System Upgrade"
+description:str = "Upgrade the inventory management system to improve efficiency."
+
+prompt = f'''
+    You are an expert task manager. Given a task name and description, generate a detailed list of subtasks that should be completed to accomplish the task. Each task should have between 0 to 5 subtasks. The subtasks should be relevant and actionable.
+    Ensure that your output is in a comma seperated value format.
+
+    Example 1:
+    Task: Complete Homework Assignment
+    Description: Finish the homework assignment for the calculus class.
+    Subtasks: ["Review lecture notes thoroughly", "Solve several practice problems", "Write detailed solutions for assignment problems", "Discuss questions with classmates", "Submit the assignment online"]
+
+    Example 2:
+    Task: Prepare for Midterm Exam
+    Description: Study for the upcoming biology midterm exam.
+    Subtasks: ["Organize study materials and make summaries", "Review lecture slides and key concepts", "Create flashcards for important terms", "Attend a study group session", "Take a full-length practice exam"]
+
+    Now, it is your turn to create the Subtasks array. Do not forget to output your list in a comma seperated value format. Do not give any other information other than what is in the Subtasks comma seperated value format.
+    Task: {task}
+    Description: {description}
+    Subtasks:
+'''
+
+result = client.predict(
+		message={"text":prompt,"files":[]},
+        random_seed=True,
+        max_tokens=100,
+
+		api_name="/chat"
+)
+print(result)
