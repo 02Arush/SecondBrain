@@ -5,39 +5,22 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import React, { useState, useCallback, useContext, useEffect} from "react";
-import { Surface, TextInput, Text, Button, Checkbox } from "react-native-paper";
-import { router, useFocusEffect } from "expo-router";
+import React, { useState, useContext } from "react";
+import { TextInput, Button } from "react-native-paper";
+import { router } from "expo-router";
 import { updateLocalStorageHabits } from "../../api/storage";
-import Habit from "../../api/habit";
 import { AuthContext } from "@/contexts/authContext";
-import { retrieveLocalHabitList } from "../../api/storage";
 import { addHabit as createHabit } from "@/api/db_ops";
-import Select from "@/components/Select";
-import { stringToTimeFrame, timeFrame } from "@/api/types_and_utils";
 import { isAnonymous } from "@/constants/constants";
-import { filterTextToInteger } from "@/api/types_and_utils";
 import { HabitGoal } from "../../api/habit";
 import OptionalGoal from "@/components/OptionalGoal";
 const addHabit = () => {
   const [habitName, setHabitName] = useState("");
   const [unit, setUnit] = useState("");
-  const { email, setEmail } = useContext(AuthContext);
-  const [timeFrameSelectVisible, setTimeFrameSelectVisible] = useState(false);
-  const [goalChecked, setGoalChecked] = useState<"checked" | "unchecked">(
-    "checked"
-  );
-
-  const [goalNumber, setGoalNumber] = useState<number>(1);
-  const [goalTimeFrameCount, setGoalTimeFrameCount] = useState<number>(1);
-  const [goalTimeFrame, setGoalTimeFrame] = useState<string>("Day");
+  const { email } = useContext(AuthContext);
   const [goal, setGoal] = useState<HabitGoal | null>(
     new HabitGoal(1, unit, 1, "day")
   );
-
-  // If signed in:
-  // get signed in user's habit list from firebase
-  // append new habit to that list
 
   const handleSubmitHabit = async () => {
     const trimmedHabitName = habitName.toUpperCase().trim();
@@ -48,15 +31,8 @@ const addHabit = () => {
       return;
     }
 
-
-
     if (!isAnonymous(email)) {
-      const res = await createHabit(
-        email,
-        trimmedHabitName,
-        trimmedUnit,
-        goal
-      );
+      const res = await createHabit(email, trimmedHabitName, trimmedUnit, goal);
       if (res.success) {
         router.replace("/");
       } else {
@@ -67,14 +43,6 @@ const addHabit = () => {
       if (res.error) {
         alert(res.error);
       }
-    }
-  };
-
-  const toggleGoalChecked = () => {
-    if (goalChecked === "checked") {
-      setGoalChecked("unchecked");
-    } else {
-      setGoalChecked("checked");
     }
   };
 
@@ -106,8 +74,7 @@ const addHabit = () => {
             style={styles.textInput}
           />
           <OptionalGoal goal={goal} setGoal={setGoal} unit={unit} />
-          
-          
+
           <Button
             mode="contained"
             onPress={handleSubmitHabit}

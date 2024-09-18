@@ -69,10 +69,13 @@ const tasks = () => {
     setViewingFilter(!filterShowing);
   };
 
+  const toggleShowingCompletedTasks = () => {
+    handleLoadTasks(!viewingCompletedTasks, selectedFilterOption);
+  };
+
   const handleChart = () => {
     alert("Not Implemented Yet");
   };
-
 
   return (
     <SafeAreaView
@@ -113,9 +116,7 @@ const tasks = () => {
                   ? theme.colors.tertiary
                   : theme.colors.onBackground
               }
-              onPress={() => {
-                handleLoadTasks(!viewingCompletedTasks);
-              }}
+              onPress={toggleShowingCompletedTasks}
             />
             <IconButton icon="chart-scatter-plot" onPress={handleChart} />
           </View>

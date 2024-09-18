@@ -171,7 +171,7 @@ const viewHabitLog = () => {
         case "All Time":
           total = habit.getTotalCount("total");
           average = habit.getAveragePerTimeFrameAllTime(1, timeFrame) || "N/A";
-          break;
+          col = getColor(total, habit.getAge());
 
         default: {
           break;
@@ -214,13 +214,13 @@ const viewHabitLog = () => {
 
   const TableRows = () => {
     const tableTimeframes = [
-      "Today",
-      "7 Days",
-      "30 Days",
-      "90 Days",
-      "6 Months",
-      "1 Year",
-      "All Time",
+      { label: "Today", lengthDays: 1 },
+      { label: "7 Days", lengthDays: 7 },
+      { label: "30 Days", lengthDays: 30 },
+      { label: "90 Days", lengthDays: 90 },
+      { label: "6 Months", lengthDays: 6 * timeFrameConverter["month"] },
+      { label: "1 Year", lengthDays: 1 * timeFrameConverter["year"] },
+      { label: "All Time", lengthDays: habit.getAge() },
     ];
 
     return (
@@ -228,14 +228,20 @@ const viewHabitLog = () => {
         {tableTimeframes.map((timeframe) => {
           // if time frame < goal time frame, use theme color
           // else:
+          const label = timeframe.label;
+
+          if (timeframe.lengthDays > habit.getAge()) {
+            return <View key={label}></View>;
+          }
+
           let themeColor = theme.colors.onBackground;
-          const totalMapping = timeFrameValueMapping(timeframe, "total");
-          const avgMapping = timeFrameValueMapping(timeframe, "average");
+          const totalMapping = timeFrameValueMapping(label, "total");
+          const avgMapping = timeFrameValueMapping(label, "average");
 
           return (
-            <DataTable.Row key={timeframe}>
+            <DataTable.Row key={label}>
               <DataTable.Cell>
-                <Text style={{ color: totalMapping.color }}>{timeframe}</Text>
+                <Text style={{ color: totalMapping.color }}>{label}</Text>
               </DataTable.Cell>
               <DataTable.Cell>
                 <Text>{totalMapping.value}</Text>
@@ -257,12 +263,11 @@ const viewHabitLog = () => {
         const parsedDate = new Date(date);
         return parsedDate.toDateString();
       } else if (date instanceof Timestamp) {
-        return date.toDate().toDateString()
+        return date.toDate().toDateString();
       }
 
       return date.toDateString();
     } catch (err) {
-
       console.log(date);
       console.log(date instanceof Timestamp);
       return "DATE ERROR";
@@ -280,7 +285,7 @@ const viewHabitLog = () => {
         <View style={{ flexDirection: "row" }}>
           <View style={{ flex: 4 }}>
             <Text>
-              Habit Name: {habit.getName()}{" "}
+              Habit: {habit.getName()}{" "}
               <Text style={{ color: "grey" }}>({habit.getUnit()})</Text>
             </Text>
             <Text>Created: {getCreationDate()}</Text>
@@ -387,7 +392,9 @@ const styles = StyleSheet.create({
   innerContainer: {
     width: 350,
     padding: 12,
-    height: "100%",
+    minHeight: "60%",
+    height: "auto",
+    maxHeight: "100%",
   },
 
   habitLog: {},

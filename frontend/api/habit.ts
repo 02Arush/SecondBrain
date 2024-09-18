@@ -3,6 +3,7 @@
 import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter } from "./types_and_utils";
 
 
+
 export interface HabitJSON {
     "habitName": string,
     "unit": string | null,
@@ -18,6 +19,7 @@ export default class Habit {
     private unit: string;
     private goal: HabitGoal | null = null;
     private creationDate: Date;
+    private age: number; // Age in days
 
 
 
@@ -26,13 +28,20 @@ export default class Habit {
         this.unit = unit;
         this.activityLog = activityLog;
         if (goal) this.goal = goal
-        if (!creationDate) {
+        if (!creationDate || !(creationDate instanceof Date)) {
             this.creationDate = this.getFirstActivityDate();
         } else {
             this.creationDate = creationDate;
         }
 
+        this.age = Math.floor((new Date().getTime() - this.creationDate.getTime()) / (1000 * 60 * 60 * 24));
     }
+
+    getAge(): number {
+        return this.age;
+    }
+
+
 
     getFirstActivityDate(): Date {
         const activities = this.getSortedActivityLog("ascending")
@@ -63,7 +72,7 @@ export default class Habit {
                 throw new Error("Unsupported type of json " + typeof json);
         }
 
-       
+
 
         const { habitName, unit, activityLog: activityLogData, creationDate, goal } = habitJSON;
 

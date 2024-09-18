@@ -92,7 +92,7 @@ const Select = ({
             }}
           >
             <SafeAreaView
-              style={{ width: "80%", borderRadius: itemBorderRadius }}
+              style={{ width: "80%", maxWidth: 700, borderRadius: itemBorderRadius }}
             >
               <Surface
                 style={{ width: "100%", borderRadius: itemBorderRadius }}
@@ -114,7 +114,6 @@ const Select = ({
                           backgroundColor: "rgba(0, 0, 0, 0)",
                           position: "relative",
                           padding: 10,
-                          borderBottomWidth: 1,
                           // Corner Border Radius to ensure the underlines don't glitch
                           borderBottomStartRadius:
                             index === items.length - 1 ? itemBorderRadius : 0,
@@ -123,7 +122,7 @@ const Select = ({
                         }}
                         key={index}
                       >
-                        <Text style={{ height: "100%" }}>{item}</Text>
+                        <Text style={{ height: "100%", textAlign: "center" }}>{item}</Text>
                       </View>
                     </TouchableRipple>
                   );
