@@ -1,28 +1,29 @@
 import { StyleSheet, View, ScrollView } from "react-native";
-import React, { useContext, useCallback } from "react";
+import React, { useContext, useCallback, useState, useEffect } from "react";
 import { useRouteInfo } from "expo-router/build/hooks";
-import { useState, useEffect } from "react";
 import Habit from "@/api/habit";
 import { retrieveHabitObject } from "@/api/storage";
 import { DataTable, Text, useTheme, IconButton } from "react-native-paper";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, router } from "expo-router";
 import {
   limitStringLength,
   stringToTimeFrame,
   timeFrame,
+  timeFrameConverter,
+  winrateToColor,
 } from "@/api/types_and_utils";
-import { router } from "expo-router";
 import Select from "@/components/Select";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
+import { Timestamp } from "firebase/firestore";
 
 const viewHabitLog = () => {
   const route = useRouteInfo();
   const habitName = route.params.habitName.toString().toUpperCase();
   const theme = useTheme();
-  const [habit, setThisHabit] = useState(new Habit("NULL_HABIT", "NULL_UNIT"));
+  const [habit, setHabit] = useState(new Habit("NULL_HABIT", "NULL_UNIT"));
   const { email } = useContext(AuthContext);
   const [timeFrameMenuOpen, setTimeFrameMenuOpen] = useState(false);
   const [selectedTimeFrame, setSelectedTimeFrame] = useState<string>("Day");
@@ -46,7 +47,7 @@ const viewHabitLog = () => {
 
         const currHabit = await retrieveHabitObject(habitName, habitList);
         if (currHabit instanceof Habit) {
-          setThisHabit(currHabit);
+          setHabit(currHabit);
         } else {
           alert(currHabit.error);
         }
@@ -62,8 +63,8 @@ const viewHabitLog = () => {
     });
   }
 
-  const roundToTwoDecimals = (num: number) => {
-    return isNaN(num) ? "N/A" : Math.round(num * 100) / 100;
+  const roundToTwoDecimals = (num: number): number => {
+    return Math.round(num * 100) / 100;
   };
 
   const handleSelectTimeFrame = (item: string) => {
@@ -74,85 +75,145 @@ const viewHabitLog = () => {
     key: string,
     mode: "total" | "average" = "total"
   ) => {
-    const mapping: any = {
-      Today: {
-        total: roundToTwoDecimals(habit.getTodayCount()),
-        average: "N/A",
-      },
-      "7 Days": {
-        total: roundToTwoDecimals(
-          habit.getCountOverTimeFrame(1, "week", "total")
-        ),
-        average: habit.getAveragePerTimeFrameOverTimeFrame(
-          1,
-          timeFrame,
-          1,
-          "week"
-        ),
-      },
-      "30 Days": {
-        total: roundToTwoDecimals(habit.getCountPastXDays(30, "total")),
-        average: habit.getAveragePerTimeFrameOverTimeFrame(
-          1,
-          timeFrame,
-          1,
-          "month"
-        ),
-      },
-      "90 Days": {
-        total: roundToTwoDecimals(
-          habit.getCountOverTimeFrame(90, "day", "total")
-        ),
-        average: habit.getAveragePerTimeFrameOverTimeFrame(
-          1,
-          timeFrame,
-          90,
-          "day"
-        ),
-      },
-      "6 Months": {
-        total: roundToTwoDecimals(
-          habit.getCountOverTimeFrame(6, "month", "total")
-        ),
-        average: habit.getAveragePerTimeFrameOverTimeFrame(
-          1,
-          timeFrame,
-          6,
-          "month"
-        ),
-      },
-      "1 Year": {
-        total: roundToTwoDecimals(
-          habit.getCountOverTimeFrame(1, "year", "total")
-        ),
-        average: habit.getAveragePerTimeFrameOverTimeFrame(
-          1,
-          timeFrame,
-          1,
-          "year"
-        ),
-      },
-      "All Time": {
-        total: habit.getTotalCount("total"),
-        average: habit.getAveragePerTimeFrameAllTime(1, timeFrame),
-      },
+    const getCellMapping = (
+      key: string
+    ): { total: number | "N/A"; average: number | "N/A"; color: string } => {
+      let total: number | "N/A" = 0;
+      let average: number | "N/A" = 0;
+      let col: string = theme.colors.onBackground;
+      const goal = habit.getGoal();
 
-      _: {
-        total: "undefined",
-        average: "undefiend",
-      },
+      const getColor = (totalCount: number | "N/A", windowSizeDays: number) => {
+        if (goal && typeof totalCount == "number") {
+          const winrate =
+            totalCount / windowSizeDays / goal.getIdealCountPerDay();
+          return winrateToColor(winrate, "dark");
+        } else {
+          return col;
+        }
+      };
+
+      switch (key) {
+        case "Today":
+          total = roundToTwoDecimals(habit.getTodayCount());
+          average = "N/A";
+          col = getColor(total, 1);
+          break;
+
+        case "7 Days":
+          total = roundToTwoDecimals(
+            habit.getCountOverTimeFrame(1, "week", "total")
+          );
+          average =
+            habit.getAveragePerTimeFrameOverTimeFrame(
+              1,
+              timeFrame,
+              1,
+              "week"
+            ) || "N/A";
+          col = getColor(total, 7);
+          break;
+
+        case "30 Days":
+          total = roundToTwoDecimals(habit.getCountPastXDays(30, "total"));
+          average =
+            habit.getAveragePerTimeFrameOverTimeFrame(
+              1,
+              timeFrame,
+              1,
+              "month"
+            ) || "N/A";
+          col = getColor(total, 30);
+          break;
+
+        case "90 Days":
+          total = roundToTwoDecimals(
+            habit.getCountOverTimeFrame(90, "day", "total")
+          );
+          average =
+            habit.getAveragePerTimeFrameOverTimeFrame(
+              1,
+              timeFrame,
+              90,
+              "day"
+            ) || "N/A";
+          col = getColor(total, 90);
+          break;
+
+        case "6 Months":
+          total = roundToTwoDecimals(
+            habit.getCountOverTimeFrame(6, "month", "total")
+          );
+          average =
+            habit.getAveragePerTimeFrameOverTimeFrame(
+              1,
+              timeFrame,
+              6,
+              "month"
+            ) || "N/A";
+          col = getColor(total, 6 * timeFrameConverter["month"]);
+          break;
+
+        case "1 Year":
+          total = roundToTwoDecimals(
+            habit.getCountOverTimeFrame(1, "year", "total")
+          );
+          average =
+            habit.getAveragePerTimeFrameOverTimeFrame(
+              1,
+              timeFrame,
+              1,
+              "year"
+            ) || "N/A";
+          col = getColor(total, 1 * timeFrameConverter["year"]);
+          break;
+
+        case "All Time":
+          total = habit.getTotalCount("total");
+          average = habit.getAveragePerTimeFrameAllTime(1, timeFrame) || "N/A";
+          break;
+
+        default: {
+          break;
+        }
+      }
+
+      return {
+        total: total,
+        average: average,
+        color: col,
+      };
     };
 
+    const mapping: Record<string, { total: any; average: any; color: string }> =
+      {
+        Today: getCellMapping("Today"),
+        "7 Days": getCellMapping("7 Days"),
+        "30 Days": getCellMapping("30 Days"),
+        "90 Days": getCellMapping("90 Days"),
+        "6 Months": getCellMapping("6 Months"),
+        "1 Year": getCellMapping("1 Year"),
+        "All Time": getCellMapping("All Time"),
+
+        _: {
+          total: "undefined",
+          average: "undefiend",
+          color: theme.colors.onBackground,
+        },
+      };
+
     const value = mapping[key][mode];
+    const col: string = mapping[key]["color"];
+
     if (typeof value === "number") {
-      return roundToTwoDecimals(value);
+      return { value: roundToTwoDecimals(value), color: col };
     } else {
-      return "N/A";
+      return { value: "N/A", color: theme.colors.onBackground };
     }
   };
 
   const TableRows = () => {
-    const tableValues = [
+    const tableTimeframes = [
       "Today",
       "7 Days",
       "30 Days",
@@ -164,21 +225,48 @@ const viewHabitLog = () => {
 
     return (
       <>
-        {tableValues.map((value) => {
+        {tableTimeframes.map((timeframe) => {
+          // if time frame < goal time frame, use theme color
+          // else:
+          let themeColor = theme.colors.onBackground;
+          const totalMapping = timeFrameValueMapping(timeframe, "total");
+          const avgMapping = timeFrameValueMapping(timeframe, "average");
+
           return (
-            <DataTable.Row key={value}>
-              <DataTable.Cell>{value}</DataTable.Cell>
+            <DataTable.Row key={timeframe}>
               <DataTable.Cell>
-                {timeFrameValueMapping(value, "total")}
+                <Text style={{ color: totalMapping.color }}>{timeframe}</Text>
               </DataTable.Cell>
               <DataTable.Cell>
-                {timeFrameValueMapping(value, "average")}
+                <Text>{totalMapping.value}</Text>
+              </DataTable.Cell>
+              <DataTable.Cell>
+                <Text>{avgMapping.value}</Text>
               </DataTable.Cell>
             </DataTable.Row>
           );
         })}
       </>
     );
+  };
+
+  const getCreationDate = (): string => {
+    const date = habit.getCreationDate();
+    try {
+      if (typeof date === "string") {
+        const parsedDate = new Date(date);
+        return parsedDate.toDateString();
+      } else if (date instanceof Timestamp) {
+        return date.toDate().toDateString()
+      }
+
+      return date.toDateString();
+    } catch (err) {
+
+      console.log(date);
+      console.log(date instanceof Timestamp);
+      return "DATE ERROR";
+    }
   };
 
   return (
@@ -191,8 +279,11 @@ const viewHabitLog = () => {
       <Surface style={styles.innerContainer}>
         <View style={{ flexDirection: "row" }}>
           <View style={{ flex: 4 }}>
-            <Text>Habit Name: {habit.getName()}</Text>
-            <Text>Habit Unit: {habit.getUnit()}</Text>
+            <Text>
+              Habit Name: {habit.getName()}{" "}
+              <Text style={{ color: "grey" }}>({habit.getUnit()})</Text>
+            </Text>
+            <Text>Created: {getCreationDate()}</Text>
             <Text>
               <Text style={{ fontWeight: "bold" }}>Habit Goal: </Text>
               <Text>
@@ -266,12 +357,12 @@ const viewHabitLog = () => {
             marginTop: 8,
           }}
         >
-          <Text style={{marginBottom: 8}}>Habit Log:</Text>
+          <Text style={{ marginBottom: 8 }}>Habit Log:</Text>
           {habit
             .getSortedActivityLog("descending")
             .map((activity: { date: string; count: number }) => {
               return (
-                <Text key={activity.date} style={{marginVertical: 1}}>
+                <Text key={activity.date} style={{ marginVertical: 1 }}>
                   {activity.date}: {roundToTwoDecimals(activity.count)}
                 </Text>
               );
@@ -290,12 +381,13 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+    paddingVertical: 20,
   },
 
   innerContainer: {
     width: 350,
     padding: 12,
-    minHeight: "50%",
+    height: "100%",
   },
 
   habitLog: {},

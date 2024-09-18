@@ -121,15 +121,7 @@ function RootLayoutNav() {
           <Stack.Screen
             name="(modals)/createTask"
             options={{
-              title: "Create Task",
-              headerBackTitle: "Home",
-            }}
-          />
-
-          <Stack.Screen
-            name="(modals)/taskDetails"
-            options={{
-              title: "Task Details",
+              title: "Task Builder",
               headerBackTitle: "Home",
             }}
           />

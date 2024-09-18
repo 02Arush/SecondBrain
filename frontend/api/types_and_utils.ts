@@ -1,3 +1,5 @@
+import { getColor } from "@/constants/Colors";
+
 /**
  * STRINGS
  */
@@ -15,19 +17,22 @@ export const limitStringLength = (text: string, length: number = 6): string => {
     return trimmedString;
 }
 
+
+
+
 /**
  * DATES/TIME
  */
 
 export type timeFrame = "day" | "week" | "month" | "year"
 
-export const timeFrameConverter = {
+export const timeFrameConverter: Record<string, number> = {
     "day": 1,
     "week": 7,
     "month": 30,
     "year": 365,
-}
 
+}
 
 export type SimpleDate = {
     day: number;
@@ -52,7 +57,15 @@ export const getDateFromSimpleDate = (simpleDate: { year: number, month: number,
     }
 }
 
+export const getSimpleDateFromDate = (date: Date): SimpleDate => {
+    return {
+        day: date.getDate(),
+        month: date.getMonth() + 1,
+        year: date.getFullYear()
+    }
+}
 
+// MAKE THIS MORE EFFICIENT
 export const stringToTimeFrame = (s: string): timeFrame | null => {
     s = s.trim().toLowerCase();
 
@@ -70,6 +83,19 @@ export const stringToTimeFrame = (s: string): timeFrame | null => {
     }
 };
 
+export const winrateToColor = (winrate: number, theme: "light" | "dark"): string => {
+
+    let color;
+    if (winrate >= .90) color = getColor(theme, "green")
+    else if (winrate >= .80) color = getColor(theme, "lime");
+    else if (winrate >= .70) color = getColor(theme, "yellow")
+    else if (winrate >= .50) color = getColor(theme, "orange")
+    else if (winrate < .50) color = getColor(theme, "red")
+
+    console.log("WINRATE " + winrate + "COLOR " + color)
+    return color || "grey";
+}
+
 /*
  OBJECTS
 */
@@ -81,3 +107,10 @@ export type habitGoal = {
     "timeFrameLabel": string
 
 }
+
+export const filterOptions = {
+    DATE_EARLIEST: "Date (Earliest)",
+    DATE_FURTHEST: "Date (Furthest)",
+    IMPORTANCE_HIGHEST: "Importance (Highest)",
+    IMPORTANCE_LOWEST: "Importance (Lowest)",
+};

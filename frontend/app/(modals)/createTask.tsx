@@ -1,5 +1,5 @@
 import { StyleSheet, View, SafeAreaView } from "react-native";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import {
   Checkbox,
@@ -17,33 +17,55 @@ import constants from "@/constants/constants";
 import { getDateFromSimpleDate } from "@/api/types_and_utils";
 import Slider from "@react-native-community/slider";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
-type checkedState = "checked" | "unchecked" | "indeterminate";
 import Task from "@/api/task";
 import { createTask as createTaskDB } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
-import { router } from "expo-router";
+import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
+import { getTaskItem, deleteTask, updateTask } from "@/api/db_ops";
+import { getSimpleDateFromDate } from "@/api/types_and_utils";
 
 const createTask = () => {
   const theme = useTheme();
   const { email } = useContext(AuthContext);
+  const { taskID } = useLocalSearchParams();
+
+  useFocusEffect(
+    useCallback(() => {
+      // get the task details
+      (async () => {
+        if (taskID && typeof taskID === "string") {
+          const currTask = await getTaskItem(email, taskID);
+          // populate the fields with intiial values
+          if (currTask instanceof Task) {
+            setTaskName(currTask.getName());
+            setTaskDescription(currTask.getDescription());
+            const deadline = currTask.getDeadline();
+
+            if (deadline) {
+              setDeadline(getSimpleDateFromDate(deadline));
+              setDisplayedDeadline("Deadline: " + deadline.toDateString());
+            }
+
+            setImportance(currTask.getImportance());
+          } else {
+            alert(currTask.error);
+          }
+        }
+      })();
+    }, [taskID, email])
+  );
+
   const [taskName, setTaskName] = useState<string>("");
   const [taskDescription, setTaskDescription] = useState<string>("");
   const todayDate = new Date();
-  const todaySimpleDate: SimpleDate = {
-    day: todayDate.getDate(),
-    month: todayDate.getMonth() + 1,
-    year: todayDate.getFullYear(),
-  };
+  const todaySimpleDate: SimpleDate = getSimpleDateFromDate(todayDate);
   const [deadline, setDeadline] = useState<SimpleDate>(todaySimpleDate);
-  const [deadlineEnabled, setDeadlineEnabled] =
-    useState<checkedState>("checked");
-
   const [displayedDeadline, setDisplayedDeadline] = useState<string>(
     constants.NO_TASK_DEADLINE
   );
 
   const [showingDeadlineModal, setShowingDeadlineModal] = useState(false);
-  const [importance, setimportance] = useState<number>(5);
+  const [importance, setImportance] = useState<number>(5);
 
   const handleEditDeadline = () => {
     setShowingDeadlineModal(true);
@@ -60,6 +82,15 @@ const createTask = () => {
       const dateString = deadlineDate.toDateString();
       setDisplayedDeadline("Deadline: " + dateString);
       setShowingDeadlineModal(false);
+    }
+  };
+
+  const handleDeleteTask = async () => {
+    const res = await deleteTask(email, taskID);
+    if (!res.error) {
+      router.replace("/tasks");
+    } else {
+      alert("Deletion Error " + res.error);
     }
   };
 
@@ -86,12 +117,17 @@ const createTask = () => {
       alert("Error: email is not a string");
     }
 
-    const res = await createTaskDB(email, newTask);
+    const res =
+      taskID && typeof taskID === "string"
+        ? await updateTask(email, newTask, taskID)
+        : await createTaskDB(email, newTask);
+
+    // const res = updateExistingTask
     if (res.ok) {
-      alert("Task Added Successfully");
-      router.replace("/tasks")
+      alert("Task Built Successfully");
+      router.replace("/tasks");
     } else {
-      alert(res.error);
+      alert(JSON.stringify(res));
     }
   };
 
@@ -124,7 +160,6 @@ const createTask = () => {
           />
 
           <Button
-            disabled={deadlineEnabled !== "checked"}
             onPress={handleEditDeadline}
             mode="text"
             style={{ marginVertical: 4 }}
@@ -139,7 +174,7 @@ const createTask = () => {
               maximumValue={10}
               value={importance}
               onValueChange={(value) => {
-                setimportance(value);
+                setImportance(value);
               }}
               step={1}
               minimumTrackTintColor={theme.colors.onBackground}
@@ -158,8 +193,9 @@ const createTask = () => {
             style={{ marginTop: 8 }}
             onPress={handleCreateTask}
           >
-            Create Task
+            {!taskID ? "Create Task" : "Update Task"}
           </Button>
+          {taskID && <Button onPress={handleDeleteTask}>Delete Task</Button>}
 
           <OutlineModal showing={showingDeadlineModal}>
             <Surface

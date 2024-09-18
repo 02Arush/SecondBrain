@@ -3,3 +3,5 @@ transformers
 huggingface-hub
 flask
 torch
+numpy
+pandas

@@ -1,13 +1,23 @@
 const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
 
-export default {
+
+const colorScheme: any = {
   light: {
     text: '#000',
     background: '#fff',
     tint: tintColorLight,
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
+
+
+    green: "#2f9e44",
+    lime: "#94d82d",
+    yellow: "#fab005",
+    orange: "#f76707",
+    red: "#e03131"
+
+
   },
   dark: {
     text: '#fff',
@@ -15,5 +25,25 @@ export default {
     tint: tintColorDark,
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
+
+    green: "#2f9e44",
+    lime: "#94d82d",
+    yellow: "#fab005",
+    orange: "#f76707",
+    red: "#e03131"
   },
 };
+
+
+export const getColor = (theme: string, color: string): string | null => {
+  if (!(theme == "light" || theme == "dark")) return null;
+
+  if (colorScheme[theme] && color in colorScheme[theme]) {
+    return colorScheme[theme][color] || null;
+  }
+
+  return null;
+
+}
+
+export default colorScheme;

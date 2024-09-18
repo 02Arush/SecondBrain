@@ -1,0 +1,848 @@
+[
+    {
+        "taskName": "Complete Homework Assignment",
+        "taskDescription": "Finish the homework assignment for the calculus class.",
+        "subTasks": [
+            "Review lecture notes thoroughly",
+            "Solve several practice problems",
+            "Write detailed solutions for assignment problems",
+            "Discuss questions with classmates",
+            "Submit the assignment online"
+        ]
+    },
+    {
+        "taskName": "Prepare for Midterm Exam",
+        "taskDescription": "Study for the upcoming biology midterm exam.",
+        "subTasks": [
+            "Organize study materials and make summaries",
+            "Review lecture slides and key concepts",
+            "Create flashcards for important terms",
+            "Attend a study group session",
+            "Take a full-length practice exam"
+        ]
+    },
+    {
+        "taskName": "Grocery Shopping",
+        "taskDescription": "Purchase groceries for the week.",
+        "subTasks": [
+            "Make a comprehensive shopping list",
+            "Check the pantry and fridge for needed items",
+            "Drive to the grocery store",
+            "Select and purchase items on the list",
+            "Return home and properly store groceries"
+        ]
+    },
+    {
+        "taskName": "Group Project Meeting",
+        "taskDescription": "Attend the group meeting for the history project.",
+        "subTasks": [
+            "Coordinate meeting time with all group members",
+            "Prepare materials and research for discussion",
+            "Contribute ideas and discuss project direction",
+            "Assign specific tasks to group members",
+            "Set next meeting date and plan milestones"
+        ]
+    },
+    {
+        "taskName": "Laundry Day",
+        "taskDescription": "Do laundry to have clean clothes for the week.",
+        "subTasks": [
+            "Sort clothes into appropriate piles",
+            "Load washing machine and start a cycle",
+            "Transfer clothes to dryer or hang to dry",
+            "Fold and organize clean clothes",
+            "Put clothes away in drawers and closets"
+        ]
+    },
+    {
+        "taskName": "Attend Lecture",
+        "taskDescription": "Attend the chemistry lecture.",
+        "subTasks": [
+            "Review previous lecture notes for context",
+            "Pack necessary materials like notebook and pen",
+            "Attend the lecture and take detailed notes",
+            "Participate in any class discussions",
+            "Review notes immediately after class"
+        ]
+    },
+    {
+        "taskName": "Write Essay",
+        "taskDescription": "Write a 1500-word essay for the English class.",
+        "subTasks": [
+            "Choose a suitable topic and get it approved",
+            "Conduct in-depth research on the topic",
+            "Create a detailed outline for the essay",
+            "Write the first draft of the essay",
+            "Revise, edit, and finalize the essay"
+        ]
+    },
+    {
+        "taskName": "Attend Club Meeting",
+        "taskDescription": "Go to the weekly meeting for the photography club.",
+        "subTasks": [
+            "Prepare camera and related equipment",
+            "Review the meeting agenda and prepare contributions",
+            "Participate actively in club discussions",
+            "Share and critique recent photos with the group",
+            "Plan upcoming events or photography outings"
+        ]
+    },
+    {
+        "taskName": "Exercise Routine",
+        "taskDescription": "Complete a daily exercise routine to stay fit.",
+        "subTasks": [
+            "Start with a 10-minute warm-up",
+            "Perform a 20-minute cardio workout",
+            "Engage in strength training for 15 minutes",
+            "Cool down with 10 minutes of stretching",
+            "Track progress in a fitness journal"
+        ]
+    },
+    {
+        "taskName": "Plan Weekend Trip",
+        "taskDescription": "Organize a weekend trip with friends.",
+        "subTasks": [
+            "Choose a destination and discuss with friends",
+            "Book accommodation that fits the group’s needs",
+            "Research and plan activities for the trip",
+            "Coordinate transportation and share responsibilities",
+            "Pack essentials for the trip"
+        ]
+    },
+    {
+        "taskName": "Website Redesign",
+        "taskDescription": "Revamp the company website to improve user experience and update branding.",
+        "subTasks": [
+            "Create wireframes for the new layout",
+            "Develop a modern website design",
+            "Implement a responsive design",
+            "Conduct user testing with a focus group",
+            "Launch the redesigned website and monitor feedback"
+        ]
+    },
+    {
+        "taskName": "Marketing Campaign",
+        "taskDescription": "Develop and execute a marketing campaign for the new product launch.",
+        "subTasks": [
+            "Research the target audience extensively",
+            "Design marketing materials across various media",
+            "Plan a comprehensive social media strategy",
+            "Execute a targeted email marketing campaign",
+            "Analyze the campaign's performance metrics"
+        ]
+    },
+    {
+        "taskName": "Mobile App Development",
+        "taskDescription": "Develop a mobile application to enhance customer engagement.",
+        "subTasks": [
+            "Define app features and technical requirements",
+            "Design the app's user interface and experience",
+            "Develop the backend API to support the app",
+            "Implement key app features and integrations",
+            "Test the app thoroughly before deployment"
+        ]
+    },
+    {
+        "taskName": "Employee Training Program",
+        "taskDescription": "Create and implement a training program for new employees.",
+        "subTasks": [
+            "Identify training needs across departments",
+            "Develop comprehensive training materials",
+            "Schedule training sessions for all employees",
+            "Conduct interactive training workshops",
+            "Evaluate the effectiveness of the training program"
+        ]
+    },
+    {
+        "taskName": "Product Development",
+        "taskDescription": "Design and develop a new product to meet market demand.",
+        "subTasks": [
+            "Conduct detailed market research",
+            "Create and refine the product design",
+            "Develop a working prototype",
+            "Test product functionality and usability",
+            "Prepare for product launch and marketing"
+        ]
+    },
+    {
+        "taskName": "Customer Feedback Analysis",
+        "taskDescription": "Analyze customer feedback to improve products and services.",
+        "subTasks": [
+            "Collect customer feedback data from surveys",
+            "Organize feedback into actionable categories",
+            "Identify key areas for improvement",
+            "Develop an action plan based on feedback",
+            "Implement changes and monitor customer reactions"
+        ]
+    },
+    {
+        "taskName": "Sales Strategy Optimization",
+        "taskDescription": "Revise and optimize the sales strategy to increase revenue.",
+        "subTasks": [
+            "Review current sales strategy and results",
+            "Identify areas where improvements are needed",
+            "Develop new sales tactics and approaches",
+            "Train the sales team on updated strategies",
+            "Monitor sales performance post-implementation"
+        ]
+    },
+    {
+        "taskName": "Content Creation",
+        "taskDescription": "Produce new content for the company blog and social media.",
+        "subTasks": [
+            "Research trending topics and keywords",
+            "Write engaging blog posts",
+            "Create visually appealing social media graphics",
+            "Schedule and publish content on various platforms",
+            "Engage with the audience through comments and shares"
+        ]
+    },
+    {
+        "taskName": "Data Migration",
+        "taskDescription": "Migrate data from the old system to the new platform.",
+        "subTasks": [
+            "Backup current data to prevent loss",
+            "Map data fields between the two systems",
+            "Execute the data migration process",
+            "Verify the integrity of migrated data",
+            "Train staff on how to use the new system"
+        ]
+    },
+    {
+        "taskName": "Inventory Management System Upgrade",
+        "taskDescription": "Upgrade the inventory management system to improve efficiency.",
+        "subTasks": [
+            "Assess current system limitations and requirements",
+            "Research new inventory management software options",
+            "Plan the upgrade implementation process",
+            "Migrate data to the new system",
+            "Train the team on how to use the new system effectively"
+        ]
+    },
+    {
+        "taskName": "Study Group Session",
+        "taskDescription": "Join a study group session to prepare for final exams.",
+        "subTasks": [
+            "Schedule a study session with classmates",
+            "Prepare study materials and notes",
+            "Review key concepts with the group",
+            "Quiz each other on potential exam questions",
+            "Summarize the session and plan the next one"
+        ]
+    },
+    {
+        "taskName": "Dorm Room Cleaning",
+        "taskDescription": "Clean and organize your dorm room.",
+        "subTasks": [
+            "Declutter desk and shelves",
+            "Vacuum the floor and clean surfaces",
+            "Organize clothes and belongings",
+            "Take out the trash and recycling",
+            "Change bed sheets and linens"
+        ]
+    },
+    {
+        "taskName": "Internship Application",
+        "taskDescription": "Apply for summer internship positions.",
+        "subTasks": [
+            "Research companies offering internships",
+            "Update resume and cover letter",
+            "Complete online application forms",
+            "Prepare for potential interviews",
+            "Follow up with applications"
+        ]
+    },
+    {
+        "taskName": "Club Fundraiser Event",
+        "taskDescription": "Organize a fundraiser event for the student club.",
+        "subTasks": [
+            "Decide on a fundraising activity",
+            "Promote the event on campus and social media",
+            "Gather necessary materials and supplies",
+            "Coordinate with club members on event day",
+            "Collect and count donations"
+        ]
+    },
+    {
+        "taskName": "Library Research Session",
+        "taskDescription": "Conduct research in the library for a class project.",
+        "subTasks": [
+            "Identify relevant books and articles",
+            "Take detailed notes on key points",
+            "Organize research materials by topic",
+            "Discuss findings with group members",
+            "Compile a bibliography for the project"
+        ]
+    },
+    {
+        "taskName": "Scholarship Application",
+        "taskDescription": "Apply for scholarships to help cover tuition costs.",
+        "subTasks": [
+            "Research available scholarships",
+            "Prepare required documents and essays",
+            "Submit applications before deadlines",
+            "Follow up on application status",
+            "Prepare for any interviews if required"
+        ]
+    },
+    {
+        "taskName": "Resume Workshop",
+        "taskDescription": "Attend a resume-building workshop.",
+        "subTasks": [
+            "Register for the workshop",
+            "Prepare a draft resume",
+            "Learn tips on effective resume writing",
+            "Revise resume based on feedback",
+            "Network with workshop attendees"
+        ]
+    },
+    {
+        "taskName": "Mental Health Day",
+        "taskDescription": "Take a day to focus on mental well-being.",
+        "subTasks": [
+            "Plan relaxing activities for the day",
+            "Disconnect from social media and work",
+            "Practice mindfulness or meditation",
+            "Spend time in nature or with loved ones",
+            "Reflect on mental health and set goals"
+        ]
+    },
+    {
+        "taskName": "Volunteer Work",
+        "taskDescription": "Participate in a community service project.",
+        "subTasks": [
+            "Choose a local organization to volunteer with",
+            "Sign up for a volunteer shift",
+            "Prepare any necessary materials",
+            "Complete volunteer tasks responsibly",
+            "Reflect on the experience and its impact"
+        ]
+    },
+    {
+        "taskName": "Budget Planning",
+        "taskDescription": "Create a monthly budget to manage expenses.",
+        "subTasks": [
+            "List all sources of income",
+            "Track and categorize expenses",
+            "Set savings goals for the month",
+            "Adjust budget to minimize unnecessary spending",
+            "Review and revise budget at the end of the month"
+        ]
+    },
+    {
+        "taskName": "Tech Skills Workshop",
+        "taskDescription": "Enhance technical skills by attending a workshop.",
+        "subTasks": [
+            "Research available workshops or online courses",
+            "Register for the selected workshop",
+            "Prepare any necessary tools or software",
+            "Participate actively in the workshop",
+            "Practice new skills learned during the session"
+        ]
+    },
+    {
+        "taskName": "Peer Tutoring Session",
+        "taskDescription": "Receive or provide peer tutoring to improve understanding of a subject.",
+        "subTasks": [
+            "Identify areas where tutoring is needed",
+            "Schedule a tutoring session with a peer",
+            "Prepare questions or materials for the session",
+            "Engage actively during the tutoring session",
+            "Review and practice concepts after the session"
+        ]
+    },
+    {
+        "taskName": "Online Course Enrollment",
+        "taskDescription": "Enroll in an online course to learn a new skill.",
+        "subTasks": [
+            "Research available online courses",
+            "Choose a course that matches your interests",
+            "Register and pay for the course",
+            "Set a schedule to complete course modules",
+            "Take notes and complete assignments on time"
+        ]
+    },
+    {
+        "taskName": "Art Portfolio Preparation",
+        "taskDescription": "Prepare an art portfolio for submission to art schools or competitions.",
+        "subTasks": [
+            "Select best artwork pieces for the portfolio",
+            "Photograph or scan artwork in high quality",
+            "Organize artwork by theme or medium",
+            "Write artist statements or descriptions",
+            "Assemble and submit the portfolio"
+        ]
+    },
+    {
+        "taskName": "Job Interview Preparation",
+        "taskDescription": "Prepare for an upcoming job interview.",
+        "subTasks": [
+            "Research the company and role",
+            "Review common interview questions",
+            "Prepare answers and practice with a friend",
+            "Choose appropriate attire for the interview",
+            "Plan travel logistics and arrive early"
+        ]
+    },
+    {
+        "taskName": "Freelance Work",
+        "taskDescription": "Complete a freelance project for a client.",
+        "subTasks": [
+            "Clarify project requirements with the client",
+            "Create a timeline and set milestones",
+            "Work on the project and track progress",
+            "Submit drafts for client feedback",
+            "Finalize the project and submit the deliverables"
+        ]
+    },
+    {
+        "taskName": "Conference Attendance",
+        "taskDescription": "Attend a professional conference related to your field.",
+        "subTasks": [
+            "Register for the conference",
+            "Prepare business cards and materials",
+            "Plan which sessions and talks to attend",
+            "Network with professionals in the field",
+            "Take notes and follow up on contacts made"
+        ]
+    },
+    {
+        "taskName": "Language Learning",
+        "taskDescription": "Practice and improve a new language.",
+        "subTasks": [
+            "Set language learning goals",
+            "Use apps or online resources for daily practice",
+            "Join a language exchange group",
+            "Practice speaking with a native speaker",
+            "Track progress and celebrate milestones"
+        ]
+    },
+    {
+        "taskName": "DIY Project",
+        "taskDescription": "Complete a DIY project for home or personal use.",
+        "subTasks": [
+            "Research and choose a DIY project",
+            "Gather necessary materials and tools",
+            "Follow instructions or plans carefully",
+            "Work on the project step by step",
+            "Showcase or use the completed project"
+        ]
+    },
+    {
+        "taskName": "Social Media Detox",
+        "taskDescription": "Take a break from social media for a set period.",
+        "subTasks": [
+            "Set a start and end date for the detox",
+            "Notify friends and followers of your break",
+            "Delete or deactivate social media apps",
+            "Engage in offline activities and hobbies",
+            "Reflect on the experience after the detox"
+        ]
+    },
+    {
+        "taskName": "Social Media Content Planning",
+        "taskDescription": "Plan content for social media channels for the week.",
+        "subTasks": [
+            "Research trending topics",
+            "Create a content calendar",
+            "Design graphics or videos",
+            "Write captions and hashtags",
+            "Schedule posts using a social media tool"
+        ]
+    },
+    {
+        "taskName": "Part-time Job Shift",
+        "taskDescription": "Work a part-time shift at the local coffee shop.",
+        "subTasks": [
+            "Arrive on time and clock in",
+            "Prepare coffee and beverages",
+            "Assist customers with orders",
+            "Clean and organize the workspace",
+            "Restock supplies for the next shift"
+        ]
+    },
+    {
+        "taskName": "Virtual Study Session",
+        "taskDescription": "Join an online study session with classmates.",
+        "subTasks": [
+            "Set up video conferencing software",
+            "Prepare study materials",
+            "Discuss difficult topics",
+            "Share notes and resources",
+            "Plan next study session"
+        ]
+    },
+    {
+        "taskName": "Job Search",
+        "taskDescription": "Search for job opportunities after graduation.",
+        "subTasks": [
+            "Update resume and LinkedIn profile",
+            "Search job boards for openings",
+            "Apply to jobs that match skills",
+            "Prepare for potential interviews",
+            "Follow up with applications"
+        ]
+    },
+    {
+        "taskName": "Virtual Internship",
+        "taskDescription": "Complete tasks for a virtual internship.",
+        "subTasks": [
+            "Attend virtual meetings with team",
+            "Complete assigned projects",
+            "Communicate progress with supervisor",
+            "Submit weekly reports",
+            "Reflect on internship experience"
+        ]
+    },
+    {
+        "taskName": "Cooking Experiment",
+        "taskDescription": "Try out a new recipe or cooking technique.",
+        "subTasks": [
+            "Choose a recipe to try",
+            "Gather all necessary ingredients",
+            "Follow the recipe step-by-step",
+            "Taste and adjust seasonings",
+            "Serve and enjoy the meal"
+        ]
+    },
+    {
+        "taskName": "Explore a New Hobby",
+        "taskDescription": "Pick up a new hobby like knitting or photography.",
+        "subTasks": [
+            "Research different hobbies",
+            "Choose one that interests you",
+            "Purchase necessary materials",
+            "Watch tutorials or read guides",
+            "Practice the new hobby regularly"
+        ]
+    },
+    {
+        "taskName": "Plan a Movie Night",
+        "taskDescription": "Organize a movie night with friends.",
+        "subTasks": [
+            "Choose a theme or genre",
+            "Select movies to watch",
+            "Prepare snacks and drinks",
+            "Invite friends to join",
+            "Set up a cozy viewing area"
+        ]
+    },
+    {
+        "taskName": "Attend a Virtual Concert",
+        "taskDescription": "Watch a live-streamed concert online.",
+        "subTasks": [
+            "Purchase or access tickets",
+            "Set up the streaming device",
+            "Invite friends to watch together",
+            "Prepare snacks and drinks",
+            "Enjoy the concert experience"
+        ]
+    },
+    {
+        "taskName": "Update Portfolio",
+        "taskDescription": "Add recent work to your professional portfolio.",
+        "subTasks": [
+            "Select recent projects to include",
+            "Write descriptions for each project",
+            "Update the design of the portfolio",
+            "Publish updates online",
+            "Share portfolio with potential employers"
+        ]
+    },
+    {
+        "taskName": "Create a Personal Website",
+        "taskDescription": "Design and launch a personal website.",
+        "subTasks": [
+            "Choose a website builder or platform",
+            "Purchase a domain name",
+            "Design the layout and content",
+            "Add a blog or portfolio section",
+            "Publish and share the website"
+        ]
+    },
+    {
+        "taskName": "Virtual Game Night",
+        "taskDescription": "Host a virtual game night with friends.",
+        "subTasks": [
+            "Choose an online game platform",
+            "Invite friends to join",
+            "Set up video or voice chat",
+            "Play a variety of games",
+            "Award virtual prizes to winners"
+        ]
+    },
+    {
+        "taskName": "Decorate Dorm Room",
+        "taskDescription": "Redecorate your dorm room to make it more comfortable.",
+        "subTasks": [
+            "Choose a theme or color scheme",
+            "Purchase new decor items",
+            "Rearrange furniture for better flow",
+            "Add personal touches like photos",
+            "Organize space for study and relaxation"
+        ]
+    },
+    {
+        "taskName": "Create a Budget for the Semester",
+        "taskDescription": "Plan a budget to manage finances during the semester.",
+        "subTasks": [
+            "List all expected expenses",
+            "Determine income sources",
+            "Allocate funds for necessities",
+            "Set savings goals",
+            "Track spending weekly"
+        ]
+    },
+    {
+        "taskName": "Update LinkedIn Profile",
+        "taskDescription": "Enhance your LinkedIn profile for job searching.",
+        "subTasks": [
+            "Update profile picture",
+            "Revise the summary section",
+            "Add recent experiences and skills",
+            "Request recommendations",
+            "Engage with industry-related content"
+        ]
+    },
+    {
+        "taskName": "Join a New Club or Organization",
+        "taskDescription": "Get involved with a new student club or organization.",
+        "subTasks": [
+            "Research clubs that match your interests",
+            "Attend an introductory meeting",
+            "Meet current members and ask questions",
+            "Sign up for membership",
+            "Participate in upcoming events or activities"
+        ]
+    },
+    {
+        "taskName": "Self-Care Day",
+        "taskDescription": "Dedicate a day to self-care and relaxation.",
+        "subTasks": [
+            "Plan activities that help you relax",
+            "Disconnect from social media and work",
+            "Indulge in a favorite hobby or pastime",
+            "Practice mindfulness or meditation",
+            "Reflect on your well-being"
+        ]
+    },
+    {
+        "taskName": "Online Fitness Class",
+        "taskDescription": "Attend an online fitness class to stay active.",
+        "subTasks": [
+            "Choose a class that fits your level",
+            "Set up space for exercise",
+            "Follow the instructor’s guidance",
+            "Complete the workout",
+            "Cool down and stretch after the class"
+        ]
+    },
+    {
+        "taskName": "Roommate Agreement",
+        "taskDescription": "Create an agreement with your roommate to avoid conflicts.",
+        "subTasks": [
+            "Discuss each other’s schedules and habits",
+            "Set rules for shared spaces",
+            "Agree on a cleaning schedule",
+            "Discuss guests and noise levels",
+            "Put the agreement in writing"
+        ]
+    },
+    {
+        "taskName": "Online Course Completion",
+        "taskDescription": "Complete an ongoing online course.",
+        "subTasks": [
+            "Review course syllabus and deadlines",
+            "Finish any pending assignments",
+            "Participate in discussion forums",
+            "Take final exams or assessments",
+            "Request a certificate of completion"
+        ]
+    },
+    {
+        "taskName": "Plan a Road Trip",
+        "taskDescription": "Organize a road trip with friends.",
+        "subTasks": [
+            "Choose a destination and route",
+            "Plan stops and activities along the way",
+            "Prepare a playlist for the trip",
+            "Pack essentials for the journey",
+            "Ensure the vehicle is ready for the trip"
+        ]
+    },
+    {
+        "taskName": "Learn to Cook a New Dish",
+        "taskDescription": "Try cooking a dish from a different cuisine.",
+        "subTasks": [
+            "Research recipes online",
+            "Buy the necessary ingredients",
+            "Follow the recipe instructions",
+            "Adjust seasoning to taste",
+            "Share the meal with friends or family"
+        ]
+    },
+    {
+        "taskName": "Participate in a Hackathon",
+        "taskDescription": "Join a coding hackathon to develop a project.",
+        "subTasks": [
+            "Register for the hackathon",
+            "Form a team or join an existing one",
+            "Brainstorm project ideas",
+            "Develop the project during the event",
+            "Present the project to judges"
+        ]
+    },
+    {
+        "taskName": "Freelance Project",
+        "taskDescription": "Work on a freelance project for extra income.",
+        "subTasks": [
+            "Discuss project requirements with the client",
+            "Set a timeline and milestones",
+            "Work on the project tasks",
+            "Submit drafts for client feedback",
+            "Finalize and deliver the project"
+        ]
+    },
+    {
+        "taskName": "Host a Virtual Meetup",
+        "taskDescription": "Organize a virtual meetup with friends or colleagues.",
+        "subTasks": [
+            "Choose a platform for the meetup",
+            "Set a time and date",
+            "Invite participants",
+            "Plan discussion topics or activities",
+            "Host and facilitate the meetup"
+        ]
+    },
+    {
+        "taskName": "Learn a New Language",
+        "taskDescription": "Start learning a new language online.",
+        "subTasks": [
+            "Choose a language learning app",
+            "Set daily practice goals",
+            "Engage in lessons and exercises",
+            "Practice speaking with a language partner",
+            "Track progress and adjust goals"
+        ]
+    },
+    {
+        "taskName": "Organize a Charity Event","taskDescription": "Plan and execute a charity event.",
+        "subTasks": [
+            "Choose a cause to support",
+            "Find a venue and set a date",
+            "Promote the event online and offline",
+            "Coordinate with volunteers",
+            "Manage the event on the day"
+        ]
+    },
+    {
+        "taskName": "Online Skill-Building Workshop",
+        "taskDescription": "Attend an online workshop to build new skills.",
+        "subTasks": [
+            "Research available workshops",
+            "Register for the chosen workshop",
+            "Prepare necessary tools or software",
+            "Participate actively in the workshop",
+            "Practice skills learned after the session"
+        ]
+    },
+    {
+        "taskName": "Home Workout Routine",
+        "taskDescription": "Develop a home workout routine to stay fit.",
+        "subTasks": [
+            "Set fitness goals",
+            "Choose exercises for each muscle group",
+            "Create a weekly workout schedule",
+            "Monitor progress and adjust routine",
+            "Incorporate rest days for recovery"
+        ]
+    },
+    {
+        "taskName": "Budget Travel Planning",
+        "taskDescription": "Plan a budget-friendly trip.",
+        "subTasks": [
+            "Choose a destination that fits your budget",
+            "Find affordable accommodation",
+            "Research free or low-cost activities",
+            "Plan meals to save money",
+            "Book transportation in advance"
+        ]
+    },
+    {
+        "taskName": "Launch a Side Business",
+        "taskDescription": "Start a side business to generate extra income.",
+        "subTasks": [
+            "Identify a business idea",
+            "Create a business plan",
+            "Set up a website or online store",
+            "Market the business through social media",
+            "Manage finances and track earnings"
+        ]
+    },
+    {
+        "taskName": "Create a Study Schedule",
+        "taskDescription": "Organize your study time effectively.",
+        "subTasks": [
+            "List all subjects or topics to study",
+            "Prioritize based on difficulty or exam dates",
+            "Allocate time slots for each subject",
+            "Include breaks to avoid burnout",
+            "Review and adjust the schedule as needed"
+        ]
+    },
+    {
+        "taskName": "Host a Virtual Workshop",
+        "taskDescription": "Teach a skill or topic in a virtual workshop.",
+        "subTasks": [
+            "Choose a topic you are knowledgeable in",
+            "Create a presentation or lesson plan",
+            "Promote the workshop on social media",
+            "Host the workshop on a virtual platform",
+            "Engage with participants and answer questions"
+        ]
+    },
+    {
+        "taskName": "Peer Mentorship",
+        "taskDescription": "Mentor a peer in a subject you excel at.",
+        "subTasks": [
+            "Identify a peer who needs help",
+            "Set regular mentorship sessions",
+            "Prepare materials or resources for each session",
+            "Guide the peer through difficult concepts",
+            "Evaluate progress and adjust mentoring style"
+        ]
+    },
+    {
+        "taskName": "Social Media Campaign",
+        "taskDescription": "Create and launch a social media campaign.",
+        "subTasks": [
+            "Define the campaign goals and target audience",
+            "Create content that aligns with the campaign",
+            "Choose platforms to launch the campaign",
+            "Engage with followers and respond to feedback",
+            "Analyze the campaign's success and metrics"
+        ]
+    },
+    {
+        "taskName": "Publish a Blog Post",
+        "taskDescription": "Write and publish a blog post on a topic of interest.",
+        "subTasks": [
+            "Choose a topic that resonates with your audience",
+            "Research and gather information",
+            "Write a draft and edit for clarity",
+            "Add images or media to enhance the post",
+            "Publish and promote the blog post"
+        ]
+    },
+    {
+        "taskName": "Learn to Play a Musical Instrument",
+        "taskDescription": "Start learning a new musical instrument.",
+        "subTasks": [
+            "Choose an instrument you want to learn",
+            "Find beginner lessons online or in person",
+            "Practice regularly to build skills",
+            "Learn to play simple songs",
+            "Perform for friends or family to gain confidence"
+        ]
+    }
+]

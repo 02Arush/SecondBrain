@@ -1,9 +1,8 @@
 import { StyleSheet, View } from "react-native";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Text, IconButton, useTheme } from "react-native-paper";
 import constants from "@/constants/constants";
 import { CustomSurface as Surface } from "./CustomSurface";
-import { completeTask } from "@/api/db_ops";
 import { router } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
 
@@ -36,17 +35,18 @@ const TaskItem = ({
 
   const displayedDeadline =
     deadline == null ? "N/A" : customDateFormat(deadline);
+
   const handleCompleteTask = async () => {
     if (!completed) {
-      onComplete();
+      onComplete(true);
     } else {
-      // Handle what happens if we click the button of a completed task
+      onComplete(false);
     }
   };
 
   const handleShowTaskDetails = async () => {
     router.push({
-      pathname: "/(modals)/taskDetails",
+      pathname: "/(modals)/createTask",
       params: {
         taskID: taskID,
       },
@@ -54,14 +54,18 @@ const TaskItem = ({
   };
 
   const theme = useTheme();
+  const [iconColor, setIconColor] = useState(
+    completed ? theme.colors.tertiary : theme.colors.onBackground
+  );
+  useEffect(() => {
+    setIconColor(completed ? theme.colors.tertiary : theme.colors.onBackground);
+  }, [completed]);
 
   return (
     <Surface style={styles.taskItemContainer}>
       <View style={styles.leftItems}>
         <IconButton
-          iconColor={
-            completed ? theme.colors.tertiary : theme.colors.onBackground
-          }
+          iconColor={iconColor}
           icon={completed ? "check-circle-outline" : "circle-outline"}
           onPress={handleCompleteTask}
           size={20}

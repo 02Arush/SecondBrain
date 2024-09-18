@@ -10,9 +10,6 @@ type propTypes = {
 };
 
 const DatePicker = ({ date, setDate }: propTypes) => {
-  // FORMAT: MONTH/DAY/YEAR
-
-  // Debating: Day Month Year vs Month Day year
 
   const MMDDWidth = 65;
 

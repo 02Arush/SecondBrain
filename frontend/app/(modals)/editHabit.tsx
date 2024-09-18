@@ -23,6 +23,7 @@ import {
   filterTextToDecimal,
   filterTextToInteger,
   getDateFromSimpleDate,
+  getSimpleDateFromDate,
 } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import { SimpleDate } from "@/api/types_and_utils";
@@ -42,11 +43,9 @@ const editHabit = () => {
   const [changeQty, setChangeQty] = useState("1");
   const { email, setEmail } = useContext(AuthContext);
   const todayDate = new Date();
-  const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>({
-    day: todayDate.getDate(),
-    month: todayDate.getMonth() + 1, // The plus 1 is here because getMonth() is 0-indexed (i.e July will output 6, but we want it to be 7)
-    year: todayDate.getFullYear(),
-  });
+  const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>(
+    getSimpleDateFromDate(new Date())
+  );
   const [incrementSelected, setIncrementSelected] = useState(true);
   const [showingEditModal, setShowingEditModal] = useState(false);
 
@@ -237,8 +236,13 @@ const editHabit = () => {
               Delete
             </Button>
             <View style={{ flexDirection: "row" }}>
-              <Button  onPress={handleCancel}>Cancel</Button>
-              <Button style={{zIndex: 0, position: "relative"}} onPress={handleSubmitChanges}>Submit Changes</Button>
+              <Button onPress={handleCancel}>Cancel</Button>
+              <Button
+                style={{ zIndex: 0, position: "relative" }}
+                onPress={handleSubmitChanges}
+              >
+                Submit Changes
+              </Button>
             </View>
           </View>
         </View>

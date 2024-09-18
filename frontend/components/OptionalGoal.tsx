@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { filterTextToInteger, stringToTimeFrame } from "@/api/types_and_utils";
 import {
   TextInput,
@@ -59,6 +59,7 @@ const OptionalGoal = ({ goal, setGoal, unit, viewStyle }: props) => {
         )
       );
     }
+
   };
 
   const theme = useTheme();

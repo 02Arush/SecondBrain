@@ -53,7 +53,6 @@ export const updateHabitObject = async (habitJSONObject, email) => {
             const userData = await getUserDataFromEmail(email);
             const habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
 
-
             const newHabitList = Habit.updateHabitInHabitList(habit, habitList);
             const response = await updateUserHabitList(email, newHabitList);
             if (response.error) {
@@ -116,6 +115,7 @@ export const retrieveHabitObject = async (habitName, habitList) => {
     }
 }
 
+// WORK IN PROGRESS
 export const deleteHabitObject = async (habitJSONObject, email) => {
     let habit;
     try {
@@ -141,6 +141,8 @@ export const deleteHabitObject = async (habitJSONObject, email) => {
         }
     } else {
         habitList = await retrieveLocalHabitList();
+
+
     }
 
     // remove the habit object from the habitList;
@@ -160,7 +162,10 @@ export const deleteHabitObject = async (habitJSONObject, email) => {
 }
 
 
-// Returns: Array<any>
+/**
+ * 
+ * @returns {Promise<Array<any>>}
+ */
 export const retrieveLocalHabitList = async () => {
     try {
         const habitListData = await retrieveData("habitList");
@@ -192,13 +197,11 @@ export async function updateLocalStorageHabits(habitName, unit) {
     if (!habitExists) {
         habitDataList.push(new Habit(habitName, unit).getJSON());
         const res = await storeData("habitList", JSON.stringify(habitDataList));
-        router.replace("/");
         if (res.error) {
             return { error: res.error }
         }
         return { error: false }
     } else {
-        alert("Habit Already Exists");
         return { error: "Habit Already Exists" }
     }
 }

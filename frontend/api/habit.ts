@@ -8,6 +8,7 @@ export interface HabitJSON {
     "unit": string | null,
     "activityLog": { [key: string]: number },
     "goal"?: habitGoal
+    "creationDate"?: Date
 }
 
 export default class Habit {
@@ -16,47 +17,67 @@ export default class Habit {
     private activityLog: Map<string, number>;
     private unit: string;
     private goal: HabitGoal | null = null;
+    private creationDate: Date;
 
 
-    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal) {
+
+    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date) {
         this.habitName = name;
         this.unit = unit;
         this.activityLog = activityLog;
         if (goal) this.goal = goal
+        if (!creationDate) {
+            this.creationDate = this.getFirstActivityDate();
+        } else {
+            this.creationDate = creationDate;
+        }
+
+    }
+
+    getFirstActivityDate(): Date {
+        const activities = this.getSortedActivityLog("ascending")
+        if (activities.length > 0) {
+            const firstDate = new Date(activities[0].date)
+            return firstDate;
+        }
+        return new Date();
+    }
+
+    getCreationDate(): Date {
+        return this.creationDate
     }
 
 
-
-    static parseHabit = (json: HabitJSON | string) => {
-
+    static parseHabit = (json: object | string): Habit => {
         let habitJSON: HabitJSON;
+
+        // Parse JSON input
         switch (typeof json) {
-            case "string": {
+            case "string":
                 habitJSON = JSON.parse(json);
                 break;
-            } case "object": {
-                habitJSON = json;
+            case "object":
+                habitJSON = json as HabitJSON;
                 break;
-            } default: {
-                throw new Error("Unsupported type of json " + typeof json)
-            }
+            default:
+                throw new Error("Unsupported type of json " + typeof json);
         }
 
-        const habitName = habitJSON.habitName;
-        const unit = habitJSON.unit || undefined
-        const activityLogData = habitJSON.activityLog;
+       
 
+        const { habitName, unit, activityLog: activityLogData, creationDate, goal } = habitJSON;
 
-        // Convert activityLogData to a Map if it is not already one
+        // Convert activityLogData to a Map
         const activityLog = activityLogData instanceof Map
             ? activityLogData
             : new Map<string, number>(Object.entries(activityLogData));
 
-        const goal = habitJSON.goal
+        // Parse the goal if present
         const parsedHabitGoal = goal ? HabitGoal.parseJSON(goal) : undefined;
 
-        return new Habit(habitName, unit, activityLog, parsedHabitGoal);
-    }
+        // Return new Habit instance
+        return new Habit(habitName, unit || undefined, activityLog, parsedHabitGoal, creationDate);
+    };
 
     static habitExistsInList(habitName: string, habitList: Array<any>) {
         if (!Array.isArray(habitList)) {
@@ -107,7 +128,11 @@ export default class Habit {
 
 
     static mergeHabits(newHabitName: string, newHabitUnit: string, habit1: Habit, habit2: Habit): Habit {
-        const mergedHabit = new Habit(newHabitName, newHabitUnit);
+
+        const creationDate = habit1.getCreationDate().getTime() < habit2.getCreationDate().getTime() ?
+            habit1.getCreationDate() : habit2.getCreationDate()
+
+        const mergedHabit = new Habit(newHabitName, newHabitUnit, undefined, undefined, creationDate);
         const h1Activities = habit1.getSortedActivityLog();
         const h2Activities = habit2.getSortedActivityLog();
         h1Activities.forEach((activity) => {
@@ -240,6 +265,7 @@ export default class Habit {
             "habitName": this.habitName,
             "unit": this.unit,
             "activityLog": Object.fromEntries(this.activityLog),
+            "creationDate": this.creationDate || this.getFirstActivityDate(),
         }
 
         if (this.goal) {
@@ -275,7 +301,6 @@ export default class Habit {
         const currCount: number = this.activityLog.get(dateKey) || 0;
         this.activityLog.set(dateKey, currCount + quantity);
     }
-
 
     /**
      * @returns {number} - Either: total count of occurences of habit during span of numDays, or average count per day over span of numDays
@@ -402,6 +427,12 @@ export class HabitGoal {
 
     getTimeFrameCount(): number {
         return this.timeFrameCount;
+    }
+
+    getIdealCountPerDay(): number {
+        const days = this.getGoalDurationDays();
+        const goalNumber = this.getGoalNumber();
+        return goalNumber / days;
     }
 }
 

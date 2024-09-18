@@ -5,7 +5,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import React, { useState, useCallback, useContext } from "react";
+import React, { useState, useCallback, useContext, useEffect} from "react";
 import { Surface, TextInput, Text, Button, Checkbox } from "react-native-paper";
 import { router, useFocusEffect } from "expo-router";
 import { updateLocalStorageHabits } from "../../api/storage";
@@ -34,6 +34,7 @@ const addHabit = () => {
   const [goal, setGoal] = useState<HabitGoal | null>(
     new HabitGoal(1, unit, 1, "day")
   );
+
   // If signed in:
   // get signed in user's habit list from firebase
   // append new habit to that list
@@ -47,23 +48,14 @@ const addHabit = () => {
       return;
     }
 
-    let habitGoal;
-    if (goalChecked === "checked") {
-      const timeFrame: timeFrame = stringToTimeFrame(goalTimeFrame) || "day";
-      habitGoal = new HabitGoal(
-        goalNumber,
-        trimmedUnit,
-        goalTimeFrameCount,
-        timeFrame
-      );
-    }
+
 
     if (!isAnonymous(email)) {
       const res = await createHabit(
         email,
         trimmedHabitName,
         trimmedUnit,
-        habitGoal
+        goal
       );
       if (res.success) {
         router.replace("/");
@@ -114,6 +106,8 @@ const addHabit = () => {
             style={styles.textInput}
           />
           <OptionalGoal goal={goal} setGoal={setGoal} unit={unit} />
+          
+          
           <Button
             mode="contained"
             onPress={handleSubmitHabit}

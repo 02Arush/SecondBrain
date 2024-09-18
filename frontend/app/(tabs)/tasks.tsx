@@ -4,32 +4,34 @@ import { useTheme, Text, Button, IconButton, Icon } from "react-native-paper";
 import TaskItem from "@/components/TaskItem";
 import { router, useFocusEffect } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
-import { getTasksForUser } from "@/api/db_ops";
+import { getTasksForUser, setCompleted } from "@/api/db_ops";
+import { filterOptions as filters } from "@/api/types_and_utils";
 import Task from "@/api/task";
-import { completeTask } from "@/api/db_ops";
+import Select from "@/components/Select";
 
 const tasks = () => {
   const theme = useTheme();
   const { email } = useContext(AuthContext);
-
   const [taskList, setTaskList] = useState<Array<Task>>([]);
   const [viewingCompletedTasks, setViewingCompletedTasks] = useState(false);
+  const [viewingFilter, setViewingFilter] = useState(false);
+  const [selectedFilterOption, setSelectedFilterOption] = useState<string>(
+    filters.DATE_EARLIEST
+  );
+  const filterOptions = Object.values(filters);
 
-  // HERE: REMOVE THE SPECIFIED TASK WITH THE TASK ID FROM TASK_LIST
-  const handleCompleteTask = async (taskID: string) => {
-    const res = await completeTask(email, taskID);
-    if (res.error) {
-      alert(res.error);
-    } else {
-      const newTaskList = taskList.filter((task: Task) => {
-        return task.getTaskID() !== taskID;
-      });
-      setTaskList(newTaskList);
-    }
-  };
+  useFocusEffect(
+    useCallback(() => {
+      handleLoadTasks();
+    }, [email])
+  );
 
-  const handleLoadTasks = async (completed: boolean = false) => {
-    const res = await getTasksForUser(email, completed);
+  const handleLoadTasks = async (
+    completed: boolean = false,
+    filterOption: string = filters.DATE_EARLIEST
+  ) => {
+    const res = await getTasksForUser(email, completed, filterOption);
+
     if (res.taskList) {
       setTaskList(res.taskList);
       setViewingCompletedTasks(completed);
@@ -40,23 +42,37 @@ const tasks = () => {
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      handleLoadTasks();
-    }, [email])
-  );
-
   const handleCreateTask = () => {
     router.navigate("/(modals)/createTask");
   };
 
-  const handleFilter = () => {
-    alert("Not Implemented Yet");
+  const handleCompleteTask = async (taskID: string, completedStatus = true) => {
+    const res = await setCompleted(email, taskID, completedStatus);
+    if (res.error) {
+      alert(res.error);
+    } else {
+      // Remove task from current displayed list of tasks
+      const newTaskList = taskList.filter((task: Task) => {
+        return task.getTaskID() !== taskID;
+      });
+      setTaskList(newTaskList);
+    }
+  };
+
+  const handleSelectFilterItem = (filterItem: string) => {
+    setSelectedFilterOption(filterItem);
+    handleLoadTasks(viewingCompletedTasks, filterItem);
+  };
+
+  const toggleShowingFilter = () => {
+    const filterShowing = viewingFilter;
+    setViewingFilter(!filterShowing);
   };
 
   const handleChart = () => {
     alert("Not Implemented Yet");
   };
+
 
   return (
     <SafeAreaView
@@ -67,10 +83,28 @@ const tasks = () => {
     >
       <View style={styles.contentContainer}>
         <View style={styles.topActivities}>
-          <View>
-            {/* TODO: LATER MOVE INVITES TO ACCOUNT PAGE */}
-            <IconButton icon="filter-variant" onPress={handleFilter} />
+          {/* TODO: LATER MOVE INVITES TO ACCOUNT PAGE */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              alignItems: "center",
+            }}
+          >
+            <IconButton
+              icon="filter-variant"
+              onPress={toggleShowingFilter}
+              iconColor={theme.colors.primary}
+            />
+            <Select
+              visible={viewingFilter}
+              setVisible={setViewingFilter}
+              selectedItem={selectedFilterOption}
+              setSelectedItem={handleSelectFilterItem}
+              items={filterOptions}
+            />
           </View>
+
           <View style={styles.topRightActivities}>
             <IconButton
               icon="check-circle-outline"
@@ -80,11 +114,7 @@ const tasks = () => {
                   : theme.colors.onBackground
               }
               onPress={() => {
-                if (viewingCompletedTasks) {
-                  handleLoadTasks(false);
-                } else {
-                  handleLoadTasks(true);
-                }
+                handleLoadTasks(!viewingCompletedTasks);
               }}
             />
             <IconButton icon="chart-scatter-plot" onPress={handleChart} />
@@ -99,8 +129,8 @@ const tasks = () => {
                 taskName={task.getName()}
                 userImportance={task.getImportance()}
                 deadline={task.getDeadline()}
-                onComplete={() => {
-                  handleCompleteTask(task.getTaskID());
+                onComplete={(completedStatus = true) => {
+                  handleCompleteTask(task.getTaskID(), completedStatus);
                 }}
                 completed={task.getCompleted()}
               />

@@ -14,6 +14,7 @@ import { Platform } from "react-native";
 import Task from "./task";
 import { isAnonymous } from "@/constants/constants";
 import { HabitGoal } from "./habit";
+import { filterOptions } from "./types_and_utils";
 
 
 const firebaseConfig = {
@@ -132,7 +133,10 @@ export const getUserDataFromEmail = async (email) => {
 
 /**
  *
- * 
+ * @param {string} email
+ * @param {string} habitName
+ * @param {string | undefined} habitUnit
+ * @param {HabitGoal | null} habitGoal
  */
 export const addHabit = async (email, habitName, habitUnit, habitGoal) => {
     try {
@@ -140,15 +144,12 @@ export const addHabit = async (email, habitName, habitUnit, habitGoal) => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-
             const data = docSnap.data();
-
-
             const habitList = Array.isArray(data["habitList"]) ? data["habitList"] : JSON.parse(data["habitList"]);
             const habitExists = Habit.habitExistsInList(habitName, habitList);
 
             if (!habitExists) {
-                const newHabit = new Habit(habitName, habitUnit);
+                const newHabit = new Habit(habitName, habitUnit, undefined, undefined, new Date());
                 if (habitGoal) {
                     newHabit.setGoal(habitGoal);
                 }
@@ -236,6 +237,11 @@ export const removeHabit = (username, habitItem) => {
 
 }
 
+/**
+ * 
+ * @param {string} email 
+ * @param {Task} task 
+ */
 export const createTask = async (email, task) => {
     if (isAnonymous(email)) {
         return { error: "Not signed in: Anonymous user cannot create tasks" };
@@ -245,6 +251,7 @@ export const createTask = async (email, task) => {
         return { error: "Task provided is not a Task object. Type: " + typeof task };
     }
 
+    // First: Add the document to the tasks collection
     try {
 
         const taskDocRef = await addDoc(collection(db, "tasks"), {
@@ -270,20 +277,51 @@ export const createTask = async (email, task) => {
     }
 };
 
+/**
+ * @param {string} email
+ * @param {Task} task
+ * @param {string} taskID
+ */
+export const updateTask = async (email, task, taskID) => {
+    const docRef = doc(db, "tasks", taskID)
 
+    try {
+        const res = await setDoc(docRef, {
+            taskName: task.getName(),
+            description: task.getDescription(),
+            importance: task.getImportance(),
+            deadline: task.getDeadline(),
+            completed: task.getCompleted(),
+            sharedUsers: task.getSharedUsers(),
+        }, { merge: true })
+
+        return { ok: true }
+
+    } catch (error) {
+        return { error: error.code, message: error.message }
+    }
+
+
+
+}
 
 /**
  * @param {string} email - user's email
  * @param {boolean | undefined} completed - if completed is true, it gets all completed tasks. if completed is false, it gets task documents where completed=false || completed=null
- * 
+ * @param {string} [sort] - This is the type of sort that will be done on the return value of the task list
  * 
  */
 
 // WORK IN PROGRESS
 // FUTURE IMPLEMENTATION: IF A TASK ID FROM USER'S TASK COLLECTION IS NOT FOUND IN THE MAIN TASK COLLECTION, REMOVE IT FROM USER'S TASK COLLECTION AND PROCEED
-export const getTasksForUser = async (email, completed) => {
+export const getTasksForUser = async (email, completed, sort) => {
     if (typeof email !== "string") return { error: "Email must be of type string: type " + typeof email }
     if (completed !== undefined && typeof completed !== "boolean") return { error: "completed field must be boolean or undefined. Type: " + typeof completed };
+    if (sort) {
+        const allFilterOptions = new Set(Object.values(filterOptions))
+        if (!allFilterOptions.has(sort)) return { error: "invalid sort parameter. Must be in: " + JSON.stringify(allFilterOptions) }
+
+    }
 
     try {
 
@@ -319,9 +357,15 @@ export const getTasksForUser = async (email, completed) => {
             }))
 
             taskList = taskList.filter(task => task !== null && task instanceof Task);
-            return taskList;
+            // now we sort the task list by sort, and if sort exists, that it is valid
+            if (sort) {
+                taskList = Task.sortTaskList(taskList, sort);
+            }
 
+            return taskList;
         }
+
+
         return { taskList: await getTaskList() }
     } catch (err) {
         return { error: err.code, message: err.message }
@@ -362,11 +406,17 @@ export const getTaskItem = async (email, taskID) => {
 // IF USER IS STANDARD, USER ONLY SETS COMPLETED FOR SELF
 
 // CURRENT IMPLEMENTATION: ANY USER CAN DECIDE TO CHECK A TASK AS COMPLETED
-export const completeTask = async (email, taskID) => {
+/**
+ * 
+ * @param {string} email 
+ * @param {string} taskID 
+ * @param {boolean} completedStatus 
+ */
+export const setCompleted = async (email, taskID, completedStatus = True) => {
     try {
         const taskDocRef = doc(db, "tasks", taskID);
         await setDoc(taskDocRef, {
-            completed: true
+            completed: completedStatus
         }, { merge: true })
 
         return { ok: true }
