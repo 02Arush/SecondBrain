@@ -18,6 +18,7 @@ import {
 import Select from "@/components/Select";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
 import { Timestamp } from "firebase/firestore";
+import { BarChart } from "react-native-chart-kit";
 
 const viewHabitLog = () => {
   const route = useRouteInfo();
@@ -274,6 +275,41 @@ const viewHabitLog = () => {
     }
   };
 
+  const today = new Date();
+  const startDate = new Date(today); // Create a copy of today's date
+  startDate.setDate(today.getDate() - 9); // Past 7 days including day
+
+  const activities = habit.getActivityOfDateRange(startDate, today);
+  const dates = activities.map((activity) => {
+    const date = new Date(activity.date);
+    return `${date.getMonth() + 1}/${date.getDate()}/${date
+      .getFullYear()
+      .toString()
+      .slice(-2)}`;
+  });
+  const values = activities.map((activity) => activity.count);
+
+  const data = {
+    labels: dates,
+    datasets: [
+      {
+        data: values,
+      },
+    ],
+  };
+
+  const chartConfig = {
+    backgroundGradientFrom: "#1E2923",
+    backgroundGradientFromOpacity: 0,
+    backgroundGradientTo: "#08130D",
+    backgroundGradientToOpacity: 0.5,
+    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+    strokeWidth: 3, // optional, default 3
+    barPercentage: 0.25,
+   
+    useShadowColorFromDataset: false, // optional
+  };
+
   return (
     <View
       style={{
@@ -323,8 +359,6 @@ const viewHabitLog = () => {
             </View>
           </View>
         </View>
-        {/* TAB 1: DATA TABLE */}
-        {/* TAB 2: VIEW HABIT LOG */}
 
         <DataTable style={{ display: showingHistory ? "none" : "flex" }}>
           <DataTable.Header>
@@ -355,24 +389,45 @@ const viewHabitLog = () => {
           <TableRows />
         </DataTable>
 
-        <ScrollView
+        <View
           style={{
-            ...styles.habitLog,
             display: showingHistory ? "flex" : "none",
+            flex: 1,
             marginTop: 8,
+            // borderWidth: 1,
+            overflow: "hidden",
           }}
         >
-          <Text style={{ marginBottom: 8 }}>Habit Log:</Text>
-          {habit
-            .getSortedActivityLog("descending")
-            .map((activity: { date: string; count: number }) => {
-              return (
-                <Text key={activity.date} style={{ marginVertical: 1 }}>
-                  {activity.date}: {roundToTwoDecimals(activity.count)}
-                </Text>
-              );
-            })}
-        </ScrollView>
+          <View style={styles.chartContainer}>
+            <BarChart
+              style={{position: "relative", left: -12}}
+              data={data}
+              width={350}
+              height={300}
+              yAxisLabel=""
+              yAxisSuffix=""
+              chartConfig={chartConfig}
+              verticalLabelRotation={67.5}
+            />
+          </View>
+
+          <ScrollView
+            style={{
+              ...styles.habitLog,
+            }}
+          >
+            <Text style={{ marginBottom: 8 }}>Habit Log:</Text>
+            {habit
+              .getSortedActivityLog("descending")
+              .map((activity: { date: string; count: number }) => {
+                return (
+                  <Text key={activity.date} style={{ marginVertical: 1 }}>
+                    {activity.date}: {roundToTwoDecimals(activity.count)}
+                  </Text>
+                );
+              })}
+          </ScrollView>
+        </View>
       </Surface>
     </View>
   );
@@ -397,5 +452,16 @@ const styles = StyleSheet.create({
     maxHeight: "100%",
   },
 
-  habitLog: {},
+  chartContainer: {
+    height: "auto",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    // borderWidth: 1,
+  },
+
+  habitLog: {
+    marginTop: 8,
+  },
 });

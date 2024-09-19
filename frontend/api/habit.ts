@@ -90,9 +90,7 @@ export default class Habit {
 
     static habitExistsInList(habitName: string, habitList: Array<any>) {
         if (!Array.isArray(habitList)) {
-            alert(typeof habitList)
-            alert(JSON.stringify(habitList))
-            throw new Error('Error: Habit List is not an Array.');
+            throw new Error('Error: Habit List is not an Array. Type: ' + typeof habitList);
         }
 
 
@@ -243,12 +241,50 @@ export default class Habit {
         return mode == "average" ? this.calculateAverage(sum, elapsedDays) : sum;
     }
 
-    getDates() {
+    getDates(): string[] {
         const dates = Array.from(this.activityLog.keys()).sort((date1, date2) => {
             return new Date(date1).getTime() - new Date(date2).getTime();
         });
         return dates;
     }
+
+    getShortDates(): string[] {
+        const log = this.getSortedActivityLog();
+        const shortDates: string[] = log.map((logObject) => {
+            const date = new Date(logObject.date);
+            const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
+            return formattedDate
+        })
+        return shortDates;
+    }
+
+
+    getValues(): number[] {
+        const log = this.getSortedActivityLog();
+        const values = log.map((logObject) => {
+            return logObject.count;
+        })
+
+        return values;
+    }
+
+    /* Returns all values in date range including start and end date, in order */
+    getActivityOfDateRange(startDate: Date, endDate: Date): { date: string, count: number }[] {
+        let curr = new Date(startDate);
+        const log: { date: string, count: number }[] = [];
+
+        while (curr.getTime() <= endDate.getTime()) {
+            const dateString = curr.toDateString();
+            const count = this.getCountOfDate(dateString);
+            log.push({ date: dateString, count: count });
+
+            curr.setDate(curr.getDate() + 1)
+        }
+        return log
+    }
+
+
+
 
     getUnit() {
         return this.unit;
