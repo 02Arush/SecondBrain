@@ -8,6 +8,7 @@ backend/Lib
 backend/Scripts
 backend/share
 backend/pyvenv.cfg
+backend/.env
 
 # Expo
 .expo/
