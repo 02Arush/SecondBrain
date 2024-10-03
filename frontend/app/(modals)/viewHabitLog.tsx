@@ -8,7 +8,7 @@ import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { useFocusEffect, router } from "expo-router";
-import { useColorScheme } from "@/components/useColorScheme.web";
+import { useColorScheme } from "react-native";
 import {
   limitStringLength,
   stringToTimeFrame,
@@ -301,7 +301,7 @@ const viewHabitLog = () => {
     ],
   };
 
-  const barColor: string = scheme === "dark" ? theme.colors.primary : "black";
+  const barColor: string = scheme == "dark" ? theme.colors.primary : "black";
   const chartConfig = {
     backgroundGradientFrom: "#FFF",
     backgroundGradientFromOpacity: 0.0,
@@ -361,7 +361,7 @@ const viewHabitLog = () => {
                 }}
               />
               <IconButton
-                icon={showingHistory ? "book-clock" : "book-clock-outline"}
+                icon={showingHistory ? "chart-box" : "chart-box-outline"}
                 size={20}
                 style={{ margin: 0, padding: 0 }}
                 iconColor={theme.colors.primary}
