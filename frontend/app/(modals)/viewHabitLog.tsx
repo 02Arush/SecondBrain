@@ -8,6 +8,7 @@ import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { useFocusEffect, router } from "expo-router";
+import { useColorScheme } from "@/components/useColorScheme.web";
 import {
   limitStringLength,
   stringToTimeFrame,
@@ -30,6 +31,7 @@ const viewHabitLog = () => {
   const [selectedTimeFrame, setSelectedTimeFrame] = useState<string>("Day");
   const [timeFrame, setTimeFrame] = useState<timeFrame>("day");
   const [showingHistory, setShowingHistory] = useState(false);
+  const scheme = useColorScheme();
 
   useEffect(() => {
     setTimeFrame(stringToTimeFrame(selectedTimeFrame) || "day");
@@ -58,7 +60,7 @@ const viewHabitLog = () => {
   );
 
   function handleEditHabit() {
-    router.push({
+    router.replace({
       pathname: "/editHabit",
       params: { habitName: habitName },
     });
@@ -275,6 +277,7 @@ const viewHabitLog = () => {
     }
   };
 
+  // the following function is used for getting habit data from start and end date to format for graphs
   const today = new Date();
   const startDate = new Date(today); // Create a copy of today's date
   startDate.setDate(today.getDate() - 9); // Past 7 days including day
@@ -298,15 +301,16 @@ const viewHabitLog = () => {
     ],
   };
 
+  const barColor: string = scheme === "dark" ? theme.colors.primary : "black";
   const chartConfig = {
-    backgroundGradientFrom: "#1E2923",
-    backgroundGradientFromOpacity: 0,
-    backgroundGradientTo: "#08130D",
-    backgroundGradientToOpacity: 0.5,
-    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-    strokeWidth: 3, // optional, default 3
+    backgroundGradientFrom: "#FFF",
+    backgroundGradientFromOpacity: 0.0,
+    backgroundGradientTo: "#FFF",
+    backgroundGradientToOpacity: 0.0,
+    color: (opacity = 1) => barColor,
+    strokeWidth: 5, // optional, default 3
     barPercentage: 0.25,
-   
+
     useShadowColorFromDataset: false, // optional
   };
 
@@ -319,7 +323,7 @@ const viewHabitLog = () => {
     >
       <Surface style={styles.innerContainer}>
         <View style={{ flexDirection: "row" }}>
-          <View style={{ flex: 4 }}>
+          <View style={{ flex: 2 }}>
             <Text>
               Habit: {habit.getName()}{" "}
               <Text style={{ color: "grey" }}>({habit.getUnit()})</Text>
@@ -340,6 +344,13 @@ const viewHabitLog = () => {
                 justifyContent: "space-evenly",
               }}
             >
+              <IconButton
+                icon={"pencil-outline"}
+                size={20}
+                style={{ margin: 0, padding: 0 }}
+                onPress={handleEditHabit}
+                iconColor={theme.colors.primary}
+              />
               <IconButton
                 icon={showingHistory ? "clipboard-outline" : "clipboard"}
                 size={20}
@@ -400,7 +411,7 @@ const viewHabitLog = () => {
         >
           <View style={styles.chartContainer}>
             <BarChart
-              style={{position: "relative", left: -12}}
+              style={{ position: "relative", left: -12 }}
               data={data}
               width={350}
               height={300}
@@ -408,6 +419,7 @@ const viewHabitLog = () => {
               yAxisSuffix=""
               chartConfig={chartConfig}
               verticalLabelRotation={67.5}
+              fromZero
             />
           </View>
 

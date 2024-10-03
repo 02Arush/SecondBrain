@@ -87,6 +87,15 @@ const editHabit = () => {
 
   // useEffect(() => {}, [thisHabit, goal]);
 
+  const handleViewHabitLog = () => {
+    router.replace({
+      pathname: "/(modals)/viewHabitLog",
+      params: {
+        habitName: thisHabit.getName(),
+      },
+    });
+  };
+
   const handleSubmitIncrement = async () => {
     try {
       const changeAmount = incrementSelected
@@ -105,7 +114,7 @@ const editHabit = () => {
       if (response.error) {
         alert("Submission response error: " + response.error);
       } else {
-        router.replace("/");
+        router.back();
       }
     } catch (e) {
       alert("Submission Error " + e);
@@ -174,7 +183,16 @@ const editHabit = () => {
               {`${goal ? goal : "N/A"}`}
             </Text>
           </View>
-          <IconButton icon="pencil" onPress={handleEditHabitDetails} />
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <IconButton icon="pencil" onPress={handleEditHabitDetails} />
+            <IconButton icon="chart-box" onPress={handleViewHabitLog} />
+          </View>
         </View>
         <View style={styles.row}>
           <IconButton
