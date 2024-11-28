@@ -63,8 +63,15 @@ const Select = ({
       return (
         <Button
           mode="contained"
-          style={{ borderRadius: 4, marginHorizontal: 2 }}
-          contentStyle={{ height: 24 }}
+          style={{
+            borderRadius: 4,
+            marginHorizontal: 2,
+          }}
+          contentStyle={{
+            height: 24,
+          }}
+          buttonColor={theme.colors.surfaceVariant}
+          textColor={theme.colors.onSurfaceVariant}
           onPress={openMenu}
         >
           {selectedItem}
@@ -113,8 +120,8 @@ const Select = ({
                 flexDirection: "column",
               }}
             >
-              <ScrollView style={{  }}>
-                <View style={{  }}>
+              <ScrollView style={{}}>
+                <View style={{}}>
                   <Surface
                     style={{ width: "100%", borderRadius: itemBorderRadius }}
                   >

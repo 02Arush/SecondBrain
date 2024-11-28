@@ -28,7 +28,7 @@ const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
       <View style={styles.actionSection}>
         <Text>Today: {dailyCount} </Text>
         <Text>Week: {sevenDayCount}</Text>
-        <IconButton icon="pencil" size={16} onPress={handleEditHabit} />
+        <IconButton icon="clipboard-edit-outline" size={16} onPress={handleEditHabit} />
         <IconButton icon="chart-box" size={16} onPress={handleViewGraph} />
       </View>
     </Surface>

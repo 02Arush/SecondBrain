@@ -196,13 +196,30 @@ const editHabit = () => {
           </View>
           <View
             style={{
-              flexDirection: "row",
+              flexDirection: "column",
               justifyContent: "center",
-              alignItems: "center",
+              alignItems: "flex-end",
             }}
           >
-            <IconButton icon="pencil" onPress={handleEditHabitDetails} />
-            <IconButton icon="chart-box" onPress={handleViewHabitLog} />
+            {/* <IconButton icon="pencil" onPress={handleEditHabitDetails} /> */}
+            <Button
+              style={{ width: 120, borderRadius: 4 }}
+              contentStyle={{ height: 30 }}
+              mode="outlined"
+              icon={"pencil"}
+              onPress={handleEditHabitDetails}
+            >
+              Details
+            </Button>
+            <Button
+              style={{ width: 120, borderRadius: 4 }}
+              contentStyle={{ height: 30 }}
+              mode="outlined"
+              onPress={handleViewHabitLog}
+              icon={"chart-box"}
+            >
+              Stats
+            </Button>
           </View>
         </View>
         <View style={styles.row}>

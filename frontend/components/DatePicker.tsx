@@ -2,7 +2,12 @@ import { StyleSheet, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { TextInput, Text } from "react-native-paper";
 import { filterTextToInteger } from "@/api/types_and_utils";
-import { SimpleDate, months, monthsAndDays } from "@/api/types_and_utils";
+import {
+  SimpleDate,
+  months,
+  monthsAndDays,
+  range,
+} from "@/api/types_and_utils";
 import Select from "./Select";
 
 type propTypes = {
@@ -50,20 +55,14 @@ const DatePicker = ({ date, setDate }: propTypes) => {
     setDate(newSimpleDate);
   };
 
-  const daysArray = [...Array(monthsAndDays[selectedMonth] + 1).keys()]
-    .slice(1)
-    .map((day) => day.toString());
+  const daysArray: string[] = range(1, monthsAndDays[selectedMonth] + 1).map(
+    (day) => day.toString()
+  );
 
-  const generateSurroundingStrings = (num: number) => {
-    // Create an array with 5 strings before and 5 strings after the given number
-    const result = [];
-    for (let i = -5; i <= 5; i++) {
-      result.push(String(num + i));
-    }
-    return result;
-  };
-
-  const yearsArray = generateSurroundingStrings(date.year);
+  // Pad plus or minus three years into the past or future for now for the year
+  const yearsArray: string[] = range(date.year - 3, date.year + 4).map((year) =>
+    year.toString()
+  );
 
   return (
     <View style={styles.container}>
@@ -75,8 +74,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
         selectedItem={selectedMonth}
         setSelectedItem={setMonth}
       />
-      <Text>/</Text>
-
+      <Text>-</Text>
       <Select
         mode="button-box"
         visible={daySelectVisible}
@@ -86,7 +84,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
         setSelectedItem={setDay}
       />
 
-      <Text>/</Text>
+      <Text>-</Text>
 
       <Select
         mode="button-box"

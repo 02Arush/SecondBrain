@@ -25,8 +25,6 @@ export const limitStringLength = (text: string, length: number = 6): string => {
  */
 
 
-
-
 export const monthsAndDays: Record<string, number> = {
     "Jan": 31,
     "Feb": 28,
@@ -135,3 +133,16 @@ export const filterOptions = {
     IMPORTANCE_HIGHEST: "Importance (Highest)",
     IMPORTANCE_LOWEST: "Importance (Lowest)",
 };
+
+/*
+ MISC
+*/
+
+export const range = (startInclusive: number = 0, endExclusive: number): number[] => {
+    const length = endExclusive - startInclusive;
+    const arr = [...Array(length)].map((_, idx) => {
+        return idx + startInclusive;
+    })
+
+    return arr;
+}

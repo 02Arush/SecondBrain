@@ -345,26 +345,30 @@ const viewHabitLog = () => {
               }}
             >
               <IconButton
-                icon={"pencil-outline"}
+                icon={"clipboard-edit-outline"}
                 size={20}
                 style={{ margin: 0, padding: 0 }}
                 onPress={handleEditHabit}
                 iconColor={theme.colors.primary}
               />
               <IconButton
-                icon={showingHistory ? "clipboard-outline" : "clipboard"}
+                icon={"timetable"}
                 size={20}
                 style={{ margin: 0, padding: 0 }}
-                iconColor={theme.colors.primary}
+                iconColor={
+                  !showingHistory ? theme.colors.tertiary : theme.colors.primary
+                }
                 onPress={() => {
                   setShowingHistory(false);
                 }}
               />
               <IconButton
-                icon={showingHistory ? "chart-box" : "chart-box-outline"}
+                icon={"chart-box-outline"}
                 size={20}
                 style={{ margin: 0, padding: 0 }}
-                iconColor={theme.colors.primary}
+                iconColor={
+                  showingHistory ? theme.colors.tertiary : theme.colors.primary
+                }
                 onPress={() => setShowingHistory(true)}
               />
             </View>
