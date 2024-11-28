@@ -30,6 +30,8 @@ import { SimpleDate } from "@/api/types_and_utils";
 import OptionalGoal from "@/components/OptionalGoal";
 import { HabitGoal } from "@/api/habit";
 import OutlineModal from "@/components/OutlineModal";
+// import { SegmentedButtons } from "react-native-paper";
+import SegmentedButtons from "@/components/SegmentedButtons";
 
 const editHabit = () => {
   const route = useRouteInfo();
@@ -41,6 +43,9 @@ const editHabit = () => {
     new Habit("NULL_HABIT", "NULL_UNIT")
   );
   const [changeQty, setChangeQty] = useState("1");
+  const [changeType, setChangeType] = useState<"increment" | "decrement">(
+    "increment"
+  );
   const { email, setEmail } = useContext(AuthContext);
   const todayDate = new Date();
   const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>(
@@ -98,11 +103,11 @@ const editHabit = () => {
 
   const handleSubmitIncrement = async () => {
     try {
-      const changeAmount = incrementSelected
-        ? Number(changeQty)
-        : -1 * Number(changeQty);
+      const changeAmount =
+        changeType === "increment" ? Number(changeQty) : -1 * Number(changeQty);
 
       // First: Check if simple date is valid date
+      // console.log("Date to Update: " + JSON.stringify(dateToUpdate));
       const updatedDate = getDateFromSimpleDate(dateToUpdate);
       if (updatedDate) {
         thisHabit.logItem(updatedDate, changeAmount);
@@ -161,6 +166,12 @@ const editHabit = () => {
     }
   };
 
+  const handleChangeIncrmentType = (type: string) => {
+    if (type === "increment" || type === "decrement") {
+      setChangeType(type);
+    }
+  };
+
   return (
     <View
       style={{
@@ -195,14 +206,23 @@ const editHabit = () => {
           </View>
         </View>
         <View style={styles.row}>
-          <IconButton
+          {/* <IconButton
             icon={
               incrementSelected ? "plus-circle-outline" : "minus-circle-outline"
             }
             onPress={() => handleSetIncrement(!incrementSelected)}
             style={{ margin: 0 }}
+          /> */}
+
+          <SegmentedButtons
+            segments={[
+              { value: "increment", icon: "plus" },
+              { value: "decrement", icon: "minus" },
+            ]}
+            selectedSegment={changeType}
+            setSelectedSegment={handleChangeIncrmentType}
           />
-          <Text>By </Text>
+          <Text style={{ marginLeft: 12 }}>By </Text>
           <TextInput
             style={styles.denseInput}
             value={changeQty}

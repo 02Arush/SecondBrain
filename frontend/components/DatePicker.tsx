@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextInput, Text } from "react-native-paper";
 import { filterTextToInteger } from "@/api/types_and_utils";
 import { SimpleDate, months, monthsAndDays } from "@/api/types_and_utils";
@@ -20,20 +20,22 @@ const DatePicker = ({ date, setDate }: propTypes) => {
   const [selectedDay, setSelectedDay] = useState(date.day.toString());
   const [selectedYear, setSelectedYear] = useState(date.year.toString());
 
+  // This is here because state changes on updates are Async, you want to wait until the date picker items are updated, than update the "SimpleDate" item
+  useEffect(() => {
+    updateSimpleDate();
+  }, [selectedDay, selectedMonth, selectedYear]);
+
   const setMonth = (item: string) => {
     setSelectedMonth(item);
     setDay("1");
-    updateSimpleDate();
   };
 
   const setDay = (item: string) => {
     setSelectedDay(item);
-    updateSimpleDate();
   };
 
   const setYear = (item: string) => {
     setSelectedYear(item);
-    updateSimpleDate();
   };
 
   const updateSimpleDate = () => {
@@ -74,19 +76,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
         setSelectedItem={setMonth}
       />
       <Text>/</Text>
-      {/* <TextInput
-        contentStyle={{ padding: 0, textAlign: "center" }}
-        dense
-        maxLength={2}
-        style={{ ...styles.denseInput, width: MMDDWidth }}
-        value={String(date.day)}
-        onChangeText={(text) => {
-          const day = filterTextToInteger(text);
-          // update day
-          const newSimpleDate: SimpleDate = { ...date, day: day };
-          setDate(newSimpleDate);
-        }}
-      /> */}
+
       <Select
         mode="button-box"
         visible={daySelectVisible}
@@ -97,18 +87,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
       />
 
       <Text>/</Text>
-      {/* <TextInput
-        value={String(date.year)}
-        contentStyle={{ padding: 0, margin: 0, textAlign: "center" }}
-        dense
-        maxLength={4}
-        style={{ ...styles.denseInput, width: 80 }}
-        onChangeText={(text) => {
-          const year = filterTextToInteger(text);
-          const newSimpleDate: SimpleDate = { ...date, year: year };
-          setDate(newSimpleDate);
-        }}
-      /> */}
+
       <Select
         mode="button-box"
         visible={yearSelectVisible}
