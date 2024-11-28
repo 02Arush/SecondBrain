@@ -3,6 +3,7 @@ import {
   View,
   SafeAreaView,
   Pressable,
+  ScrollView,
 } from "react-native";
 import {
   Button,
@@ -11,7 +12,7 @@ import {
   useTheme,
   Surface,
   Portal,
-  TouchableRipple
+  TouchableRipple,
 } from "react-native-paper";
 import React from "react";
 
@@ -21,7 +22,7 @@ type props = {
   items: Array<string>;
   selectedItem: string;
   setSelectedItem: (item: string) => void;
-  mode?: "text" | "button";
+  mode?: "text" | "button" | "button-box";
 };
 
 const Select = ({
@@ -58,6 +59,17 @@ const Select = ({
           {selectedItem}
         </Text>
       );
+    } else if (mode === "button-box") {
+      return (
+        <Button
+          mode="contained"
+          style={{ borderRadius: 4, marginHorizontal: 2 }}
+          contentStyle={{ height: 24 }}
+          onPress={openMenu}
+        >
+          {selectedItem}
+        </Button>
+      );
     } else {
       return (
         <Button mode="text" compact onPress={openMenu}>
@@ -92,42 +104,60 @@ const Select = ({
             }}
           >
             <SafeAreaView
-              style={{ width: "80%", maxWidth: 700, borderRadius: itemBorderRadius }}
+              style={{
+                width: "100%",
+                maxWidth: 700,
+                maxHeight: "50%",
+                borderRadius: itemBorderRadius,
+                justifyContent: "flex-end",
+                flexDirection: "column",
+              }}
             >
-              <Surface
-                style={{ width: "100%", borderRadius: itemBorderRadius }}
-              >
-                {items.map((item, index) => {
-                  return (
-                    <TouchableRipple
-                      key={index}
-                      style={{
-                        height: 40,
-                        
-                      }}
-                      onPress={() => {
-                        closeMenu(item);
-                      }}
-                    >
-                      <View
-                        style={{
-                          backgroundColor: "rgba(0, 0, 0, 0)",
-                          position: "relative",
-                          padding: 10,
-                          // Corner Border Radius to ensure the underlines don't glitch
-                          borderBottomStartRadius:
-                            index === items.length - 1 ? itemBorderRadius : 0,
-                          borderBottomEndRadius:
-                            index === items.length - 1 ? itemBorderRadius : 0,
-                        }}
-                        key={index}
-                      >
-                        <Text style={{ height: "100%", textAlign: "center" }}>{item}</Text>
-                      </View>
-                    </TouchableRipple>
-                  );
-                })}
-              </Surface>
+              <ScrollView style={{  }}>
+                <View style={{  }}>
+                  <Surface
+                    style={{ width: "100%", borderRadius: itemBorderRadius }}
+                  >
+                    {items.map((item, index) => {
+                      return (
+                        <TouchableRipple
+                          key={index}
+                          style={{
+                            height: 40,
+                          }}
+                          onPress={() => {
+                            closeMenu(item);
+                          }}
+                        >
+                          <View
+                            style={{
+                              backgroundColor: "rgba(0, 0, 0, 0)",
+                              position: "relative",
+                              padding: 10,
+                              // Corner Border Radius to ensure the underlines don't glitch
+                              borderBottomStartRadius:
+                                index === items.length - 1
+                                  ? itemBorderRadius
+                                  : 0,
+                              borderBottomEndRadius:
+                                index === items.length - 1
+                                  ? itemBorderRadius
+                                  : 0,
+                            }}
+                            key={index}
+                          >
+                            <Text
+                              style={{ height: "100%", textAlign: "center" }}
+                            >
+                              {item}
+                            </Text>
+                          </View>
+                        </TouchableRipple>
+                      );
+                    })}
+                  </Surface>
+                </View>
+              </ScrollView>
             </SafeAreaView>
           </Pressable>
         </Portal>

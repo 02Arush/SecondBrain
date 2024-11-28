@@ -24,6 +24,28 @@ export const limitStringLength = (text: string, length: number = 6): string => {
  * DATES/TIME
  */
 
+
+
+
+export const monthsAndDays: Record<string, number> = {
+    "Jan": 31,
+    "Feb": 28,
+    "Mar": 31,
+    "Apr": 30,
+    "May": 31,
+    "Jun": 30,
+    "Jul": 31,
+    "Aug": 31,
+    "Sep": 30,
+    "Oct": 31,
+    "Nov": 30,
+    "Dec": 31
+
+}
+
+
+export const months = Object.keys(monthsAndDays)
+
 export type timeFrame = "day" | "week" | "month" | "year"
 
 export const timeFrameConverter: Record<string, number> = {
@@ -31,7 +53,6 @@ export const timeFrameConverter: Record<string, number> = {
     "week": 7,
     "month": 30,
     "year": 365,
-
 }
 
 export type SimpleDate = {

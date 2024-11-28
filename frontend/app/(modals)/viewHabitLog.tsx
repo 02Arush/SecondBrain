@@ -280,7 +280,7 @@ const viewHabitLog = () => {
   // the following function is used for getting habit data from start and end date to format for graphs
   const today = new Date();
   const startDate = new Date(today); // Create a copy of today's date
-  startDate.setDate(today.getDate() - 9); // Past 7 days including day
+  startDate.setDate(today.getDate() - 9); // Past 10 days including day
 
   const activities = habit.getActivityOfDateRange(startDate, today);
   const dates = activities.map((activity) => {
