@@ -125,6 +125,12 @@ function RootLayoutNav() {
               headerBackTitle: "Home",
             }}
           />
+          <Stack.Screen
+            name="(modals)/tasksScatterplot"
+            options={{
+              title: "Task Visualizer",
+            }}
+          />
         </Stack>
       </AuthProvider>
     </PaperProvider>

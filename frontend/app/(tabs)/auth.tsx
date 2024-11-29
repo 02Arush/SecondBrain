@@ -16,7 +16,6 @@ import {
 } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
 import constants, { isAnonymous } from "@/constants/constants";
-import ModalScreen from "../modal";
 import OutlineModal from "@/components/OutlineModal";
 
 export default function auth() {

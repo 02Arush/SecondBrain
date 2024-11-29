@@ -74,7 +74,12 @@ const tasks = () => {
   };
 
   const handleChart = () => {
-    alert("Not Implemented Yet");
+    router.push({
+      pathname: "/(modals)/tasksScatterplot",
+      params: {
+        
+      }
+    });
   };
 
   return (
