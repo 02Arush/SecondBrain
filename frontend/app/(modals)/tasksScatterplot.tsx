@@ -30,11 +30,12 @@ const tasksScatterplot = () => {
             setTaskList(tasks);
 
             const newDataPoints: DataPoint[] = tasks.map((task: Task) => {
-              const importance = task.getImportance();
+              const importance = task.getImportance(); // Always between 0 and 10
               const deadline = task.getDeadline(); // Assume task.getDeadline() returns a string or Date
               const currDate = new Date();
 
-              let urgency: number = 0; // Default urgency if no deadline is provided
+              // MORE urgent is CLOSER to ZERO (Because we want it on the LEFT side)
+              let urgency: number = 10; // Default urgency if no deadline is provided (Furthest Right)
 
               if (deadline) {
                 const deadlineDate = new Date(deadline); // Ensure the deadline is a Date object
@@ -43,12 +44,18 @@ const tasksScatterplot = () => {
                   (1000 * 60 * 60 * 24); // Calculate days difference
 
                 // Normalize to a 0-10 scale
-                urgency = Math.max(0, daysUntilDeadline);
+                urgency = Math.max(0, daysUntilDeadline); // If past deadline, move urgency to zero
+                urgency = Math.min(urgency, 9); // If > 10 days til deadline, move urgency to 10
+
+                // 10 days or more gives it further right on urgency
               }
+
+              // Question: Given a deadline, how do I convert it to "Urgency" on a 1-10 scale?
+              // Note: MORE Urgent should be CLOSER to Zero
 
               const point: DataPoint = {
                 id: task.getName(),
-                y: importance,
+                y: 10-importance,
                 x: urgency,
                 data: {
                   deadline: deadline,
@@ -88,8 +95,7 @@ const tasksScatterplot = () => {
         <View style={styles.scatterContainer}>
           <ScatterPlot
             data={dataPoints}
-            width={300}
-            height={300}
+            size={300}
             xAxisLabel="Urgency"
             yAxisLabel="Importance"
           />
@@ -128,7 +134,6 @@ const styles = StyleSheet.create({
 
   scatterContainer: {
     borderWidth: 1,
-    // borderColor: "red",
     flex: 3,
     width: "100%",
     flexDirection: "column",
