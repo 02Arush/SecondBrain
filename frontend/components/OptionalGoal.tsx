@@ -59,7 +59,6 @@ const OptionalGoal = ({ goal, setGoal, unit, viewStyle }: props) => {
         )
       );
     }
-
   };
 
   const theme = useTheme();
@@ -90,6 +89,8 @@ const OptionalGoal = ({ goal, setGoal, unit, viewStyle }: props) => {
             }}
           >
             <TextInput
+              inputMode="numeric"
+              returnKeyType="done"
               value={
                 respectedGoal.getGoalNumber()
                   ? respectedGoal.getGoalNumber().toString()
@@ -114,6 +115,8 @@ const OptionalGoal = ({ goal, setGoal, unit, viewStyle }: props) => {
             </Text>
             <Text> per </Text>
             <TextInput
+              inputMode="numeric"
+              returnKeyType="done"
               dense
               style={{ ...styles.denseInput, width: 75 }}
               value={

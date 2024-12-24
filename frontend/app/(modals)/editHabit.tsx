@@ -241,6 +241,8 @@ const editHabit = () => {
           />
           <Text style={{ marginLeft: 12 }}>By </Text>
           <TextInput
+            inputMode="numeric"
+            returnKeyType="done"
             style={styles.denseInput}
             value={changeQty}
             onChangeText={handleEditChangeQty}

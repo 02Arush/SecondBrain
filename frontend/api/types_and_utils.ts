@@ -146,3 +146,10 @@ export const range = (startInclusive: number = 0, endExclusive: number): number[
 
     return arr;
 }
+
+export interface DataPoint {
+    id: string;
+    x: number;
+    y: number;
+    data?: Record<string, any>;
+}

@@ -15,7 +15,8 @@ import DatePicker from "@/components/DatePicker";
 import OutlineModal from "@/components/OutlineModal";
 import constants from "@/constants/constants";
 import { getDateFromSimpleDate } from "@/api/types_and_utils";
-import Slider from "@react-native-community/slider";
+import { Slider } from "@react-native-assets/slider";
+
 import { CustomSurface as Surface } from "@/components/CustomSurface";
 import Task from "@/api/task";
 import { createTask as createTaskDB } from "@/api/db_ops";
@@ -169,6 +170,16 @@ const createTask = () => {
           <View>
             <Text>Importance: {importance}</Text>
             <Slider
+              value={importance}
+              onValueChange={(value) => {
+                setImportance(value);
+              }}
+              minimumValue={1}
+              maximumValue={10}
+              step={1}
+              thumbTintColor={theme.colors.primary}
+            />
+            {/* <Slider
               style={{ width: "100%", height: 40 }}
               minimumValue={1}
               maximumValue={10}
@@ -180,7 +191,15 @@ const createTask = () => {
               minimumTrackTintColor={theme.colors.onBackground}
               maximumTrackTintColor={theme.colors.onBackground}
               thumbTintColor={theme.colors.primary}
-            />
+            /> */}
+            {/* <RangeSlider
+              min={1}
+              max={10}
+              onValueChange={(value) => {
+                setImportance(value);
+              }}
+            /> */}
+
             <View
               style={{ justifyContent: "space-between", flexDirection: "row" }}
             >

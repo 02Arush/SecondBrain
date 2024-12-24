@@ -1,22 +1,25 @@
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from "react-native";
 import React from "react";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
-import { useTheme } from "react-native-paper";
+import { useTheme, Portal } from "react-native-paper";
 
 const OutlineModal = ({ children, showing = true }) => {
   const theme = useTheme();
   return (
-    <>
+    <Portal>
       {showing && (
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-          style={{...styles.container, backgroundColor: theme.colors.backdrop}}
+          style={{
+            ...styles.container,
+            backgroundColor: theme.colors.backdrop,
+          }}
         >
           <Surface style={styles.innerContainer}>{children}</Surface>
         </KeyboardAvoidingView>
       )}
-    </>
+    </Portal>
   );
 };
 
@@ -32,7 +35,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1,
-    
   },
 
   innerContainer: {

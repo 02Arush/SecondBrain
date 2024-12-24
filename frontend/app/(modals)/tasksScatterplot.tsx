@@ -8,6 +8,7 @@ import {
 import React, { useCallback, useContext, useState, useEffect } from "react";
 import { Text, useTheme } from "react-native-paper";
 import { useFocusEffect } from "expo-router";
+import { DataPoint } from "@/api/types_and_utils";
 import { isAnonymous } from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { getTasksForUser } from "@/api/db_ops";
@@ -27,8 +28,6 @@ const tasksScatterplot = () => {
           if (res.taskList) {
             const tasks = res.taskList;
             setTaskList(tasks);
-            
-            
 
             const newDataPoints: DataPoint[] = tasks.map((task: Task) => {
               const importance = task.getImportance();
@@ -51,6 +50,10 @@ const tasksScatterplot = () => {
                 id: task.getName(),
                 y: importance,
                 x: urgency,
+                data: {
+                  deadline: deadline,
+                  importance: importance,
+                },
               };
 
               return point;
@@ -65,12 +68,6 @@ const tasksScatterplot = () => {
   );
 
   const theme = useTheme();
-
-  interface DataPoint {
-    id: string;
-    x: number;
-    y: number;
-  }
 
   const data: DataPoint[] = [
     { id: "P1", x: 1, y: 3 },
