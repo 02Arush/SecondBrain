@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "red",
+    padding: 8,
   },
   contentContainer: {
     minWidth: 350,
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     borderColor: "orange",
 
     // WORK IN PROGRESS: BOX SIZINGF
-    height: 75
+    // height: 75
   },
 
   heading: {
@@ -88,7 +89,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     flexDirection: "row",
-    flex: 1,
+
+    borderColor: "green",
+    // maxHeight: 25,
+    
   },
 
   habitInfo: {},

@@ -94,7 +94,7 @@ const editHabit = () => {
 
   const handleViewHabitLog = () => {
     router.replace({
-      pathname: "/(modals)/viewHabitLog",
+      pathname: "/(modals)/viewHabitLog/averages",
       params: {
         habitName: thisHabit.getName(),
       },
