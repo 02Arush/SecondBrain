@@ -2,7 +2,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Button, Icon, IconButton, Text } from "react-native-paper";
 import { router, useRouter } from "expo-router";
-import { CustomSurface as Surface} from "@/components/CustomSurface";
+import { CustomSurface as Surface } from "@/components/CustomSurface";
 const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
   const router = useRouter();
 
@@ -15,7 +15,7 @@ const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
 
   async function handleViewGraph() {
     router.push({
-      pathname: "/viewHabitLog",
+      pathname: "/(modals)/viewHabitLog/averages",
       params: { habitName: name },
     });
   }
@@ -28,7 +28,11 @@ const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
       <View style={styles.actionSection}>
         <Text>Today: {dailyCount} </Text>
         <Text>Week: {sevenDayCount}</Text>
-        <IconButton icon="clipboard-edit-outline" size={16} onPress={handleEditHabit} />
+        <IconButton
+          icon="clipboard-edit-outline"
+          size={16}
+          onPress={handleEditHabit}
+        />
         <IconButton icon="chart-box" size={16} onPress={handleViewGraph} />
       </View>
     </Surface>
