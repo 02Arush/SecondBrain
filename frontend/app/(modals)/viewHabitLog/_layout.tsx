@@ -52,7 +52,7 @@ const ViewHabitLogLayout = () => {
             <IconButton icon="chart-bar" onPress={handleNavigateToChart} />
           </View>
         </View>
-        <View>
+        <View style={styles.slotContainer}>
           <Slot />
         </View>
       </View>
@@ -68,16 +68,24 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "red",
+    // borderWidth: 1,
+    // borderColor: "red",
     padding: 8,
   },
   contentContainer: {
-    minWidth: 350,
-    borderWidth: 1,
+    // FOR PROD
+    // minWidth: 350,
+    // maxWidth: 700,
+    // width: "100%",
+
+    // FOR TESTING ON SMALL SCREENS ONLY
+    width: 350,
+
+    // borderWidth: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    borderColor: "orange",
+    // borderColor: "purple",
+    flex: 1,
 
     // WORK IN PROGRESS: BOX SIZINGF
     // height: 75
@@ -87,17 +95,22 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 1,
+    // borderWidth: 1,
     flexDirection: "row",
 
-    borderColor: "green",
-    // maxHeight: 25,
-    
+    // borderColor: "green",
   },
 
   habitInfo: {},
 
   habitNavigation: {
     flexDirection: "row",
+  },
+
+  slotContainer: {
+    width: "100%",
+    flex: 1,
+    // borderWidth: 1,
+    // borderColor: "red",
   },
 });
