@@ -61,7 +61,17 @@ const Scatterplot: React.FC<ScatterplotProps> = ({
 
   return (
     <>
-      <View style={{ ...styles.container, height: size, width: size }}>
+      <View style={{ ...styles.container, maxHeight: size, minHeight: size, maxWidth: size, minWidth: size }}>
+        <View style={styles.xAxisLabelContainer}>
+          <Text>High</Text>
+          <Text style={styles.xAxisLabel}>{xAxisLabel}</Text>
+          <Text>Low</Text>
+        </View>
+        <View style={styles.yAxisLabelContainer}>
+          <Text>0</Text>
+          <Text style={styles.yAxisLabel}>{yAxisLabel}</Text>
+          <Text>10</Text>
+        </View>
         <View style={styles.plotContainer}>
           {/* <View style={styles.verticalLine}></View> */}
           {Array.from({ length: NUM_GRID_LINES }).map((_, idx) => {
@@ -95,7 +105,9 @@ const Scatterplot: React.FC<ScatterplotProps> = ({
 
             return (
               <Pressable
-                onPress={() => {handlePointPress(ids)}}
+                onPress={() => {
+                  handlePointPress(ids);
+                }}
                 style={{
                   ...styles.point,
                   left: `${Number(x) * 10}%`,
@@ -135,13 +147,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    borderWidth: 1,
-    borderColor: "red",
+    // borderWidth: 1,
+    // borderColor: "yellow",
   },
 
   plotContainer: {
-    borderWidth: 1,
-    borderColor: "orange",
+    // borderWidth: 1,
+    // borderColor: "orange",
     width: "80%",
     height: "80%",
   },
@@ -174,6 +186,36 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  xAxisLabelContainer: {
+    position: "absolute",
+    borderWidth: 1,
+    // borderColor: "red",
+    bottom: 10,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 30,
+  },
+
+  yAxisLabelContainer: {
+    position: "absolute",
+    left: -130,
+    borderWidth: 1,
+    // borderColor: "orange",
+    transform: [{ rotate: "-90deg" }],
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+
+  xAxisLabel: {
+    fontWeight: "bold",
+  },
+
+  yAxisLabel: {
+    fontWeight: "bold",
   },
 });
 

@@ -143,7 +143,6 @@ const styles = StyleSheet.create({
 
   legendContainer: {
     borderWidth: 1,
-    // borderColor: "orange",
     flex: 1,
     width: "100%",
   },
