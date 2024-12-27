@@ -42,6 +42,10 @@ export const monthsAndDays: Record<string, number> = {
 }
 
 
+export const weekDays = [
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+]
+
 export const months = Object.keys(monthsAndDays)
 
 export type timeFrame = "day" | "week" | "month" | "year"
@@ -59,7 +63,7 @@ export type SimpleDate = {
     year: number;
 };
 
-export const getDateFromSimpleDate = (simpleDate: { year: number, month: number, day: number }): Date | null => {
+export const getDateFromSimpleDate = (simpleDate: { year: number, month: number, day: number }): Date => {
     const { year, month, day } = simpleDate;
 
     const date = new Date(year, month - 1, day);
@@ -72,7 +76,7 @@ export const getDateFromSimpleDate = (simpleDate: { year: number, month: number,
     ) {
         return date;
     } else {
-        return null;
+        throw new Error("INVALID SIMPLE DATE")
     }
 }
 
