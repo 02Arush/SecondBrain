@@ -131,7 +131,7 @@ function RootLayoutNav() {
           <Stack.Screen
             name="(modals)/tasksScatterplot"
             options={{
-              title: "Task Visualizer",
+              title: "Task Visualizer", presentation: "card",
             }}
           />
         </Stack>

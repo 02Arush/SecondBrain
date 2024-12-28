@@ -122,7 +122,6 @@ export const winrateToColor = (winrate: number, theme: "light" | "dark"): string
     else if (winrate >= .50) color = getColor(theme, "orange")
     else if (winrate < .50) color = getColor(theme, "red")
 
-    console.log("WINRATE " + winrate + "COLOR " + color)
     return color || "grey";
 }
 
