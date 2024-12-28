@@ -1,6 +1,6 @@
 
 
-import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter } from "./types_and_utils";
+import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate } from "./types_and_utils";
 
 
 
@@ -193,8 +193,19 @@ export default class Habit {
         return this.activityLog.get(new Date().toDateString()) || 0;
     }
 
-    getCountOfDate(date: string) {
-        const dateString = new Date(date).toDateString();
+    getCountOfDate(date: string | SimpleDate) {
+        let dateString;
+
+        if (typeof date === "string") {
+            dateString = new Date(date).toDateString();
+        } else {
+            const dateToCheck = getDateFromSimpleDate(date)
+            if (!dateToCheck) {
+                return 0;
+            }
+
+            dateString = dateToCheck.toDateString()
+        }
         return this.activityLog.get(dateString) || 0; // Returns int or 0 if not found
     }
 

@@ -42,7 +42,7 @@ const ViewHabitLogLayout = () => {
 
   const handleNavigateToEditHabit = () => {
     router.replace({
-      pathname: "/(modals)/editHabit",
+      pathname: "/(modals)/viewHabitLog/editHabit",
       params: {
         habitName: habitName,
       },

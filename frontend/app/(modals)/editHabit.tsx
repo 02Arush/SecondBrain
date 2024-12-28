@@ -162,7 +162,7 @@ const editHabit = () => {
     } else {
       // The following setters assist in refreshing the page
       setGoal(newGoal);
-      setThisHabit(thisHabit);
+      // setThisHabit(thisHabit);
       setShowingEditModal(false);
     }
   };
