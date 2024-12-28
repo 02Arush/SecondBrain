@@ -79,7 +79,7 @@ const ViewHabitLogLayout = () => {
                 {habitName}
                 <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
               </Text>
-              <Text>Goal: {habit.getGoal()?.toString() || "N/A"}</Text>
+              <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
             </View>
             <View style={styles.habitNavigation}>
               <IconButton icon="pencil" onPress={handleNavigateToEditHabit} />
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     // alignItems: "center",
     // borderColor: "purple",
     // flex: 1,
-    minHeight: "50%",
+    minHeight: "70%",
 
     // WORK IN PROGRESS: BOX SIZINGF
     // height: 75
@@ -150,6 +150,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // borderWidth: 1,
     flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "grey",
 
     // borderColor: "green",
   },

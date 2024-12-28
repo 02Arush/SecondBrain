@@ -25,6 +25,7 @@ import {
   getDateFromSimpleDate,
   getSimpleDateFromDate,
   isEqualSimpleDate,
+  shiftSimpleDate,
 } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import { SimpleDate } from "@/api/types_and_utils";
@@ -44,6 +45,7 @@ const editHabit = () => {
     .toLocaleUpperCase();
 
   const habit = useContext(HabitContext);
+  const { email } = useContext(AuthContext);
   const [changeQty, setChangeQty] = useState("1");
   const [changeType, setChangeType] = useState<"increment" | "decrement">(
     "increment"
@@ -60,6 +62,31 @@ const editHabit = () => {
     setChangeQty(filteredText.toString());
   };
 
+  const handleSubmitIncrement = async () => {
+    try {
+      const changeAmount =
+        changeType === "increment" ? Number(changeQty) : -1 * Number(changeQty);
+
+      // First: Check if simple date is valid date
+      // console.log("Date to Update: " + JSON.stringify(dateToUpdate));
+      const updatedDate = getDateFromSimpleDate(dateToUpdate);
+      if (updatedDate) {
+        habit.logItem(updatedDate, changeAmount);
+      } else {
+        alert("Error: Invalid Date. Enter Date in Format: MM/DD/YYYY");
+      }
+
+      const response = await updateHabitObject(habit.getJSON(), email);
+      if (response.error) {
+        alert("Submission response error: " + response.error);
+      } else {
+        router.back();
+      }
+    } catch (e) {
+      alert("Submission Error " + e);
+    }
+  };
+
   const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>(
     getSimpleDateFromDate(new Date())
   );
@@ -69,41 +96,92 @@ const editHabit = () => {
     return isEqualSimpleDate(today, dateToUpdate);
   };
 
+  const shiftDate = (days: number) => {
+    const newDate = shiftSimpleDate(dateToUpdate, days);
+    setDateToUpdate(newDate);
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
-        <Button style={{ flex: 1 }}>"Prev"</Button>
-        <View style={{ ...styles.col, flex: 2 }}>
+      <View
+        style={{
+          width: "100%",
+          minHeight: 80,
+
+          justifyContent: "flex-start",
+          alignItems: "center",
+          //   borderBottomWidth: 1,
+          //   borderBottomColor: "grey",
+          //   marginBottom: 2,
+        }}
+      >
+        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+          {/* <Button
+          compact
+          style={{ flex: 1 }}
+          onPress={() => {
+            shiftDate(-1);
+          }}
+        >
+          Prev
+        </Button> */}
+          <IconButton
+            icon="chevron-left"
+            onPress={() => {
+              shiftDate(-1);
+            }}
+          />
+
           <DatePicker date={dateToUpdate} setDate={setDateToUpdate} />
-          {!dateIsToday() && (
-            <Button
-              compact
-              mode="text"
-              onPress={() => {
-                const today = getSimpleDateFromDate(new Date());
-                setDateToUpdate(today);
-              }}
-            >
-              <Text
-                style={{
-                  color: theme.colors.primary,
-                  textDecorationLine: "underline",
-                }}
-                variant="bodyMedium"
-              >
-                Reset to Today
-              </Text>
-            </Button>
-          )}
+
+          <IconButton
+            icon="chevron-right"
+            onPress={() => {
+              shiftDate(1);
+            }}
+          />
         </View>
-        <Button style={{ flex: 1 }}>"Next"</Button>
+        <View style={{ ...styles.row, justifyContent: "center" }}>
+          <Button
+            style={{
+              display: dateIsToday() ? "none" : "flex",
+              padding: 0,
+              margin: 0,
+            }}
+            compact
+            labelStyle={{
+              fontSize: 12,
+              paddingVertical: 4,
+              paddingHorizontal: 8,
+              margin: 0,
+              textDecorationLine: "underline",
+            }}
+            mode="text"
+            onPress={() => {
+              const today = getSimpleDateFromDate(new Date());
+              setDateToUpdate(today);
+            }}
+          >
+            Reset To Today
+          </Button>
+        </View>
       </View>
-      <Text>
-        {getDateFromSimpleDate(dateToUpdate)?.toDateString()}
-        {": "}
-        {habit.getCountOfDate(dateToUpdate)}
-      </Text>
+      {/* <Text variant="headlineSmall">Log Data</Text> */}
+
       <View style={styles.row}>
+        <Text>Set To: </Text>
+        <TextInput
+          style={styles.denseInput}
+          value={habit.getCountOfDate(dateToUpdate).toString()}
+          inputMode="numeric"
+          returnKeyType="done"
+        />
+        <Text>{habit.getUnit()}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text>OR</Text>
+      </View>
+      <View style={{ ...styles.row, marginTop: 6 }}>
         <SegmentedButtons
           segments={[
             { value: "increment", icon: "plus" },
@@ -122,6 +200,25 @@ const editHabit = () => {
         />
         <Text>{habit.getUnit()}</Text>
       </View>
+      <View
+        style={{
+          ...styles.row,
+          justifyContent: "center",
+          //   borderTopWidth: 1,
+          //   borderTopColor: "grey",
+          //   paddingTop: 4,
+        }}
+      >
+        <Button
+          style={{
+            borderRadius: 6,
+          }}
+          mode="contained"
+          onPress={handleSubmitIncrement}
+        >
+          Submit
+        </Button>
+      </View>
     </View>
   );
 };
@@ -130,8 +227,8 @@ export default editHabit;
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 1,
-    borderColor: "red",
+    // borderWidth: 1,
+    // borderColor: "red",
     flexDirection: "column",
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -140,7 +237,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 16,
+    marginVertical: 2,
   },
 
   col: {
@@ -152,7 +249,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: "25%",
     height: 24,
-    marginVertical: 4,
+    marginVertical: 0,
     padding: 0,
     margin: 0,
   },

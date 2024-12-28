@@ -88,8 +88,22 @@ export const getSimpleDateFromDate = (date: Date): SimpleDate => {
     }
 }
 
+
+export const shiftSimpleDate = (date: SimpleDate, days: number): SimpleDate => {
+    const regDate = getDateFromSimpleDate(date);
+
+    if (!regDate) {
+        return date;
+    }
+
+    const newDate = new Date(regDate);
+    newDate.setDate(regDate.getDate() + days);
+    return getSimpleDateFromDate(newDate);
+
+}
+
 export const isEqualSimpleDate = (date1: SimpleDate, date2: SimpleDate): boolean => {
-    
+
     return date1.day === date2.day && date1.month === date2.month && date1.year === date2.year
 }
 
@@ -166,4 +180,4 @@ export interface DataPoint {
 
 export const roundToTwoDecimals = (num: number): number => {
     return Math.round(num * 100) / 100;
-  };
+};
