@@ -15,7 +15,8 @@ const colorScheme: any = {
     lime: "#94d82d",
     yellow: "#fab005",
     orange: "#f76707",
-    red: "#e03131"
+    red: "#e03131",
+    blue: "##1c7ed6"
 
 
   },
@@ -30,12 +31,13 @@ const colorScheme: any = {
     lime: "#94d82d",
     yellow: "#fab005",
     orange: "#f76707",
-    red: "#e03131"
+    red: "#e03131",
+    blue: "#1c7ed6",
   },
 };
 
 
-export const getColor = (theme: string, color: string): string | null => {
+export const getColor = (theme: string | undefined | null = "light", color: string): string | null => {
   if (!(theme == "light" || theme == "dark")) return null;
 
   if (colorScheme[theme] && color in colorScheme[theme]) {

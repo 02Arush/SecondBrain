@@ -41,12 +41,12 @@ export const monthsAndDays: Record<string, number> = {
 
 }
 
+export const months = Object.keys(monthsAndDays)
 
 export const weekDays = [
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 ]
 
-export const months = Object.keys(monthsAndDays)
 
 export type timeFrame = "day" | "week" | "month" | "year"
 
@@ -110,6 +110,8 @@ export const stringToTimeFrame = (s: string): timeFrame | null => {
             return null;
     }
 };
+
+// WINRATES
 
 export const winrateToColor = (winrate: number, theme: "light" | "dark"): string => {
 

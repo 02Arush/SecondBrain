@@ -24,6 +24,7 @@ import {
   filterTextToInteger,
   getDateFromSimpleDate,
   getSimpleDateFromDate,
+  isEqualSimpleDate,
 } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import { SimpleDate } from "@/api/types_and_utils";
@@ -172,6 +173,11 @@ const editHabit = () => {
     }
   };
 
+  const dateIsToday = () => {
+    const today = getSimpleDateFromDate(todayDate);
+    return isEqualSimpleDate(today, dateToUpdate);
+  };
+
   return (
     <View
       style={{
@@ -251,6 +257,26 @@ const editHabit = () => {
         </View>
         <View style={styles.row}>
           <DatePicker date={dateToUpdate} setDate={setDateToUpdate} />
+          {!dateIsToday() && (
+            <Button
+              compact
+              mode="text"
+              onPress={() => {
+                const today = getSimpleDateFromDate(new Date());
+                setDateToUpdate(today);
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.primary,
+                  textDecorationLine: "underline",
+                }}
+                variant="bodyMedium"
+              >
+                Reset to Today
+              </Text>
+            </Button>
+          )}
         </View>
         <View style={{ ...styles.row, justifyContent: "flex-end" }}>
           <Button onPress={handleSubmitIncrement}>Submit</Button>

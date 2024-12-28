@@ -4,15 +4,21 @@ import {
   StyleSheet,
   View,
   FlatList,
+  useColorScheme,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { TextInput, Text, IconButton, useTheme } from "react-native-paper";
+import {
+  TextInput,
+  Text,
+  IconButton,
+  useTheme,
+  Button,
+} from "react-native-paper";
 import {
   isEqualSimpleDate,
   filterTextToInteger,
   getSimpleDateFromDate,
 } from "@/api/types_and_utils";
-import { Button } from "react-native-paper";
 import {
   SimpleDate,
   months,
@@ -23,6 +29,7 @@ import {
 import Select from "./Select";
 import { getDateFromSimpleDate } from "@/api/types_and_utils";
 import OutlineModal from "./OutlineModal";
+import colorScheme, { getColor } from "@/constants/Colors";
 
 type propTypes = {
   date: SimpleDate;
@@ -89,24 +96,50 @@ const DatePicker = ({ date, setDate }: propTypes) => {
     setShowingMonthYear(!showingMonthYear);
   };
 
+  const handleShiftMonth = (direction: "left" | "right") => {
+    const currMonth = selectedMonth;
+    let monthIDX = months.indexOf(currMonth);
+    if (monthIDX <= 0 && direction.localeCompare("left") === 0) {
+      const newYear = Number(selectedYear) - 1;
+      setYear(newYear.toString());
+      monthIDX = months.length - 1;
+    } else if (
+      monthIDX >= months.length - 1 &&
+      direction.localeCompare("right") === 0
+    ) {
+      monthIDX = 0;
+      const newYear = Number(selectedYear) + 1;
+      setYear(newYear.toString());
+    } else {
+      monthIDX += direction.localeCompare("left") === 0 ? -1 : 1;
+    }
+
+    const newMonth = months[monthIDX];
+    setMonth(newMonth);
+    setDay("1");
+  };
+
   const calendarDate: SimpleDate = {
     day: parseInt(selectedDay),
     month: months.findIndex((item) => item === selectedMonth) + 1,
     year: parseInt(selectedYear),
   };
 
+  const theme = useTheme();
+  const scheme = useColorScheme();
+
   return (
     <>
-      <Pressable
-        style={styles.container}
+      <Button
+        mode="outlined"
+        style={{ ...styles.container }}
         onPress={() => setShowingCalendar(true)}
+        icon={"pencil"}
       >
-        <Text variant="labelMedium">
-          {getDateFromSimpleDate(date)
-            ? getDateFromSimpleDate(date)?.toDateString()
-            : new Date().toDateString()}
-        </Text>
-      </Pressable>
+        {getDateFromSimpleDate(date)
+          ? getDateFromSimpleDate(date)?.toDateString()
+          : new Date().toDateString()}
+      </Button>
 
       <OutlineModal showing={showingCalendar}>
         <View style={styles.calendarContainer}>
@@ -122,6 +155,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
                 {selectedMonth}, {selectedDay}, {selectedYear}
               </Text>
               <IconButton
+                iconColor={getColor(scheme, "blue") || undefined}
                 icon={showingMonthYear ? "chevron-down" : "chevron-right"}
                 onPress={toggleShowingMonthYear}
               />
@@ -133,8 +167,16 @@ const DatePicker = ({ date, setDate }: propTypes) => {
                 alignItems: "center",
               }}
             >
-              <IconButton icon={"chevron-left"} />
-              <IconButton icon={"chevron-right"} />
+              <IconButton
+                iconColor={getColor(scheme, "blue") || undefined}
+                icon={"chevron-left"}
+                onPress={() => handleShiftMonth("left")}
+              />
+              <IconButton
+                iconColor={getColor(scheme, "blue") || undefined}
+                icon={"chevron-right"}
+                onPress={() => handleShiftMonth("right")}
+              />
             </View>
           </View>
 
@@ -303,14 +345,12 @@ const Calendar = ({ date, setDay, selectedDay }: CalendarProps) => {
   };
 
   return (
-    <View style={{   margin: 4 }}>
+    <View style={{ margin: 4 }}>
       {range(0, 6).map((_, i) => {
         return (
           <View
             key={i}
             style={{
-            
-
               flexDirection: "row",
               justifyContent: "center",
             }}
@@ -370,6 +410,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     cursor: "pointer",
+    // paddingVertical: 8,
+    // paddingHorizontal: 16,
+    borderRadius: 4,
   },
   calendarContainer: {
     minWidth: 350,
