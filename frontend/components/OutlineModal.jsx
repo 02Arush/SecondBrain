@@ -14,6 +14,7 @@ const OutlineModal = ({ children, showing = true }) => {
           style={{
             ...styles.container,
             backgroundColor: theme.colors.backdrop,
+        
           }}
         >
           <Surface style={styles.innerContainer}>{children}</Surface>
@@ -39,6 +40,9 @@ const styles = StyleSheet.create({
 
   innerContainer: {
     width: 350,
-    backgroundColor: "red",
+    flexDirection: "column",
+
+    
+
   },
 });

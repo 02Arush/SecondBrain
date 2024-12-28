@@ -41,8 +41,12 @@ export const monthsAndDays: Record<string, number> = {
 
 }
 
-
 export const months = Object.keys(monthsAndDays)
+
+export const weekDays = [
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+]
+
 
 export type timeFrame = "day" | "week" | "month" | "year"
 
@@ -84,6 +88,11 @@ export const getSimpleDateFromDate = (date: Date): SimpleDate => {
     }
 }
 
+export const isEqualSimpleDate = (date1: SimpleDate, date2: SimpleDate): boolean => {
+    
+    return date1.day === date2.day && date1.month === date2.month && date1.year === date2.year
+}
+
 // MAKE THIS MORE EFFICIENT
 export const stringToTimeFrame = (s: string): timeFrame | null => {
     s = s.trim().toLowerCase();
@@ -101,6 +110,8 @@ export const stringToTimeFrame = (s: string): timeFrame | null => {
             return null;
     }
 };
+
+// WINRATES
 
 export const winrateToColor = (winrate: number, theme: "light" | "dark"): string => {
 
