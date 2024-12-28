@@ -1,12 +1,43 @@
 import { StyleSheet, View } from "react-native";
-import React from "react";
+import React, { useState, useCallback, useContext } from "react";
 import { Slot, router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { Text, IconButton, Icon } from "react-native-paper";
-
+import { useFocusEffect } from "expo-router";
+import Habit from "@/api/habit";
+import { AuthContext } from "@/contexts/authContext";
+import { isAnonymous } from "@/constants/constants";
+import { getUserDataFromEmail } from "@/api/db_ops";
+import { retrieveHabitObject } from "@/api/storage";
+import { HabitProvider } from "@/contexts/habitContext";
 const ViewHabitLogLayout = () => {
   const route = useRouteInfo();
   const habitName = route.params.habitName;
+  const { email } = useContext(AuthContext);
+
+  const [habit, setHabit] = useState(new Habit("NULL_HABIT", "NULL_UNIT"));
+
+  useFocusEffect(
+    useCallback(() => {
+      async function getHabitData() {
+        let habitList = null;
+        if (!isAnonymous(email)) {
+          const userData = await getUserDataFromEmail(email);
+          habitList = Array.isArray(userData["habitList"])
+            ? userData["habitList"]
+            : JSON.parse(userData["habitList"]);
+        }
+
+        const currHabit = await retrieveHabitObject(habitName, habitList);
+        if (currHabit instanceof Habit) {
+          setHabit(currHabit);
+        } else {
+          alert(currHabit.error);
+        }
+      }
+      getHabitData();
+    }, [email])
+  );
 
   const handleNavigateToEditHabit = () => {
     router.replace({
@@ -36,27 +67,32 @@ const ViewHabitLogLayout = () => {
   };
 
   return (
-    <View style={styles.pageContainer}>
-      <View style={styles.contentContainer}>
-        <View style={styles.heading}>
-          <View style={styles.habitInfo}>
-            <Text>{habitName}</Text>
-            <Text>Habit Goal</Text>
+    <HabitProvider initialHabit={habit}>
+      <View style={styles.pageContainer}>
+        <View style={styles.contentContainer}>
+          <View style={styles.heading}>
+            <View style={styles.habitInfo}>
+              <Text>
+                {habitName}
+                <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
+              </Text>
+              <Text>Goal: {habit.getGoal()?.toString() || "N/A"}</Text>
+            </View>
+            <View style={styles.habitNavigation}>
+              <IconButton icon="pencil" onPress={handleNavigateToEditHabit} />
+              <IconButton
+                icon="timetable"
+                onPress={handleNavigateToAverages}
+              ></IconButton>
+              <IconButton icon="chart-bar" onPress={handleNavigateToChart} />
+            </View>
           </View>
-          <View style={styles.habitNavigation}>
-            <IconButton icon="pencil" onPress={handleNavigateToEditHabit} />
-            <IconButton
-              icon="timetable"
-              onPress={handleNavigateToAverages}
-            ></IconButton>
-            <IconButton icon="chart-bar" onPress={handleNavigateToChart} />
+          <View style={styles.slotContainer}>
+            <Slot />
           </View>
-        </View>
-        <View style={styles.slotContainer}>
-          <Slot />
         </View>
       </View>
-    </View>
+    </HabitProvider>
   );
 };
 

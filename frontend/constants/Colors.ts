@@ -16,7 +16,7 @@ const colorScheme: any = {
     yellow: "#fab005",
     orange: "#f76707",
     red: "#e03131",
-    blue: "##1c7ed6"
+    blue: "#1c7ed6"
 
 
   },

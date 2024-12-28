@@ -15,37 +15,40 @@ import {
   timeFrame,
 } from "@/api/types_and_utils";
 
+import { HabitContext } from "@/contexts/habitContext";
+
 const averages = () => {
   const { email } = useContext(AuthContext);
-  const [habit, setHabit] = useState<Habit>(
-    new Habit("NULL_NAME", "NULL_UNIT")
-  );
+  // const [habit, setHabit] = useState<Habit>(
+  //   new Habit("NULL_NAME", "NULL_UNIT")
+  // );
   const routeInfo = useRouteInfo();
   const habitName = routeInfo.params.habitName;
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const [timeFrame, setTimeFrame] = useState<timeFrame>("day");
+  const habit = useContext(HabitContext);
 
-  useFocusEffect(
-    useCallback(() => {
-      setLoading(true);
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     setLoading(true);
 
-      (async () => {
-        // Get user data on page focus
-        const data = await getUserDataFromEmail(email);
-        const habitList = data["habitList"];
-        const habit = await retrieveHabitObject(habitName, habitList);
+  //     (async () => {
+  //       // Get user data on page focus
+  //       const data = await getUserDataFromEmail(email);
+  //       const habitList = data["habitList"];
+  //       const habit = await retrieveHabitObject(habitName, habitList);
 
-        if (habit instanceof Habit) {
-          setHabit(habit);
-        } else {
-          alert(`ERROR: ${habit.error}`);
-        }
-      })();
+  //       if (habit instanceof Habit) {
+  //         setHabit(habit);
+  //       } else {
+  //         alert(`ERROR: ${habit.error}`);
+  //       }
+  //     })();
 
-      setLoading(false);
-    }, [])
-  );
+  //     setLoading(false);
+  //   }, [])
+  // );
 
   const TableRows = () => {
     const tableTimeframes = [

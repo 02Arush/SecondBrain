@@ -49,8 +49,11 @@ const customLightTheme = {
   ...MD3LightTheme,
 
   colors: {
+
     ...MD3LightTheme.colors,
     tertiary: "#2b8a3e",
+    background: "#ebebf0",
+    surface: "#d8d8dc"
   },
 };
 

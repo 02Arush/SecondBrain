@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "components/Themed.jsx"  ]
+, "components/Themed.jsx", "contexts/habitContext.js"  ]
 }
