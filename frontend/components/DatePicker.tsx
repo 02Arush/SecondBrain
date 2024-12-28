@@ -7,7 +7,11 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { TextInput, Text, IconButton, useTheme } from "react-native-paper";
-import { filterTextToInteger } from "@/api/types_and_utils";
+import {
+  isEqualSimpleDate,
+  filterTextToInteger,
+  getSimpleDateFromDate,
+} from "@/api/types_and_utils";
 import { Button } from "react-native-paper";
 import {
   SimpleDate,
@@ -26,24 +30,31 @@ type propTypes = {
 };
 
 const DatePicker = ({ date, setDate }: propTypes) => {
-  const MMDDWidth = 65;
-
   const [selectedMonth, setSelectedMonth] = useState(months[date.month - 1]);
   const [selectedDay, setSelectedDay] = useState(date.day.toString());
   const [selectedYear, setSelectedYear] = useState(date.year.toString());
   const [showingCalendar, setShowingCalendar] = useState(false);
-
-  // TODO: MAKE THIS INITIALIZE AS FALSE
   const [showingMonthYear, setShowingMonthYear] = useState(false);
 
-  // This is here because state changes on updates are Async, you want to wait until the date picker items are updated, than update the "SimpleDate" item
   useEffect(() => {
-    updateSimpleDate();
-  }, [selectedDay, selectedMonth, selectedYear]);
+    setSelectedMonth(months[date.month - 1]);
+    setSelectedDay(date.day.toString());
+    setSelectedYear(date.year.toString());
+  }, [date]);
+
+  const todayDate = new Date();
+  const yearsArray: string[] = range(
+    todayDate.getFullYear() - 3,
+    todayDate.getFullYear() + 4
+  ).map((year) => year.toString());
 
   const setMonth = (item: string) => {
-    setSelectedMonth(item);
-    setDay("1");
+    const newMonth = item;
+    setSelectedMonth(newMonth);
+    const maxDays = monthsAndDays[newMonth];
+    if (parseInt(selectedDay) > maxDays) {
+      setSelectedDay("1");
+    }
   };
 
   const setDay = (item: string) => {
@@ -54,7 +65,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
     setSelectedYear(item);
   };
 
-  const updateSimpleDate = () => {
+  const handleSaveDate = () => {
     const day = Number(selectedDay);
     const month = months.findIndex((item) => item === selectedMonth) + 1;
     const year = Number(selectedYear);
@@ -64,31 +75,24 @@ const DatePicker = ({ date, setDate }: propTypes) => {
       year: year,
     };
     setDate(newSimpleDate);
-  };
-
-  const daysArray: string[] = range(1, monthsAndDays[selectedMonth] + 1).map(
-    (day) => day.toString()
-  );
-
-  const todayDate = new Date();
-
-  // Pad plus or minus three years into the past or future for now for the year
-  const yearsArray: string[] = range(
-    todayDate.getFullYear() - 3,
-    todayDate.getFullYear() + 4
-  ).map((year) => year.toString());
-
-  const handleSaveDate = () => {
-    alert("Saving Date...");
     setShowingCalendar(false);
   };
 
-  const toggleShowingCalendar = () => {
-    setShowingCalendar(!showingCalendar);
+  const handleCancel = () => {
+    setSelectedMonth(months[date.month - 1]);
+    setSelectedDay(date.day.toString());
+    setSelectedYear(date.year.toString());
+    setShowingCalendar(false);
   };
 
   const toggleShowingMonthYear = () => {
     setShowingMonthYear(!showingMonthYear);
+  };
+
+  const calendarDate: SimpleDate = {
+    day: parseInt(selectedDay),
+    month: months.findIndex((item) => item === selectedMonth) + 1,
+    year: parseInt(selectedYear),
   };
 
   return (
@@ -141,7 +145,6 @@ const DatePicker = ({ date, setDate }: propTypes) => {
                 display: showingMonthYear ? "flex" : "none",
               }}
             >
-              {/* TODO: Change TEXT item to MENU ITEM */}
               <FlatList
                 contentContainerStyle={styles.monthYearScrollView}
                 data={months}
@@ -154,7 +157,6 @@ const DatePicker = ({ date, setDate }: propTypes) => {
                 )}
                 keyExtractor={(month) => month}
               />
-              {/* </ScrollView> */}
               <FlatList
                 contentContainerStyle={styles.monthYearScrollView}
                 data={yearsArray}
@@ -167,11 +169,13 @@ const DatePicker = ({ date, setDate }: propTypes) => {
                 )}
                 keyExtractor={(year) => year}
               />
-
-              {/* <Text>Content 2</Text> */}
             </View>
             <View style={{ display: showingMonthYear ? "none" : "flex" }}>
-              <Calendar date={date} setDate={setDate} />
+              <Calendar
+                date={calendarDate}
+                setDay={setDay}
+                selectedDay={selectedDay}
+              />
             </View>
           </View>
           <View
@@ -182,12 +186,7 @@ const DatePicker = ({ date, setDate }: propTypes) => {
               paddingVertical: 8,
             }}
           >
-            <Button
-              mode="text"
-              onPress={() => {
-                setShowingCalendar(false);
-              }}
-            >
+            <Button mode="text" onPress={handleCancel}>
               Cancel
             </Button>
             <Button mode="contained" onPress={handleSaveDate}>
@@ -206,6 +205,7 @@ type menuItemPropTypes = {
   displayValue?: string;
   setIsSelected: (value: string) => void;
 };
+
 const MenuItem = ({
   isSelected = false,
   setIsSelected,
@@ -240,21 +240,21 @@ const MenuItem = ({
 
 type CalendarProps = {
   date: SimpleDate;
-  setDate: (newDate: SimpleDate) => void;
+  setDay: (day: string) => void;
+  selectedDay: string;
 };
-const Calendar = ({ date, setDate }: CalendarProps) => {
+
+const Calendar = ({ date, setDay, selectedDay }: CalendarProps) => {
   const MONTH = date.month;
   const YEAR = date.year;
+  const todaySimpleDate = getSimpleDateFromDate(new Date());
+  const theme = useTheme();
 
-  const getCalendarBoxValue = (i: number, j: number): string => {
-    // Weekday labels for the first row
-
-    // Handle the first row: weekday labels
+  const getCalendarBoxValue = (i: number, j: number): string | null => {
     if (i === 0) {
       return weekDays[j];
     }
 
-    // Get the first day of the month and total days in the month
     const firstDayOfMonthSimple: SimpleDate = {
       day: 1,
       month: MONTH,
@@ -262,61 +262,99 @@ const Calendar = ({ date, setDate }: CalendarProps) => {
     };
 
     const firstDayOfMonth = getDateFromSimpleDate(firstDayOfMonthSimple);
-    const firstDay = firstDayOfMonth?.getDay() || 0; // Get the weekday index (0 = Sun, 6 = Sat)
+    const firstDay = firstDayOfMonth?.getDay() || 0;
 
-    const month = firstDayOfMonth.getMonth(); // 0-based month index
-    const year = firstDayOfMonth.getFullYear();
-    const totalDays = new Date(year, month + 1, 0).getDate(); // Last day of the month
+    const month = firstDayOfMonth?.getMonth();
+    const year = firstDayOfMonth?.getFullYear();
 
-    // Calculate the day corresponding to the (i, j) coordinate
+    let totalDays = 30;
+    if (year && month !== undefined) {
+      totalDays = new Date(year, month + 1, 0).getDate();
+    }
+
     i = i - 1;
     const day = i * 7 + j - firstDay + 1;
 
-    // Display the day if valid, otherwise return an empty string
     if (day > 0 && day <= totalDays) {
       return day.toString();
     } else {
-      return ""; // Empty for invalid cells
+      return null;
     }
   };
 
-  return (
-    // OUTER CALENDAR
-    <View style={{ flex: 1, borderWidth: 1, borderColor: "red", margin: 4 }}>
-      {/* ROWS */}
+  const isSelectedDay = (dayOfMonth: string): boolean => {
+    return dayOfMonth === selectedDay;
+  };
 
-      {[...new Array(6)].map((_, i) => {
+  const isToday = (dayOfMonth: string): boolean => {
+    const dayAsNum = Number(dayOfMonth);
+
+    if (isNaN(dayAsNum)) {
+      return false;
+    }
+
+    const currAsSimpleDate: SimpleDate = {
+      day: dayAsNum,
+      month: MONTH,
+      year: YEAR,
+    };
+
+    return isEqualSimpleDate(currAsSimpleDate, todaySimpleDate);
+  };
+
+  return (
+    <View style={{   margin: 4 }}>
+      {range(0, 6).map((_, i) => {
         return (
           <View
             key={i}
             style={{
-              flex: 1,
-              borderWidth: 1,
-              borderColor: "red",
+            
+
               flexDirection: "row",
-              // MIGHT NEED TO DELETE, TO ENSURE PROPER CALENDAR WIDTHS
               justifyContent: "center",
             }}
           >
-            {/* COLS */}
-            {[...new Array(7)].map((_, j) => {
+            {range(0, 7).map((_, j) => {
               const dayOfMonth = getCalendarBoxValue(i, j);
+              const selected = dayOfMonth ? isSelectedDay(dayOfMonth) : false;
+              const today = dayOfMonth ? isToday(dayOfMonth) : false;
 
               return (
-                <View
+                <Pressable
                   key={j}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
+                  onPress={() => {
+                    if (dayOfMonth && !isNaN(Number(dayOfMonth))) {
+                      setDay(dayOfMonth);
+                    }
                   }}
                 >
-                  <Text style={{ textAlign: "center", alignItems: "center" }}>
-                    {dayOfMonth}
-                  </Text>
-                </View>
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      backgroundColor: selected
+                        ? theme.colors.primary
+                        : "transparent",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        alignItems: "center",
+                        color: selected
+                          ? theme.colors.onPrimary
+                          : theme.colors.onBackground,
+                        textDecorationLine: today ? "underline" : "none",
+                      }}
+                    >
+                      {dayOfMonth}
+                    </Text>
+                  </View>
+                </Pressable>
               );
             })}
           </View>
@@ -326,25 +364,6 @@ const Calendar = ({ date, setDate }: CalendarProps) => {
   );
 };
 
-type CalendarDayProps = {
-  day: number;
-  setDay: (value: number) => void;
-  size?: number;
-};
-const CalendarDay = ({ day, setDay, size }: CalendarDayProps) => {
-  const SIZE = size ? size : "100%";
-  return (
-    <Pressable
-      style={{ width: SIZE, height: SIZE }}
-      onPress={() => setDay(day)}
-    >
-      <Text>{day.toString()}</Text>
-    </Pressable>
-  );
-};
-
-export default DatePicker;
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
@@ -352,38 +371,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     cursor: "pointer",
   },
-  denseInput: {
-    // marginHorizontal: 2,
-    // textAlign: "center",
-    // height: 24,
-  },
-
-  // For some reason, flex: 1 breaks it here
   calendarContainer: {
     minWidth: 350,
-
-    // flexDirection: "row",
   },
-
   calendarHeading: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     height: 50,
   },
-
   calendarContent: {},
-
   monthYearSelections: {
     flexDirection: "row",
+    height: 200,
   },
-
   daySelection: {},
-
   monthYearScrollView: {
     flexDirection: "column",
     justifyContent: "flex-start",
-    height: 100,
+    height: "auto",
     width: "100%",
   },
 });
+
+export default DatePicker;

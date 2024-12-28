@@ -41,8 +41,7 @@ const styles = StyleSheet.create({
   innerContainer: {
     width: 350,
     flexDirection: "column",
-    borderWidth: 1,
-    borderColor: "green",
+
     
 
   },

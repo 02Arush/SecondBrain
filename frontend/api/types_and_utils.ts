@@ -63,7 +63,7 @@ export type SimpleDate = {
     year: number;
 };
 
-export const getDateFromSimpleDate = (simpleDate: { year: number, month: number, day: number }): Date => {
+export const getDateFromSimpleDate = (simpleDate: { year: number, month: number, day: number }): Date | null => {
     const { year, month, day } = simpleDate;
 
     const date = new Date(year, month - 1, day);
@@ -76,7 +76,7 @@ export const getDateFromSimpleDate = (simpleDate: { year: number, month: number,
     ) {
         return date;
     } else {
-        throw new Error("INVALID SIMPLE DATE")
+        return null;
     }
 }
 
@@ -86,6 +86,11 @@ export const getSimpleDateFromDate = (date: Date): SimpleDate => {
         month: date.getMonth() + 1,
         year: date.getFullYear()
     }
+}
+
+export const isEqualSimpleDate = (date1: SimpleDate, date2: SimpleDate): boolean => {
+    
+    return date1.day === date2.day && date1.month === date2.month && date1.year === date2.year
 }
 
 // MAKE THIS MORE EFFICIENT
