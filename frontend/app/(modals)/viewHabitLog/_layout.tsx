@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import React, { useState, useCallback, useContext } from "react";
 import { Slot, router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
-import { Text, IconButton, Icon } from "react-native-paper";
+import { Text, IconButton, Icon, useTheme } from "react-native-paper";
 import { useFocusEffect } from "expo-router";
 import Habit from "@/api/habit";
 import { AuthContext } from "@/contexts/authContext";
@@ -10,6 +10,7 @@ import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { retrieveHabitObject } from "@/api/storage";
 import { HabitProvider } from "@/contexts/habitContext";
+
 const ViewHabitLogLayout = () => {
   const route = useRouteInfo();
   const habitName = route.params.habitName;
@@ -66,6 +67,8 @@ const ViewHabitLogLayout = () => {
     });
   };
 
+  const theme = useTheme();
+
   return (
     <HabitProvider initialHabit={habit}>
       <View style={styles.pageContainer}>
@@ -83,8 +86,21 @@ const ViewHabitLogLayout = () => {
               <IconButton
                 icon="timetable"
                 onPress={handleNavigateToAverages}
+                iconColor={
+                  route.pathname.localeCompare("/viewHabitLog/averages") === 0
+                    ? theme.colors.tertiary
+                    : "grey"
+                }
               ></IconButton>
-              <IconButton icon="chart-bar" onPress={handleNavigateToChart} />
+              <IconButton
+                icon="chart-bar"
+                onPress={handleNavigateToChart}
+                iconColor={
+                  route.pathname.localeCompare("/viewHabitLog/barCharts") === 0
+                    ? theme.colors.tertiary
+                    : "grey"
+                }
+              />
             </View>
           </View>
           <View style={styles.slotContainer}>
