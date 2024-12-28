@@ -254,8 +254,8 @@ const styles = StyleSheet.create({
   componentContainer: {
     width: "100%",
     flexDirection: "column",
-    borderWidth: 1,
-    borderColor: "red",
+    // borderWidth: 1,
+    // borderColor: "red",
     flex: 1,
   },
 
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     // borderWidth: 1,
     // borderColor: "green",

@@ -83,9 +83,10 @@ const styles = StyleSheet.create({
 
     // borderWidth: 1,
     justifyContent: "flex-start",
-    alignItems: "center",
+    // alignItems: "center",
     // borderColor: "purple",
-    flex: 1,
+    // flex: 1,
+    minHeight: "50%",
 
     // WORK IN PROGRESS: BOX SIZINGF
     // height: 75
