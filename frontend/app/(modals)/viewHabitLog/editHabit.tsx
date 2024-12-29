@@ -44,12 +44,30 @@ const editHabit = () => {
     .toString()
     .toLocaleUpperCase();
 
+  //   const habit = useContext(HabitContext);
+
   const habit = useContext(HabitContext);
+
   const { email } = useContext(AuthContext);
   const [changeQty, setChangeQty] = useState("1");
+  const [hasUnsavedSetChanges, setHasUnsavedSetChanges] = useState(false);
+  const [hasUnsavedIncChanges, setHasUnsavedIncChanges] = useState(false);
+
+  const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>(
+    getSimpleDateFromDate(new Date())
+  );
   const [changeType, setChangeType] = useState<"increment" | "decrement">(
     "increment"
   );
+  const [qtyToSet, setQtyToSet] = useState(
+    habit.getCountOfDate(dateToUpdate).toString()
+  );
+
+  useEffect(() => {
+    const isDifferent = habit.getCountOfDate(dateToUpdate) !== Number(qtyToSet);
+
+    setHasUnsavedSetChanges(isDifferent);
+  }, [dateToUpdate, qtyToSet]);
 
   const handleChangeIncrmentType = (type: string) => {
     if (type === "increment" || type === "decrement") {
@@ -57,9 +75,34 @@ const editHabit = () => {
     }
   };
 
+  const handleSetDateToUpdate = (newDate: SimpleDate | null) => {
+    if (newDate) {
+      setDateToUpdate(newDate);
+      setQtyToSet(habit.getCountOfDate(newDate).toString());
+    }
+  };
+
+  const handleSubmitSet = async () => {
+    const newAmount = Number(qtyToSet);
+    const currDate = getDateFromSimpleDate(dateToUpdate);
+
+    if (currDate) {
+      habit.updateCountOnDate(currDate.toDateString(), newAmount);
+    } else {
+      alert("Error updating: Invalid date to increment");
+    }
+
+    await handleUpdateHabit();
+  };
+
   const handleEditChangeQty = (text: string) => {
     const filteredText = filterTextToInteger(text);
     setChangeQty(filteredText.toString());
+  };
+
+  const handleEditSetQty = (text: string) => {
+    setQtyToSet(text);
+    setHasUnsavedIncChanges(true);
   };
 
   const handleSubmitIncrement = async () => {
@@ -76,20 +119,25 @@ const editHabit = () => {
         alert("Error: Invalid Date. Enter Date in Format: MM/DD/YYYY");
       }
 
-      const response = await updateHabitObject(habit.getJSON(), email);
-      if (response.error) {
-        alert("Submission response error: " + response.error);
-      } else {
-        router.back();
-      }
+      await handleUpdateHabit();
     } catch (e) {
       alert("Submission Error " + e);
     }
   };
 
-  const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>(
-    getSimpleDateFromDate(new Date())
-  );
+  const handleUpdateHabit = async () => {
+    const response = await updateHabitObject(habit.getJSON(), email);
+    if (response.error) {
+      alert("Submission response error: " + response.error);
+    } else {
+      alert("Updated Successfully");
+
+      const newQty = habit.getCountOfDate(dateToUpdate);
+      setQtyToSet(newQty.toString());
+
+      handleSetDateToUpdate(getSimpleDateFromDate(new Date()));
+    }
+  };
 
   const dateIsToday = () => {
     const today = getSimpleDateFromDate(todayDate);
@@ -98,7 +146,7 @@ const editHabit = () => {
 
   const shiftDate = (days: number) => {
     const newDate = shiftSimpleDate(dateToUpdate, days);
-    setDateToUpdate(newDate);
+    handleSetDateToUpdate(newDate);
   };
 
   return (
@@ -159,7 +207,7 @@ const editHabit = () => {
             mode="text"
             onPress={() => {
               const today = getSimpleDateFromDate(new Date());
-              setDateToUpdate(today);
+              handleSetDateToUpdate(today);
             }}
           >
             Reset To Today
@@ -169,14 +217,21 @@ const editHabit = () => {
       {/* <Text variant="headlineSmall">Log Data</Text> */}
 
       <View style={styles.row}>
-        <Text>Set To: </Text>
+        <Text>Set to: </Text>
         <TextInput
           style={styles.denseInput}
-          value={habit.getCountOfDate(dateToUpdate).toString()}
+          value={qtyToSet}
+          onChangeText={handleEditSetQty}
           inputMode="numeric"
           returnKeyType="done"
         />
         <Text>{habit.getUnit()}</Text>
+        <Button
+          style={{ display: hasUnsavedSetChanges ? "flex" : "none" }}
+          onPress={handleSubmitSet}
+        >
+          Set New Value
+        </Button>
       </View>
       <View style={styles.row}>
         <Text>OR</Text>
@@ -199,25 +254,7 @@ const editHabit = () => {
           onChangeText={handleEditChangeQty}
         />
         <Text>{habit.getUnit()}</Text>
-      </View>
-      <View
-        style={{
-          ...styles.row,
-          justifyContent: "center",
-          //   borderTopWidth: 1,
-          //   borderTopColor: "grey",
-          //   paddingTop: 4,
-        }}
-      >
-        <Button
-          style={{
-            borderRadius: 6,
-          }}
-          mode="contained"
-          onPress={handleSubmitIncrement}
-        >
-          Submit
-        </Button>
+        <Button onPress={handleSubmitIncrement}>Submit Increment</Button>
       </View>
     </View>
   );

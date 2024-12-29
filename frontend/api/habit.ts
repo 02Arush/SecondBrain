@@ -312,7 +312,7 @@ export default class Habit {
     updateCountOnDate(date: string, count: number) {
         const dateString = new Date(date).toDateString();
         const currentCount = this.activityLog.get(dateString) || 0;
-        this.activityLog.set(dateString, currentCount + count);
+        this.activityLog.set(dateString, count);
     }
 
     getJSON(): HabitJSON {

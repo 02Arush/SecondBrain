@@ -21,9 +21,8 @@ const barCharts = () => {
   // const habit = useContext(HabitContext);
   // const [habit, setHabit] = useState<Habit>();
 
-  const habit = useContext(HabitContext)
-
-
+  // const { habit } = useContext(HabitContext);
+  const habit = useContext(HabitContext);
 
   // useFocusEffect(
   //   useCallback(() => {

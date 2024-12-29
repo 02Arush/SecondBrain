@@ -27,7 +27,9 @@ const averages = () => {
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const [timeFrame, setTimeFrame] = useState<timeFrame>("day");
-  const habit = useContext(HabitContext);
+  // const { habit } = useContext(HabitContext);
+  const  habit  = useContext(HabitContext);
+
 
   // useFocusEffect(
   //   useCallback(() => {
