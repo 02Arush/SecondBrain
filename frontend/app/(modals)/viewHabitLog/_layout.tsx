@@ -82,7 +82,15 @@ const ViewHabitLogLayout = () => {
               <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
             </View>
             <View style={styles.habitNavigation}>
-              <IconButton icon="pencil" onPress={handleNavigateToEditHabit} />
+              <IconButton 
+              
+              iconColor={
+                route.pathname.localeCompare("/viewHabitLog/editHabit") === 0
+                  ? theme.colors.tertiary
+                  : "grey"
+              }
+              
+              icon="clipboard-edit-outline" onPress={handleNavigateToEditHabit} />
               <IconButton
                 icon="timetable"
                 onPress={handleNavigateToAverages}

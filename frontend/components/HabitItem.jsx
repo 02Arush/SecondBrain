@@ -8,7 +8,7 @@ const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
 
   function handleEditHabit() {
     router.push({
-      pathname: "/editHabit",
+      pathname: "/(modals)/viewHabitLog/editHabit",
       params: { habitName: name },
     });
   }

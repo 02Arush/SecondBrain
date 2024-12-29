@@ -8,6 +8,7 @@ import {
   TextInput,
   Button,
   useTheme,
+  Divider,
 } from "react-native-paper";
 import {
   retrieveHabitObject,
@@ -103,6 +104,15 @@ const editHabit = () => {
   const handleEditSetQty = (text: string) => {
     setQtyToSet(text);
     setHasUnsavedIncChanges(true);
+  };
+
+  const handleShiftSetQty = (direction: "increase" | "decrease") => {
+    const changeAmount =
+      direction === "increase" ? Number(changeQty) : -1 * Number(changeQty);
+
+    const currSetQty = Number(qtyToSet) || 0;
+    const newSetQty = currSetQty + changeAmount;
+    handleEditSetQty(newSetQty.toString());
   };
 
   const handleSubmitIncrement = async () => {
@@ -215,8 +225,14 @@ const editHabit = () => {
         </View>
       </View>
       {/* <Text variant="headlineSmall">Log Data</Text> */}
-
-      <View style={styles.row}>
+      <Divider style={{ marginBottom: 16 }} />
+      <View
+        style={{
+          ...styles.row,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <Text>Set to: </Text>
         <TextInput
           style={styles.denseInput}
@@ -226,26 +242,21 @@ const editHabit = () => {
           returnKeyType="done"
         />
         <Text>{habit.getUnit()}</Text>
-        <Button
-          style={{ display: hasUnsavedSetChanges ? "flex" : "none" }}
-          onPress={handleSubmitSet}
-        >
-          Set New Value
-        </Button>
       </View>
-      <View style={styles.row}>
-        <Text>OR</Text>
-      </View>
-      <View style={{ ...styles.row, marginTop: 6 }}>
-        <SegmentedButtons
-          segments={[
-            { value: "increment", icon: "plus" },
-            { value: "decrement", icon: "minus" },
-          ]}
-          selectedSegment={changeType}
-          setSelectedSegment={handleChangeIncrmentType}
+
+      <View
+        style={{
+          ...styles.row,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <IconButton
+          icon="minus"
+          onPress={() => {
+            handleShiftSetQty("decrease");
+          }}
         />
-        <Text style={{ marginLeft: 12 }}>By </Text>
         <TextInput
           inputMode="numeric"
           returnKeyType="done"
@@ -253,9 +264,22 @@ const editHabit = () => {
           value={changeQty}
           onChangeText={handleEditChangeQty}
         />
-        <Text>{habit.getUnit()}</Text>
-        <Button onPress={handleSubmitIncrement}>Submit Increment</Button>
+
+        <IconButton
+          icon="plus"
+          onPress={() => {
+            handleShiftSetQty("increase");
+          }}
+        />
       </View>
+      <Button
+        mode="contained"
+        disabled={!hasUnsavedSetChanges}
+        // style={{ display: hasUnsavedSetChanges ? "flex" : "none" }}
+        onPress={handleSubmitSet}
+      >
+        Submit Changes
+      </Button>
     </View>
   );
 };
@@ -274,7 +298,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 2,
+    marginVertical: 0,
   },
 
   col: {
