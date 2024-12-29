@@ -5,10 +5,11 @@ import Habit, { HabitJSON } from "@/api/habit";
 import {
   Text,
   IconButton,
-  TextInput,
+  // TextInput,
   Button,
   useTheme,
   Divider,
+  TextInput,
 } from "react-native-paper";
 import {
   retrieveHabitObject,
@@ -173,7 +174,7 @@ const editHabit = () => {
           //   marginBottom: 2,
         }}
       >
-        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+        <View style={styles.row}>
           {/* <Button
           compact
           style={{ flex: 1 }}
@@ -235,7 +236,9 @@ const editHabit = () => {
       >
         <Text>Set to: </Text>
         <TextInput
+          // dense
           style={styles.denseInput}
+          contentStyle={styles.denseInput}
           value={qtyToSet}
           onChangeText={handleEditSetQty}
           inputMode="numeric"
@@ -261,6 +264,8 @@ const editHabit = () => {
           inputMode="numeric"
           returnKeyType="done"
           style={styles.denseInput}
+          contentStyle={styles.denseInput}
+          // dense
           value={changeQty}
           onChangeText={handleEditChangeQty}
         />
@@ -272,14 +277,17 @@ const editHabit = () => {
           }}
         />
       </View>
-      <Button
-        mode="contained"
-        disabled={!hasUnsavedSetChanges}
-        // style={{ display: hasUnsavedSetChanges ? "flex" : "none" }}
-        onPress={handleSubmitSet}
-      >
-        Submit Changes
-      </Button>
+      <View style={styles.row}>
+        <Button
+          mode="contained"
+          disabled={!hasUnsavedSetChanges}
+          style={{ flex: 1 }}
+          // style={{ display: hasUnsavedSetChanges ? "flex" : "none" }}
+          onPress={handleSubmitSet}
+        >
+          Submit Changes
+        </Button>
+      </View>
     </View>
   );
 };
@@ -298,7 +306,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 0,
+    marginVertical: 4,
   },
 
   col: {
@@ -306,12 +314,10 @@ const styles = StyleSheet.create({
   },
 
   denseInput: {
-    marginHorizontal: 8,
+    maxHeight: 30,
+    maxWidth: 90,
     textAlign: "center",
-    width: "25%",
-    height: 24,
-    marginVertical: 0,
-    padding: 0,
     margin: 0,
+    padding: 0,
   },
 });
