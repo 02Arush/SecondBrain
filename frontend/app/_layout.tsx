@@ -98,10 +98,6 @@ function RootLayoutNav() {
             }}
           />
           <Stack.Screen
-            name="(modals)/editHabit"
-            options={{ title: "Update Habit", headerBackTitle: "Home" }}
-          />
-          <Stack.Screen
             name="(modals)/viewHabitLog"
             options={{ title: "Habit Log", headerBackTitle: "Home" }}
           />
