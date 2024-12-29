@@ -53,14 +53,11 @@ const editHabit = () => {
   const { email } = useContext(AuthContext);
   const [changeQty, setChangeQty] = useState("1");
   const [hasUnsavedSetChanges, setHasUnsavedSetChanges] = useState(false);
-  const [hasUnsavedIncChanges, setHasUnsavedIncChanges] = useState(false);
 
   const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>(
     getSimpleDateFromDate(new Date())
   );
-  const [changeType, setChangeType] = useState<"increment" | "decrement">(
-    "increment"
-  );
+
   const [qtyToSet, setQtyToSet] = useState(
     habit.getCountOfDate(dateToUpdate).toString()
   );
@@ -70,12 +67,6 @@ const editHabit = () => {
 
     setHasUnsavedSetChanges(isDifferent);
   }, [dateToUpdate, qtyToSet]);
-
-  const handleChangeIncrmentType = (type: string) => {
-    if (type === "increment" || type === "decrement") {
-      setChangeType(type);
-    }
-  };
 
   const handleSetDateToUpdate = (newDate: SimpleDate | null) => {
     if (newDate) {
@@ -104,7 +95,11 @@ const editHabit = () => {
 
   const handleEditSetQty = (text: string) => {
     setQtyToSet(text);
-    setHasUnsavedIncChanges(true);
+  };
+
+  const handleResetSetQty = () => {
+    const originalSetQty = habit.getCountOfDate(dateToUpdate);
+    handleEditSetQty(originalSetQty.toString());
   };
 
   const handleShiftSetQty = (direction: "increase" | "decrease") => {
@@ -116,35 +111,20 @@ const editHabit = () => {
     handleEditSetQty(newSetQty.toString());
   };
 
-  const handleSubmitIncrement = async () => {
-    try {
-      const changeAmount =
-        changeType === "increment" ? Number(changeQty) : -1 * Number(changeQty);
-
-      // First: Check if simple date is valid date
-      // console.log("Date to Update: " + JSON.stringify(dateToUpdate));
-      const updatedDate = getDateFromSimpleDate(dateToUpdate);
-      if (updatedDate) {
-        habit.logItem(updatedDate, changeAmount);
-      } else {
-        alert("Error: Invalid Date. Enter Date in Format: MM/DD/YYYY");
-      }
-
-      await handleUpdateHabit();
-    } catch (e) {
-      alert("Submission Error " + e);
-    }
-  };
-
   const handleUpdateHabit = async () => {
     const response = await updateHabitObject(habit.getJSON(), email);
     if (response.error) {
       alert("Submission response error: " + response.error);
     } else {
-      alert("Updated Successfully");
-
       const newQty = habit.getCountOfDate(dateToUpdate);
+      const dateUpdated =
+        getDateFromSimpleDate(dateToUpdate)?.toDateString() ||
+        "ERR: INVALID DATE";
+
       setQtyToSet(newQty.toString());
+      alert(
+        `Habit: ${habit.getName()}, Date: ${dateUpdated}, Quantity Set: ${newQty} ${habit.getUnit()}`
+      );
 
       handleSetDateToUpdate(getSimpleDateFromDate(new Date()));
     }
@@ -244,7 +224,7 @@ const editHabit = () => {
           inputMode="numeric"
           returnKeyType="done"
         />
-        <Text>{habit.getUnit()}</Text>
+        <Text>&nbsp;{habit.getUnit()}</Text>
       </View>
 
       <View
@@ -277,7 +257,7 @@ const editHabit = () => {
           }}
         />
       </View>
-      <View style={styles.row}>
+      <View style={styles.col}>
         <Button
           mode="contained"
           disabled={!hasUnsavedSetChanges}
@@ -286,6 +266,14 @@ const editHabit = () => {
           onPress={handleSubmitSet}
         >
           Submit Changes
+        </Button>
+        <Button
+          mode="text"
+          labelStyle={{ textDecorationLine: "underline" }}
+          onPress={handleResetSetQty}
+          disabled={!hasUnsavedSetChanges}
+        >
+          Reset
         </Button>
       </View>
     </View>
