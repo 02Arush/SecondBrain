@@ -85,6 +85,14 @@ export const getDateFromSimpleDate = (simpleDate: { year: number, month: number,
     }
 }
 
+export const getElapsedDays = (startDate: Date, endDate: Date): number => {
+    const elapsedMS = endDate.getTime() - startDate.getTime();
+    const elapsedConverted = elapsedMS /(1000 * 60 * 60 * 24);
+    const rounded = Math.round(elapsedConverted);
+    return rounded;
+
+}
+
 export const getSimpleDateFromDate = (date: Date): SimpleDate => {
     return {
         day: date.getDate(),

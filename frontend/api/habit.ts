@@ -1,6 +1,6 @@
 
 
-import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate } from "./types_and_utils";
+import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays } from "./types_and_utils";
 
 
 
@@ -244,11 +244,9 @@ export default class Habit {
 
 
 
-    getLogForBarcharts(startDate: Date, endDate: Date, maxNumberOfBars: number = 10): { date: string, count: number }[] {
+    getLogForBarcharts(startDate: Date, endDate: Date, maxNumberOfBars: number = 8): { date: string, count: number }[] {
 
-        const elapsedDays = Math.ceil(
-            (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        const elapsedDays = getElapsedDays(startDate, endDate)
 
         const numBars = Math.min(maxNumberOfBars, elapsedDays)
 
@@ -268,7 +266,7 @@ export default class Habit {
             const nextDateMS = i + daysPerStep * (1000 * 60 * 60 * 24)
             const nextDate = new Date(nextDateMS)
 
-            const countToAdd = this.getCountFromDateRange(iAsDate, nextDate,false);
+            const countToAdd = this.getCountFromDateRange(iAsDate, nextDate, false);
 
             countGroups.push({
                 date: iAsDate.toDateString(),
