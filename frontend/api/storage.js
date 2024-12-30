@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Habit from './habit';
 import { isAnonymous } from '@/constants/constants';
 import { getUserDataFromEmail, updateUserHabitList } from './db_ops';
+import { Task } from './task'
 
 // Function to store data
 export const storeData = async (key, value) => {
@@ -83,6 +84,8 @@ export const updateHabitObject = async (habitJSONObject, email) => {
         return { error: `Local update failed: ${e.message}` };
     }
 };
+
+
 
 
 
