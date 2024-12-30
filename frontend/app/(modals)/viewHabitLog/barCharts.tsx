@@ -21,7 +21,7 @@ const barCharts = () => {
   const habitName = route.params.habitName.toString().toUpperCase();
   const today = new Date();
   const startDate = new Date(today); // Create a copy of today's date
-  startDate.setDate(today.getDate() - 7); // Past 7 days including day
+  startDate.setDate(today.getDate() - 7); // Past 7 wdays including day
 
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: startDate,

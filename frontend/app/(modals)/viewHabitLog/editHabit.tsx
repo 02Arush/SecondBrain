@@ -20,7 +20,6 @@ import { router, useFocusEffect } from "expo-router";
 import { isAnonymous } from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { getUserDataFromEmail } from "@/api/db_ops";
-import { CustomSurface as Surface } from "@/components/CustomSurface";
 import {
   filterTextToDecimal,
   filterTextToInteger,
@@ -38,13 +37,13 @@ import OutlineModal from "@/components/OutlineModal";
 import SegmentedButtons from "@/components/SegmentedButtons";
 import { HabitContext } from "@/contexts/habitContext";
 
+// Q:
+// Why is it that when I navigate from within tabs of ViewHabitLog, the "set qty" is initialized properly,
+// But when I navigate from the HabitItem, it is NOT set correctly?
 const editHabit = () => {
   const todayDate = new Date();
   const route = useRouteInfo();
   const theme = useTheme();
-  const habitName: string = route.params.habitName
-    .toString()
-    .toLocaleUpperCase();
 
   //   const habit = useContext(HabitContext);
 
@@ -55,7 +54,7 @@ const editHabit = () => {
   const [hasUnsavedSetChanges, setHasUnsavedSetChanges] = useState(false);
 
   const [dateToUpdate, setDateToUpdate] = useState<SimpleDate>(
-    getSimpleDateFromDate(new Date())
+    getSimpleDateFromDate(todayDate)
   );
 
   const [qtyToSet, setQtyToSet] = useState(
@@ -63,8 +62,12 @@ const editHabit = () => {
   );
 
   useEffect(() => {
-    const isDifferent = habit.getCountOfDate(dateToUpdate) !== Number(qtyToSet);
+    // This is here to ensure that whenever I update the date, or update qtyToSet, I allow myself to save unsaved changes
 
+    if (habit.getUnit() === "NULL_UNIT") {
+      alert("We have an issue");
+    }
+    const isDifferent = habit.getCountOfDate(dateToUpdate) !== Number(qtyToSet);
     setHasUnsavedSetChanges(isDifferent);
   }, [dateToUpdate, qtyToSet]);
 
@@ -74,6 +77,11 @@ const editHabit = () => {
       setQtyToSet(habit.getCountOfDate(newDate).toString());
     }
   };
+
+  // This is here because sometimes a NULL_HABIT is initiially passed, but than it quickly updates, so we want to make sure the text fields update respectively
+  useEffect(() => {
+    handleEditSetQty(habit.getCountOfDate(dateToUpdate).toString());
+  }, [habit]);
 
   const handleSubmitSet = async () => {
     const newAmount = Number(qtyToSet);
@@ -155,15 +163,6 @@ const editHabit = () => {
         }}
       >
         <View style={styles.row}>
-          {/* <Button
-          compact
-          style={{ flex: 1 }}
-          onPress={() => {
-            shiftDate(-1);
-          }}
-        >
-          Prev
-        </Button> */}
           <IconButton
             icon="chevron-left"
             onPress={() => {
