@@ -259,7 +259,7 @@ export default class Habit {
         dateGroups.push(startDate)
 
         // Print the dates evenly distributed across the startDate and endDate
-        console.log("DAYS PER STEP" + daysPerStep.toString())
+        // console.log("DAYS PER STEP" + daysPerStep.toString())
         let i = startDate.getTime() // MS
         while (i <= endDate.getTime()) {
             const iAsDate = new Date(i)

@@ -1,6 +1,6 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Pressable } from "react-native";
 import React from "react";
-import { Button, IconButton, Text } from "react-native-paper";
+import { Button, IconButton, Text, useTheme } from "react-native-paper";
 
 type SegmentButton = {
   value: string;
@@ -14,54 +14,38 @@ type propTypes = {
   setSelectedSegment: (item: string) => void;
 };
 
-const handleSetSegment = (item: string) => {};
-
 const SegmentedButtons = ({
   segments,
   selectedSegment,
   setSelectedSegment,
 }: propTypes) => {
+  const theme = useTheme();
   return (
     <View style={styles.container}>
-      {segments.map((segment: SegmentButton, index) => {
-        const isLeft = index === 0;
-        const isRight = index === segments.length - 1;
-        const isSelected = selectedSegment === segment.value;
-        let borderRadiusLeft = 0;
-        let borderRadiusRight = 0;
-        if (isLeft) {
-          borderRadiusLeft = 4;
-        }
+      {segments.map((segment: SegmentButton) => {
+        const isSelected = segment.value === selectedSegment;
 
-        if (isRight) {
-          borderRadiusRight = 4;
-        }
-
-        const Parent = segment.icon ? IconButton : Button;
+        const segmentColors = {
+          backgroundColor: isSelected ? theme.colors.secondary : "transparent",
+          borderColor: theme.colors.primary,
+        };
 
         return (
-          <Parent
-            style={{
-              borderWidth: 1,
-              borderRadius: 0,
-              borderTopLeftRadius: borderRadiusLeft,
-              borderBottomLeftRadius: borderRadiusLeft,
-              borderTopRightRadius: borderRadiusRight,
-              borderBottomRightRadius: borderRadiusRight,
-              margin: 0,
-              padding: 0,
-            }}
-            mode={isSelected ? "contained" : "outlined"}
-            contentStyle={{ margin: 0, padding: 0 }}
-            key={index}
-            size={12}
-            icon={segment.icon ? segment.icon : ""}
-            onPress={() => {
-              setSelectedSegment(segment.value);
-            }}
+          <Pressable
+            key={segment.value}
+            style={{ ...styles.segmentButton, ...segmentColors }}
+            onPress={() => setSelectedSegment(segment.value)}
           >
-            {segment.label && !segment.icon ? segment.label : segment.value}
-          </Parent>
+            <Text
+              style={{
+                color: isSelected
+                  ? theme.colors.onPrimary
+                  : theme.colors.onBackground,
+              }}
+            >
+              {segment.label ? segment.label : segment.value}
+            </Text>
+          </Pressable>
         );
       })}
     </View>
@@ -77,5 +61,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     maxWidth: "100%",
     flexWrap: "wrap",
+  },
+
+  segmentButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
   },
 });

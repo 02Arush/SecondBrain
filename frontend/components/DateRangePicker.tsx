@@ -58,5 +58,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    maxWidth: "100%",
   },
 });

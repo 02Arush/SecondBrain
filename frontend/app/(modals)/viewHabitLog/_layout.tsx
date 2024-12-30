@@ -131,6 +131,8 @@ const styles = StyleSheet.create({
     // borderWidth: 1,
     // borderColor: "red",
     padding: 8,
+    overflowX: "none",
+    overflowY: "scroll",
   },
   contentContainer: {
     // FOR PROD
@@ -146,8 +148,10 @@ const styles = StyleSheet.create({
     // alignItems: "center",
     // borderColor: "purple",
     // flex: 1,
+    // flex: 1,
+    // overflowY: "scroll",
     minHeight: "70%",
-
+    maxHeight: "95%",
     // WORK IN PROGRESS: BOX SIZINGF
     // height: 75
   },

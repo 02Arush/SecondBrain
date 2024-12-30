@@ -259,11 +259,17 @@ const editHabit = () => {
         />
       </View>
       <View style={styles.col}>
+        {/* <Button
+          mode="contained"
+          style={{ flex: 1 }}
+          // style={{ display: hasUnsavedSetChanges ? "flex" : "none" }}
+          onPress={handleSubmitSet}
+        >
+          Submit Changes
+        </Button> */}
         <Button
           mode="contained"
           disabled={!hasUnsavedSetChanges}
-          style={{ flex: 1 }}
-          // style={{ display: hasUnsavedSetChanges ? "flex" : "none" }}
           onPress={handleSubmitSet}
         >
           Submit Changes

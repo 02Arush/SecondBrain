@@ -85,10 +85,9 @@ const barCharts = () => {
     backgroundGradientTo: "#FFF",
     backgroundGradientToOpacity: 0.0,
     color: (opacity = 1) => barColor,
-    strokeWidth: 5, // optional, default 3
+    strokeWidth: 3, // optional, default 3
     barPercentage: 0.25,
     propsForLabels: {
-      
       fontSize: 12,
     },
 
@@ -112,6 +111,7 @@ const barCharts = () => {
               { value: "14", label: "2 Weeks" },
               { value: "30", label: "1 Month" },
               { value: "90", label: "3 Months" },
+              { value: "182", label: "6 Months" },
               { value: "365", label: "1 Year" },
             ]}
             selectedSegment={getElapsedDays(
@@ -129,7 +129,7 @@ const barCharts = () => {
       <BarChart
         data={data}
         width={350}
-        height={300}
+        height={350}
         yAxisLabel=""
         yAxisSuffix=""
         chartConfig={chartConfig}
