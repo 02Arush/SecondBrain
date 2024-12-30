@@ -49,17 +49,18 @@ const SegmentedButtons = ({
               borderTopRightRadius: borderRadiusRight,
               borderBottomRightRadius: borderRadiusRight,
               margin: 0,
+              padding: 0,
             }}
             mode={isSelected ? "contained" : "outlined"}
             contentStyle={{ height: 24 }}
             key={index}
             size={12}
-            icon={segment.icon ? segment.icon : "plus"}
+            icon={segment.icon ? segment.icon : ""}
             onPress={() => {
               setSelectedSegment(segment.value);
             }}
           >
-            {segment.label}
+            {segment.label ? segment.label : segment.value}
           </Parent>
         );
       })}
@@ -72,7 +73,9 @@ export default SegmentedButtons;
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     alignItems: "center",
+    maxWidth: "100%",
+    flexWrap: "wrap",
   },
 });

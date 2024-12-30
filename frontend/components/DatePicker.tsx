@@ -33,10 +33,12 @@ import colorScheme, { getColor } from "@/constants/Colors";
 
 type propTypes = {
   date: SimpleDate;
-  setDate: React.Dispatch<React.SetStateAction<SimpleDate>>;
+  setDate: (date: SimpleDate) => void;
+  min?: SimpleDate;
+  max?: SimpleDate;
 };
 
-const DatePicker = ({ date, setDate }: propTypes) => {
+const DatePicker = ({ date, setDate, min, max }: propTypes) => {
   const [selectedMonth, setSelectedMonth] = useState(months[date.month - 1]);
   const [selectedDay, setSelectedDay] = useState(date.day.toString());
   const [selectedYear, setSelectedYear] = useState(date.year.toString());

@@ -41,8 +41,6 @@ export default class Habit {
         return this.age;
     }
 
-
-
     getFirstActivityDate(): Date {
         const activities = this.getSortedActivityLog("ascending")
         if (activities.length > 0) {
@@ -55,7 +53,6 @@ export default class Habit {
     getCreationDate(): Date {
         return this.creationDate
     }
-
 
     static parseHabit = (json: object | string): Habit => {
         let habitJSON: HabitJSON;
@@ -209,18 +206,78 @@ export default class Habit {
         return this.activityLog.get(dateString) || 0; // Returns int or 0 if not found
     }
 
-    getCountFromDateRange(startDate: Date, endDate: Date) {
+    getCountFromDateRange(startDate: Date, endDate: Date, inclusiveEnd = true) {
+        let curr = new Date(startDate);
+        let totalCount = 0
 
-        let sum = 0;
-
-        for (let [date, count] of this.activityLog) {
-            const current = new Date(date);
-            if (current >= startDate && current <= endDate) {
-                sum += count;
-            }
+        const isIncluded = (date: Date): boolean => {
+            const condition = inclusiveEnd ? curr.getTime() <= endDate.getTime() : curr.getTime() < endDate.getTime();
+            return condition
         }
 
-        return sum;
+
+        while (isIncluded(curr)) {
+            const dateString = curr.toDateString();
+            const count = this.getCountOfDate(dateString);
+            totalCount += count
+
+            curr.setDate(curr.getDate() + 1)
+        }
+
+        return totalCount;
+    }
+
+    /* Returns all values in date range including start and end date, in order */
+    getActivityOfDateRange(startDate: Date, endDate: Date): { date: string, count: number }[] {
+        let curr = new Date(startDate);
+        const log: { date: string, count: number }[] = [];
+
+        while (curr.getTime() <= endDate.getTime()) {
+            const dateString = curr.toDateString();
+            const count = this.getCountOfDate(dateString);
+            log.push({ date: dateString, count: count });
+
+            curr.setDate(curr.getDate() + 1)
+        }
+        return log
+    }
+
+
+
+    getLogForBarcharts(startDate: Date, endDate: Date, maxNumberOfBars: number = 10): { date: string, count: number }[] {
+
+        const elapsedDays = Math.ceil(
+            (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        const numBars = Math.min(maxNumberOfBars, elapsedDays)
+
+        // Use ceil so that you don't exceed the max number of bars
+        const daysPerStep = Math.ceil(elapsedDays / numBars)
+
+        const dateGroups = Array<Date>()
+        const countGroups = Array<{ date: string, count: number }>()
+
+        dateGroups.push(startDate)
+
+        // Print the dates evenly distributed across the startDate and endDate
+        console.log("DAYS PER STEP" + daysPerStep.toString())
+        let i = startDate.getTime() // MS
+        while (i <= endDate.getTime()) {
+            const iAsDate = new Date(i)
+            const nextDateMS = i + daysPerStep * (1000 * 60 * 60 * 24)
+            const nextDate = new Date(nextDateMS)
+
+            const countToAdd = this.getCountFromDateRange(iAsDate, nextDate,false);
+
+            countGroups.push({
+                date: iAsDate.toDateString(),
+                count: countToAdd
+            })
+
+            i = nextDateMS;
+        }
+        return countGroups;
     }
 
     getTotalCount(mode: "total" | "average" = "total") {
@@ -279,20 +336,7 @@ export default class Habit {
         return values;
     }
 
-    /* Returns all values in date range including start and end date, in order */
-    getActivityOfDateRange(startDate: Date, endDate: Date): { date: string, count: number }[] {
-        let curr = new Date(startDate);
-        const log: { date: string, count: number }[] = [];
 
-        while (curr.getTime() <= endDate.getTime()) {
-            const dateString = curr.toDateString();
-            const count = this.getCountOfDate(dateString);
-            log.push({ date: dateString, count: count });
-
-            curr.setDate(curr.getDate() + 1)
-        }
-        return log
-    }
 
 
 

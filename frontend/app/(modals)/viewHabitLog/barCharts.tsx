@@ -10,14 +10,27 @@ import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { retrieveHabitObject } from "@/api/storage";
 import { HabitContext } from "@/contexts/habitContext";
+import DateRangePicker from "@/components/DateRangePicker";
+import { DateRange } from "@/api/types_and_utils";
+import SegmentedButtons from "@/components/SegmentedButtons";
 
 const barCharts = () => {
   const scheme = useColorScheme();
   const theme = useTheme();
   const route = useRouteInfo();
-
   const habitName = route.params.habitName.toString().toUpperCase();
+  const today = new Date();
+  const startDate = new Date(today); // Create a copy of today's date
+  startDate.setDate(today.getDate() - 9); // Past 10 days including day
+
+  const [selectedPrebuiltDateRange, setSelectedPrebuiltDateRange] =
+    useState("7");
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: startDate,
+    endDate: today,
+  });
   const { email } = useContext(AuthContext);
+
   // const habit = useContext(HabitContext);
   // const [habit, setHabit] = useState<Habit>();
 
@@ -26,32 +39,16 @@ const barCharts = () => {
 
   // useFocusEffect(
   //   useCallback(() => {
-  //     async function getHabitData() {
-  //       let habitList = null;
-  //       if (!isAnonymous(email)) {
-  //         const userData = await getUserDataFromEmail(email);
-  //         habitList = Array.isArray(userData["habitList"])
-  //           ? userData["habitList"]
-  //           : JSON.parse(userData["habitList"]);
-  //       }
 
-  //       const currHabit = await retrieveHabitObject(habitName, habitList);
-  //       if (currHabit instanceof Habit) {
-  //         setHabit(currHabit);
-  //       } else {
-  //         alert(currHabit.error);
-  //       }
-  //     }
-  //     getHabitData();
   //   }, [email])
   // );
 
   // the following function is used for getting habit data from start and end date to format for graphs
-  const today = new Date();
-  const startDate = new Date(today); // Create a copy of today's date
-  startDate.setDate(today.getDate() - 9); // Past 10 days including day
 
-  const activities = habit?.getActivityOfDateRange(startDate, today) || [];
+  // const activities = habit?.getActivityOfDateRange(startDate, today) || [];
+
+  const activities =
+    habit?.getLogForBarcharts(dateRange.startDate, dateRange.endDate) || [];
   const dates = activities.map((activity) => {
     const date = new Date(activity.date);
     return `${date.getMonth() + 1}/${date.getDate()}/${date
@@ -84,8 +81,36 @@ const barCharts = () => {
     useShadowColorFromDataset: false, // optional
   };
 
+  const handleSetDateRange = (dateRange: DateRange) => {
+    setDateRange(dateRange);
+  };
+
   return (
     <View>
+      <View style={styles.row}>
+        <View style={{ flex: 2 }}>
+          <Text>Showing Past:</Text>
+        </View>
+        <View style={{ flex: 5 }}>
+          <SegmentedButtons
+            segments={[
+              { value: "7" },
+              { value: "14" },
+              { value: "30" },
+              { value: "90" },
+              { value: "365" },
+            ]}
+            selectedSegment={"7"}
+            setSelectedSegment={(segment: string) => {
+              alert(segment);
+            }}
+          />
+        </View>
+      </View>
+      <DateRangePicker
+        dateRange={dateRange}
+        setDateRange={handleSetDateRange}
+      />
       <BarChart
         style={{ position: "relative" }}
         data={data}
@@ -103,4 +128,9 @@ const barCharts = () => {
 
 export default barCharts;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+});

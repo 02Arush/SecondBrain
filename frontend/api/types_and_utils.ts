@@ -63,6 +63,11 @@ export type SimpleDate = {
     year: number;
 };
 
+export type DateRange = {
+    startDate: Date,
+    endDate: Date,
+}
+
 export const getDateFromSimpleDate = (simpleDate: { year: number, month: number, day: number }): Date | null => {
     const { year, month, day } = simpleDate;
 

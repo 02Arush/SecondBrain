@@ -171,7 +171,12 @@ const editHabit = () => {
             }}
           />
 
-          <DatePicker date={dateToUpdate} setDate={setDateToUpdate} />
+          <DatePicker
+            date={dateToUpdate}
+            setDate={(date: SimpleDate) => {
+              setDateToUpdate(date);
+            }}
+          />
 
           <IconButton
             icon="chevron-right"
