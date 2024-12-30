@@ -52,7 +52,7 @@ const SegmentedButtons = ({
               padding: 0,
             }}
             mode={isSelected ? "contained" : "outlined"}
-            contentStyle={{ height: 24 }}
+            contentStyle={{ margin: 0, padding: 0 }}
             key={index}
             size={12}
             icon={segment.icon ? segment.icon : ""}
@@ -60,7 +60,7 @@ const SegmentedButtons = ({
               setSelectedSegment(segment.value);
             }}
           >
-            {segment.label ? segment.label : segment.value}
+            {segment.label && !segment.icon ? segment.label : segment.value}
           </Parent>
         );
       })}
