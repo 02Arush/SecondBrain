@@ -7,7 +7,6 @@ const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
   const router = useRouter();
 
   function handleEditHabit() {
-    alert(name);
     router.push({
       pathname: "/(modals)/viewHabitLog/editHabit",
       params: {
@@ -17,7 +16,6 @@ const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
   }
 
   async function handleViewGraph() {
-    alert(name);
     router.push({
       pathname: "/(modals)/viewHabitLog/averages",
       params: {

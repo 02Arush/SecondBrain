@@ -64,9 +64,6 @@ const editHabit = () => {
   useEffect(() => {
     // This is here to ensure that whenever I update the date, or update qtyToSet, I allow myself to save unsaved changes
 
-    if (habit.getUnit() === "NULL_UNIT") {
-      alert("We have an issue");
-    }
     const isDifferent = habit.getCountOfDate(dateToUpdate) !== Number(qtyToSet);
     setHasUnsavedSetChanges(isDifferent);
   }, [dateToUpdate, qtyToSet]);
