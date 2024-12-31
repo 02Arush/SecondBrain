@@ -1,5 +1,5 @@
 
-const constants = {
+export const constants = {
     ANONYMOUS: "Anonymous",
     NO_TASK_DEADLINE: "No Deadline",
     TASK_LIST: "TaskList"

@@ -254,14 +254,7 @@ export const createTask = async (email, task) => {
     // First: Add the document to the tasks collection
     try {
 
-        const taskDocRef = await addDoc(collection(db, "tasks"), {
-            taskName: task.getName(),
-            description: task.getDescription(),
-            importance: task.getImportance(),
-            deadline: task.getDeadline(),
-            completed: task.getCompleted(),
-            sharedUsers: task.getSharedUsers()
-        });
+        const taskDocRef = await addDoc(collection(db, "tasks"), task.getJSON());
 
 
         const taskID = taskDocRef.id;
@@ -286,23 +279,13 @@ export const updateTask = async (email, task, taskID) => {
     const docRef = doc(db, "tasks", taskID)
 
     try {
-        const res = await setDoc(docRef, {
-            taskName: task.getName(),
-            description: task.getDescription(),
-            importance: task.getImportance(),
-            deadline: task.getDeadline(),
-            completed: task.getCompleted(),
-            sharedUsers: task.getSharedUsers(),
-        }, { merge: true })
+        const res = await setDoc(docRef, task.getJSON(), { merge: true })
 
         return { ok: true }
 
     } catch (error) {
         return { error: error.code, message: error.message }
     }
-
-
-
 }
 
 /**

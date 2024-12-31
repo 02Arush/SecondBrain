@@ -23,7 +23,9 @@ import { createTask as createTaskDB } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { getTaskItem, deleteTask, updateTask } from "@/api/db_ops";
+import { isAnonymous } from "@/constants/constants";
 import { getSimpleDateFromDate } from "@/api/types_and_utils";
+import { updateLocalTaskList } from "@/api/taskStorage";
 
 const createTask = () => {
   const theme = useTheme();
@@ -116,6 +118,14 @@ const createTask = () => {
       newTask.addSharedUser({ email: email, permission: "admin" });
     } else {
       alert("Error: email is not a string");
+    }
+
+    if (isAnonymous(email)) {
+      const res = await updateLocalTaskList(newTask);
+      if (!res.ok) {
+        alert(res.message);
+      }
+      return;
     }
 
     const res =

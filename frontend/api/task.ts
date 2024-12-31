@@ -17,12 +17,13 @@ export default class Task {
     private sharedUsers: TaskUser[] = []
     private completed: boolean = false;
 
-    static fromObject(taskObject: any, id: string) {
+    static fromObject(taskObject: any, id: string): Task | null {
 
         if (taskObject === undefined || taskObject === null) {
             return null;
         }
 
+        // FIX THIS: ENSURE TASK DEADLINE IS PROPER
         const taskDeadline: Date | null = taskObject.deadline ? new Date(taskObject.deadline.toDate()) : null;
         const sharedUsers: TaskUser[] = taskObject.sharedUsers;
         const task = new Task(id, taskObject.taskName, taskObject.description, taskDeadline, taskObject.importance, taskObject.completed, sharedUsers);
@@ -61,9 +62,12 @@ export default class Task {
         }
     }
 
+    // The reason why taskID is not an optional parameter yet, is because it was made "optional" later on in the procss, but would mess up the orderings of the rest of the 
+    // parameters if I now made it optional wherever its used- ideally, it would be an optional parameter
     constructor(taskID: string = "-1", name: string, description: string = "", deadline: Date | null = null, importance: number | null = null, completed: boolean = false, sharedUsers?: TaskUser[],) {
 
-        this.taskID = taskID;
+        // IF A TASK ID IS NOT GIVEN, ASSIGN IT A TASK ID USING NAME AND LINUX EPOCH TIME
+        this.taskID = taskID === "-1" ? `${name}${new Date().getTime()}` : taskID
         this.name = name.length === 0 ? "Unnamed Task" : name;
         this.description = description;
         this.deadline = deadline;
@@ -179,7 +183,18 @@ export default class Task {
             }
         }
 
-        return false;
+    }
+
+    getJSON() {
+        return {
+            taskID: this.getTaskID(),
+            taskName: this.getName(),
+            description: this.getDescription(),
+            importance: this.getImportance(),
+            deadline: this.getDeadline(),
+            completed: this.getCompleted(),
+            sharedUsers: this.getSharedUsers()
+        }
     }
 
 
