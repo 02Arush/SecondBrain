@@ -12,6 +12,7 @@ import { DataPoint } from "@/api/types_and_utils";
 import { isAnonymous } from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { getTasksForUser } from "@/api/db_ops";
+import { retrieveTasks } from "@/api/taskStorage";
 import Task from "@/api/task";
 import ScatterPlot from "@/components/Scatterplot";
 const tasksScatterplot = () => {
@@ -22,55 +23,59 @@ const tasksScatterplot = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (!isAnonymous(email)) {
-        (async () => {
-          const res = await getTasksForUser(email, false);
-          if (res.taskList) {
-            const tasks = res.taskList;
-            setTaskList(tasks);
+      console.log("RUNNING OUTER SCATTER");
 
-            const newDataPoints: DataPoint[] = tasks.map((task: Task) => {
-              const importance = task.getImportance(); // Always between 0 and 10
-              const deadline = task.getDeadline(); // Assume task.getDeadline() returns a string or Date
-              const currDate = new Date();
+      (async () => {
+        const res = await retrieveTasks(email, false);
+        const taskList = res.data;
+        console.log("RUNNING INNER SCATTER");
+        console.log(taskList);
 
-              // MORE urgent is CLOSER to ZERO (Because we want it on the LEFT side)
-              let urgency: number = 10; // Default urgency if no deadline is provided (Furthest Right)
+        if (taskList) {
+          const tasks = taskList;
+          setTaskList(tasks);
 
-              if (deadline) {
-                const deadlineDate = new Date(deadline); // Ensure the deadline is a Date object
-                const daysUntilDeadline: number =
-                  (deadlineDate.getTime() - currDate.getTime()) /
-                  (1000 * 60 * 60 * 24); // Calculate days difference
+          const newDataPoints: DataPoint[] = tasks.map((task: Task) => {
+            const importance = task.getImportance(); // Always between 0 and 10
+            const deadline = task.getDeadline(); // Assume task.getDeadline() returns a string or Date
+            const currDate = new Date();
 
-                // Normalize to a 0-10 scale
-                urgency = Math.max(0, daysUntilDeadline); // If past deadline, move urgency to zero
-                urgency = Math.min(urgency, 9); // If > 10 days til deadline, move urgency to 10
+            // MORE urgent is CLOSER to ZERO (Because we want it on the LEFT side)
+            let urgency: number = 10; // Default urgency if no deadline is provided (Furthest Right)
 
-                // 10 days or more gives it further right on urgency
-              }
+            if (deadline) {
+              const deadlineDate = new Date(deadline); // Ensure the deadline is a Date object
+              const daysUntilDeadline: number =
+                (deadlineDate.getTime() - currDate.getTime()) /
+                (1000 * 60 * 60 * 24); // Calculate days difference
 
-              // Question: Given a deadline, how do I convert it to "Urgency" on a 1-10 scale?
-              // Note: MORE Urgent should be CLOSER to Zero
+              // Normalize to a 0-10 scale
+              urgency = Math.max(0, daysUntilDeadline); // If past deadline, move urgency to zero
+              urgency = Math.min(urgency, 9); // If > 10 days til deadline, move urgency to 10
 
-              const point: DataPoint = {
-                id: task.getName(),
-                y: 10-importance,
-                x: urgency,
-                data: {
-                  deadline: deadline,
-                  importance: importance,
-                },
-              };
+              // 10 days or more gives it further right on urgency
+            }
 
-              return point;
-            });
+            // Question: Given a deadline, how do I convert it to "Urgency" on a 1-10 scale?
+            // Note: MORE Urgent should be CLOSER to Zero
 
-            setDataPoints(newDataPoints);
-          } else {
-          }
-        })();
-      }
+            const point: DataPoint = {
+              id: task.getName(),
+              y: 10 - importance,
+              x: urgency,
+              data: {
+                deadline: deadline,
+                importance: importance,
+              },
+            };
+
+            return point;
+          });
+
+          setDataPoints(newDataPoints);
+        } else {
+        }
+      })();
     }, [email])
   );
 

@@ -25,7 +25,10 @@ import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { getTaskItem, deleteTask, updateTask } from "@/api/db_ops";
 import { isAnonymous } from "@/constants/constants";
 import { getSimpleDateFromDate } from "@/api/types_and_utils";
-import { updateLocalTaskList } from "@/api/taskStorage";
+import {
+  retrieveLocalStorageTasks,
+  updateLocalTaskList,
+} from "@/api/taskStorage";
 
 const createTask = () => {
   const theme = useTheme();
@@ -122,9 +125,14 @@ const createTask = () => {
 
     if (isAnonymous(email)) {
       const res = await updateLocalTaskList(newTask);
-      if (!res.ok) {
-        alert(res.message);
+      alert(res.message);
+
+      const test = await retrieveLocalStorageTasks();
+      if (test.data) {
+        console.log("==TASK DATA===");
+        console.log(JSON.stringify(test.data));
       }
+
       return;
     }
 

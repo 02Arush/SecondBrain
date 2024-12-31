@@ -22,8 +22,7 @@ export const retrieveData = async (key) => {
         if (value !== null) {
             return value;
         } else {
-            console.log('No data found for key:', key);
-            return null;
+            return { error: "No Data Found For Key: " + key }
         }
     } catch (e) {
         return { error: 'Failed to fetch the data from storage' + e };

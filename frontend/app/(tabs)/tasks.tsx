@@ -8,6 +8,9 @@ import { getTasksForUser, setCompleted } from "@/api/db_ops";
 import { filterOptions as filters } from "@/api/types_and_utils";
 import Task from "@/api/task";
 import Select from "@/components/Select";
+import { retrieveTasks } from "@/api/taskStorage";
+import { removeData } from "@/api/storage";
+import constants from "@/constants/constants";
 
 const tasks = () => {
   const theme = useTheme();
@@ -30,13 +33,18 @@ const tasks = () => {
     completed: boolean = false,
     filterOption: string = filters.DATE_EARLIEST
   ) => {
-    const res = await getTasksForUser(email, completed, filterOption);
+    // TODO: Change to retrieving from taskStorage file
+    // await removeData(constants.TASK_LIST)
 
-    if (res.taskList) {
-      setTaskList(res.taskList);
+    // const res = await getTasksForUser(email, completed, filterOption);
+
+    const res = await retrieveTasks(email, completed, filterOption);
+
+    if (res.data) {
+      setTaskList(res.data);
       setViewingCompletedTasks(completed);
-    } else if (res.error) {
-      alert(res.error);
+    } else if (!res.ok) {
+      alert(res.message);
     } else {
       alert("TASKS: RESPONSE ERROR");
     }
@@ -76,9 +84,7 @@ const tasks = () => {
   const handleChart = () => {
     router.push({
       pathname: "/(modals)/tasksScatterplot",
-      params: {
-        
-      }
+      params: {},
     });
   };
 

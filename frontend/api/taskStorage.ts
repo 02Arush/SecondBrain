@@ -1,6 +1,8 @@
 import Task from "./task";
 import { storeData, retrieveData } from "./storage";
 import { isAnonymous, constants } from "@/constants/constants";
+import { getTasksForUser } from "./db_ops";
+import { filterOptions } from "./types_and_utils";
 
 export const updateTask = async (task: Task, email: String): Promise<{ ok: boolean, message: string }> => {
 
@@ -29,7 +31,7 @@ export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, me
 
     const newTaskJSON = task.getJSON()
 
-    if (!currTasks) {
+    if (!currTasks || (typeof currTasks === "object" && currTasks.error)) {
         // If currTasks Array isn't created, it should be created.
         const tasks = JSON.stringify([]);
         const res = await storeData(constants.TASK_LIST, tasks);
@@ -38,9 +40,14 @@ export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, me
         }
     }
 
+    // SO CURR TASKS DOES EXIST?
+
     if (!(typeof currTasks === "string")) {
         const type = typeof currTasks
-        return { ok: false, message: "Task Retrieval from local storage error. Contact Support. Current type: " + type }
+        const isArray = Array.isArray(currTasks);
+        const object = typeof currTasks == "object" ? JSON.stringify(currTasks) : null;
+
+        return { ok: false, message: `Task Retrieval from local storage error. Contact Support. Current type: ${type}, is Array: ${isArray}, Object Data: ${object} ` }
     }
 
     const tasks = JSON.parse(currTasks);
@@ -66,20 +73,49 @@ export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, me
     }
 
 
-
     const res = await storeData(constants.TASK_LIST, JSON.stringify(tasks))
     if (res.error) {
         return { ok: false, message: `${res.error}` }
     } else {
-        return { ok: true, message: "Task Updated In Place Successfully" }
+        return { ok: true, message: "Task Updated Successfully" }
     }
 
 }
 
-export const retrieveLocalStorageTasks = async (): Promise<{ ok: boolean, data: any, message: string }> => {
+
+export const retrieveTasks = async (email: string, completed: boolean = false, filterOption = filterOptions.DATE_EARLIEST) => {
+
+    if (isAnonymous(email)) {
+        const res = await retrieveLocalStorageTasks()
+
+
+        return res;
+
+    } else {
+        const res = await getTasksForUser(email, completed, filterOption);
+        const ok = !(res.error);
+        const message = `
+            message: ${res.error}
+            error: ${res.error}
+        `
+        const data = res.taskList
+
+
+        return {
+            ok: ok,
+            message: message,
+            data: data,
+        };
+    }
+
+}
+
+export const retrieveLocalStorageTasks = async (completed: boolean = false, filterOption: string = filterOptions.DATE_EARLIEST): Promise<{ ok: boolean, data: any, message: string }> => {
 
     const taskJSONS = await retrieveData(constants.TASK_LIST);
     if (typeof taskJSONS === "string") {
+
+
         const taskObjArray = JSON.parse(taskJSONS);
         const tasks = taskObjArray.map(
             (task: any) => {
@@ -87,11 +123,15 @@ export const retrieveLocalStorageTasks = async (): Promise<{ ok: boolean, data: 
             }
         )
 
-        const filteredTasks = tasks.filter(
+
+
+        const filteredTasks: Task[] = tasks.filter(
             (task: any) => {
-                task !== null;
+                return task !== null;
             }
         )
+
+
 
         return {
             ok: true,
@@ -102,7 +142,8 @@ export const retrieveLocalStorageTasks = async (): Promise<{ ok: boolean, data: 
 
 
     } else {
-        const errMsg = taskJSONS?.error || "Error Retrieving Local Tasks"
+
+        const errMsg = `ERR: ${taskJSONS?.error} // Error Retrieving Local Tasks`
         return {
             ok: false,
             data: null,

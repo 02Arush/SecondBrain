@@ -24,7 +24,11 @@ export default class Task {
         }
 
         // FIX THIS: ENSURE TASK DEADLINE IS PROPER
-        const taskDeadline: Date | null = taskObject.deadline ? new Date(taskObject.deadline.toDate()) : null;
+        const taskObjDeadline = taskObject.deadline;
+        const hasDeadline = taskObjDeadline != null || taskObjDeadline != undefined
+
+
+        const taskDeadline: Date | null = hasDeadline ? new Date(taskObject.deadline.toDate()) : null;
         const sharedUsers: TaskUser[] = taskObject.sharedUsers;
         const task = new Task(id, taskObject.taskName, taskObject.description, taskDeadline, taskObject.importance, taskObject.completed, sharedUsers);
         return task;
