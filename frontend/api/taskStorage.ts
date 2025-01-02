@@ -19,7 +19,7 @@ export const updateTask = async (email: string, task: Task, isNewTask: boolean =
                 : await updateTaskCloud(email, task, taskID)
 
         const ok = !res.error
-        const message = ok ? "Task Update Successfully In Cloud" : `ERROR: ${res.error}, MSG: ${res.message}`
+        const message = ok ? "Task Update Successfully In Cloud" : `${task.getTaskID} ERROR: ${res.error}, MSG: ${res.message}`
         return { ok, message }
 
 
@@ -126,9 +126,7 @@ export const retrieveLocalStorageTasks = async (completed: boolean | undefined =
                 return exists && matchCompleted;
             }
         )
-
         const sortedTaskList = Task.sortTaskList(filteredTasks, filterOption)
-
         return {
             ok: true,
             data: sortedTaskList,
@@ -279,5 +277,59 @@ export const setCompletedStatus = async (email: string, taskID: string, complete
         const message = `${res.message}, ${res.error}`
         return { ok, message }
     }
+
+}
+
+
+// Upon registering an account, sync the tasks on local storage to the cloud
+export const uploadLocalTasks = async (email: string) => {
+
+
+    if (isAnonymous(email)) {
+        return {
+            ok: false,
+            error: "Development Error: Anonymous User Can't Upload Habits"
+        }
+    }
+
+    // retrieve the local task list
+    const res = await retrieveLocalStorageTasks();
+    const taskList = await res.data;
+
+    if (!res.ok) {
+        return { ok: false, message: res.message }
+    }
+
+    if (!Array.isArray(taskList)) {
+        return { ok: false, message: "Error Uploading Local Tasks: taskList is not an array" }
+    }
+
+    const uploads = taskList.map(async (task: Task) => {
+        const res = await updateTask(email, task, true)
+        return res;
+    })
+
+    const allTaskUploads = await Promise.all(uploads)
+
+    let msg = '';
+    const reduceFctn = (accumulator: string, curr: { ok: boolean, message: string }) => {
+        const hasError = !curr.ok
+        if (hasError) {
+            return accumulator + curr.message + "\n"
+        } else {
+            return accumulator
+        }
+    }
+
+    allTaskUploads.reduce(reduceFctn, msg);
+    const ok = msg.length == 0;
+    if (ok) {
+        return { ok: true, message: "All Tasks Uploaded Successfully" }
+    } else {
+        return { ok: false, message: msg }
+    }
+
+
+    // For each item in the local task list, upload it to the cloud using the function: createTask, given the userID
 
 }

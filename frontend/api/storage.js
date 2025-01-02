@@ -207,3 +207,48 @@ export async function updateLocalStorageHabits(habitName, unit) {
         return { error: "Habit Already Exists" }
     }
 }
+
+
+/**
+ * 
+ * @param {string} email 
+ * @returns {Promise<{ok: boolean, message: string}}
+ */
+export const uploadLocalStorageHabits = async (email) => {
+
+
+    const localHabitList = await retrieveLocalHabitList();
+    const remoteUserData = await getUserDataFromEmail(email);
+    const remoteHabitList = Array.isArray(remoteUserData["habitList"])
+        ? remoteUserData["habitList"]
+        : JSON.parse(remoteUserData["habitList"]);
+
+    if (!Array.isArray(remoteHabitList)) {
+        return {
+            ok: false,
+            message: "Remote Habit List is Not an Array",
+        };
+    }
+
+    // Merge the habit lists
+    if (remoteHabitList.length > 0) {
+        const mergedHabitList = Habit.mergeHabitLists(
+            remoteHabitList,
+            localHabitList
+        );
+        // set remote habit list to mergedHabitList
+        response = await updateUserHabitList(email, mergedHabitList);
+    } else {
+        response = await updateUserHabitList(email, localHabitList);
+    }
+
+
+    // Merge the habit lists
+    if (response && response.error) {
+        const errMsg = "error " + response.error + "message " + response.message;
+        return { ok: false, message: errMsg };
+    } else {
+        return { ok: true, message: "Habit lists have been merged successfully" };
+    }
+
+}

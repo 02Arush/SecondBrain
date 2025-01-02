@@ -16,8 +16,13 @@ import { router, useFocusEffect } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
 import OutlineModal from "@/components/OutlineModal";
 import { isAnonymous } from "@/constants/constants";
-import { retrieveLocalHabitList } from "@/api/storage";
+import {
+  retrieveLocalHabitList,
+  uploadLocalStorageHabits,
+} from "@/api/storage";
 import Habit from "@/api/habit";
+import { uploadLocalTasks } from "@/api/taskStorage";
+import { useEffect } from "react";
 
 const register = () => {
   // This is here such that the "sync local storage to new account" modal never initially displays
@@ -34,6 +39,9 @@ const register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showingLocalStorageSyncModal, setShowingLocalStorageSyncModal] =
     useState(false);
+
+  // This is here to ensure that the email when uploading tasks is most up to  date
+  useEffect(() => {}, [email]);
 
   const handleRegister = async () => {
     const validEmail = emailTxt.length > 0;
@@ -53,32 +61,13 @@ const register = () => {
 
   const navigateHomeScreen = async (syncData: boolean) => {
     if (syncData) {
-      const localHabitList = await retrieveLocalHabitList();
-      const remoteUserData = await getUserDataFromEmail(email);
-      const remoteHabitList = Array.isArray(remoteUserData["habitList"])
-        ? remoteUserData["habitList"]
-        : JSON.parse(remoteUserData["habitList"]);
+      const habitUploadRes = await uploadLocalStorageHabits(email);
+      const taskUploadRes = await uploadLocalTasks(email);
 
-      let response;
-      if (Array.isArray(remoteHabitList)) {
-        if (remoteHabitList.length > 0) {
-          const mergedHabitList = Habit.mergeHabitLists(
-            remoteHabitList,
-            localHabitList
-          );
-          // set remote habit list to mergedHabitList
-          response = await updateUserHabitList(email, mergedHabitList);
-        } else {
-          response = await updateUserHabitList(email, localHabitList);
-        }
+      if (habitUploadRes.ok && taskUploadRes.ok) {
       } else {
-        alert("Remote Habit List is not an array");
-      }
-
-      if (response && response.error) {
-        alert("error " + response.error + "message " + response.message);
-      } else {
-        alert("Habit lists have been merged successfully");
+        const message = `Task Upload Status : ${taskUploadRes.message}\nHabit Upload Status: ${habitUploadRes.message}`;
+        alert(message);
       }
     }
 
