@@ -22,8 +22,8 @@ import Task from "@/api/task";
 import { createTask as createTaskDB } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
-import { getTaskItem, deleteTask, updateTask } from "@/api/db_ops";
-import { isAnonymous } from "@/constants/constants";
+import { updateTask } from "@/api/taskStorage";
+import { deleteTask, getTask } from "@/api/taskStorage";
 import { getSimpleDateFromDate } from "@/api/types_and_utils";
 import {
   retrieveLocalStorageTasks,
@@ -33,14 +33,19 @@ import {
 const createTask = () => {
   const theme = useTheme();
   const { email } = useContext(AuthContext);
-  const { taskID } = useLocalSearchParams();
+  const local = useLocalSearchParams();
+  const { taskID } = useLocalSearchParams<{ taskID: string }>();
 
   useFocusEffect(
     useCallback(() => {
       // get the task details
       (async () => {
+        // alert(taskID);
+
         if (taskID && typeof taskID === "string") {
-          const currTask = await getTaskItem(email, taskID);
+          const res = await getTask(email, taskID);
+
+          const currTask = res.data;
           // populate the fields with intiial values
           if (currTask instanceof Task) {
             setTaskName(currTask.getName());
@@ -54,7 +59,7 @@ const createTask = () => {
 
             setImportance(currTask.getImportance());
           } else {
-            alert(currTask.error);
+            alert(res.message);
           }
         }
       })();
@@ -93,10 +98,10 @@ const createTask = () => {
 
   const handleDeleteTask = async () => {
     const res = await deleteTask(email, taskID);
-    if (!res.error) {
+    if (res.ok) {
       router.replace("/tasks");
     } else {
-      alert("Deletion Error " + res.error);
+      alert("Deletion Error. Message: " + res.message);
     }
   };
 
@@ -110,7 +115,7 @@ const createTask = () => {
         : getDateFromSimpleDate(deadline);
 
     const newTask = new Task(
-      undefined,
+      taskID,
       taskName,
       taskDescription,
       taskDeadline,
@@ -123,30 +128,15 @@ const createTask = () => {
       alert("Error: email is not a string");
     }
 
-    if (isAnonymous(email)) {
-      const res = await updateLocalTaskList(newTask);
-      alert(res.message);
-
-      const test = await retrieveLocalStorageTasks();
-      if (test.data) {
-        console.log("==TASK DATA===");
-        console.log(JSON.stringify(test.data));
-      }
-
-      return;
-    }
-
-    const res =
-      taskID && typeof taskID === "string"
-        ? await updateTask(email, newTask, taskID)
-        : await createTaskDB(email, newTask);
+    const isNewTask = taskID == undefined;
+    const res = await updateTask(email, newTask, isNewTask);
 
     // const res = updateExistingTask
     if (res.ok) {
       alert("Task Built Successfully");
       router.replace("/tasks");
     } else {
-      alert(JSON.stringify(res));
+      alert(`ERROR: ${res.message}`);
     }
   };
 
@@ -197,27 +187,6 @@ const createTask = () => {
               step={1}
               thumbTintColor={theme.colors.primary}
             />
-            {/* <Slider
-              style={{ width: "100%", height: 40 }}
-              minimumValue={1}
-              maximumValue={10}
-              value={importance}
-              onValueChange={(value) => {
-                setImportance(value);
-              }}
-              step={1}
-              minimumTrackTintColor={theme.colors.onBackground}
-              maximumTrackTintColor={theme.colors.onBackground}
-              thumbTintColor={theme.colors.primary}
-            /> */}
-            {/* <RangeSlider
-              min={1}
-              max={10}
-              onValueChange={(value) => {
-                setImportance(value);
-              }}
-            /> */}
-
             <View
               style={{ justifyContent: "space-between", flexDirection: "row" }}
             >

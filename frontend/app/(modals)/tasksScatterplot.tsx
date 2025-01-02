@@ -23,13 +23,10 @@ const tasksScatterplot = () => {
 
   useFocusEffect(
     useCallback(() => {
-      console.log("RUNNING OUTER SCATTER");
 
       (async () => {
         const res = await retrieveTasks(email, false);
         const taskList = res.data;
-        console.log("RUNNING INNER SCATTER");
-        console.log(taskList);
 
         if (taskList) {
           const tasks = taskList;

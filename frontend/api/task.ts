@@ -19,19 +19,39 @@ export default class Task {
 
     static fromObject(taskObject: any, id: string): Task | null {
 
-        if (taskObject === undefined || taskObject === null) {
+        try {
+
+
+            if (taskObject == undefined || taskObject == null) {
+                return null;
+            }
+
+            // FIX THIS: ENSURE TASK DEADLINE IS PROPER
+            const taskObjDeadline = taskObject.deadline;
+            const hasDeadline = taskObjDeadline != null || taskObjDeadline != undefined
+            let taskDeadline: Date | null;
+
+            // When getting task deadlines from cloud, its saved as a TimeStamp object, which acts differently from strings in local storage
+            try {
+                const cloudFixedDate = hasDeadline ? new Date(taskObject.deadline.toDate()) : null;
+                taskDeadline = cloudFixedDate;
+
+            } catch (err) {
+                taskDeadline = hasDeadline ? new Date(taskObject.deadline) : null;
+            }
+
+            const sharedUsers: TaskUser[] = taskObject.sharedUsers;
+            const task = new Task(id, taskObject.taskName, taskObject.description, taskDeadline, taskObject.importance, taskObject.completed, sharedUsers);
+            return task;
+
+        } catch (err) {
+            console.log("===INVALID TAStK JSON===")
+            console.log("ID " + id)
+            console.log(JSON.stringify(taskObject));
+            console.log(err);
             return null;
         }
 
-        // FIX THIS: ENSURE TASK DEADLINE IS PROPER
-        const taskObjDeadline = taskObject.deadline;
-        const hasDeadline = taskObjDeadline != null || taskObjDeadline != undefined
-
-
-        const taskDeadline: Date | null = hasDeadline ? new Date(taskObject.deadline.toDate()) : null;
-        const sharedUsers: TaskUser[] = taskObject.sharedUsers;
-        const task = new Task(id, taskObject.taskName, taskObject.description, taskDeadline, taskObject.importance, taskObject.completed, sharedUsers);
-        return task;
     }
 
     // typescript sorts least to greatest, so smaller numbers come closer to the front

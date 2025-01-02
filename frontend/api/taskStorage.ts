@@ -1,10 +1,10 @@
 import Task from "./task";
 import { storeData, retrieveData } from "./storage";
 import { isAnonymous, constants } from "@/constants/constants";
-import { getTasksForUser } from "./db_ops";
+import { getTasksForUser, deleteTask as deleteTaskFromCloud, getTaskItem, updateTask as updateTaskCloud, createTask as createTaskCloud } from "./db_ops";
 import { filterOptions } from "./types_and_utils";
 
-export const updateTask = async (task: Task, email: String): Promise<{ ok: boolean, message: string }> => {
+export const updateTask = async (email: string, task: Task, isNewTask: boolean = false): Promise<{ ok: boolean, message: string }> => {
 
     const offline = isAnonymous(email);
 
@@ -12,18 +12,24 @@ export const updateTask = async (task: Task, email: String): Promise<{ ok: boole
         const res = await updateLocalTaskList(task);
         return res;
     } else {
-        // Online: Create the task if it doesn't exist, OR update task?
+        // NOW: ALL TASKS HAVE AN ID, RIGHT? SO 
+        const taskID = task.getTaskID();
+        const res =
+            isNewTask && typeof taskID === "string" ?
+                await createTaskCloud(email, task)
+                : await updateTaskCloud(email, task, taskID)
+
+        const ok = !res.error
+        const message = ok ? "Task Update Successfully In Cloud" : `ERROR: ${res.error}, MSG: ${res.message}`
+        return { ok, message }
 
 
     }
 
-    return { ok: false, message: "NOT YET IMPLEMENTED" }
     // This function is meant to first: if online, update it in the cloud. If TASK NOT FOUND, INSERT IT. OTHERWISE, MODIFY IT TO NEW TASK
     // If offline: IF NOT FOUND, INSERT IT. IF IT IS FOUND, THAN UPDATE IT.
 
 }
-
-
 
 // Updates local storage task list with new task. If task doesn't exist, it adds it. If it does exist, it inserts it.
 export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, message: string }> => {
@@ -84,11 +90,8 @@ export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, me
 
 
 export const retrieveTasks = async (email: string, completed: boolean = false, filterOption = filterOptions.DATE_EARLIEST) => {
-
     if (isAnonymous(email)) {
-        const res = await retrieveLocalStorageTasks()
-
-
+        const res = await retrieveLocalStorageTasks(completed, filterOption)
         return res;
 
     } else {
@@ -98,23 +101,18 @@ export const retrieveTasks = async (email: string, completed: boolean = false, f
             message: ${res.error}
             error: ${res.error}
         `
-        const data = res.taskList
-
-
+        const data = res.taskList || []
         return {
             ok: ok,
             message: message,
             data: data,
         };
     }
-
 }
 
-export const retrieveLocalStorageTasks = async (completed: boolean = false, filterOption: string = filterOptions.DATE_EARLIEST): Promise<{ ok: boolean, data: any, message: string }> => {
-
+export const retrieveLocalStorageTasks = async (completed: boolean | undefined = undefined, filterOption: string = filterOptions.DATE_EARLIEST): Promise<{ ok: boolean, data: any, message: string }> => {
     const taskJSONS = await retrieveData(constants.TASK_LIST);
     if (typeof taskJSONS === "string") {
-
 
         const taskObjArray = JSON.parse(taskJSONS);
         const tasks = taskObjArray.map(
@@ -123,23 +121,24 @@ export const retrieveLocalStorageTasks = async (completed: boolean = false, filt
             }
         )
 
-
-
         const filteredTasks: Task[] = tasks.filter(
             (task: any) => {
-                return task !== null;
+                const exists = task != null;
+                const matchCompleted =
+                    completed != undefined ?
+                        task?.completed == completed : true
+
+                return exists && matchCompleted;
             }
         )
 
-
+        const sortedTaskList = Task.sortTaskList(filteredTasks, filterOption)
 
         return {
             ok: true,
-            data: filteredTasks,
+            data: sortedTaskList,
             message: "Tasks Retrieved Successfully from Local Storage"
         }
-
-
 
     } else {
 
@@ -150,6 +149,107 @@ export const retrieveLocalStorageTasks = async (completed: boolean = false, filt
             message: errMsg
         }
     }
+}
 
 
+export const getTask = async (email: string, taskID: string): Promise<{ ok: boolean, data: any, message: string }> => {
+
+    if (isAnonymous(email)) {
+        const res = await getTaskFromLocalStorage(taskID)
+        return res;
+    } else {
+        const res = await getTaskItem(email, taskID)
+        if (res instanceof Task) {
+            return { ok: true, data: res, message: "Task Retrieved Successfully" }
+
+        } else {
+            return { ok: false, data: null, message: res.error }
+        }
+    }
+
+}
+
+export const getTaskFromLocalStorage = async (taskID: string): Promise<{ ok: boolean, message: string, data: any }> => {
+
+    const res = await retrieveLocalStorageTasks();
+    if (!res.ok) {
+        return { ok: false, message: res.message, data: null }
+    }
+
+    const taskList = res.data;
+
+    if (!Array.isArray(taskList)) {
+        storeData(constants.TASK_LIST, JSON.stringify([]));
+        return { ok: true, message: "Task Not Found, Task List is Not an Array", data: null };
+    }
+
+    const foundTask = taskList.find((task: Task) => {
+        return task.getTaskID() == taskID;
+    })
+
+
+    if (foundTask) {
+        return {
+            ok: true,
+            message: "Task Found Successfully",
+            data: foundTask
+
+        }
+    } else {
+        return {
+            ok: false,
+            message: "Task Not Parsed Properly",
+            data: null,
+        }
+    }
+
+
+
+}
+
+export const deleteTask = async (email: string, taskID: string): Promise<{ ok: boolean, message: string }> => {
+    const res: { ok: boolean, message: string } = { ok: false, message: "Nothing Happened" }
+
+    if (isAnonymous(email)) {
+
+        const taskList = await retrieveData(constants.TASK_LIST)
+        if (!(typeof taskList == "string")) {
+            return { ok: false, message: "No Task List Found In Local Storage" }
+        }
+
+        const parsedTaskList = JSON.parse(taskList);
+
+        // Doing this because if parsedTaskList happens to not be an array, make it a new, empty array
+        if (!Array.isArray(parsedTaskList)) {
+            const res = await storeData(constants.TASK_LIST, JSON.stringify([]));
+            return { ok: true, message: "Re-Initialized Task List" }
+        }
+
+        const idxToRm = parsedTaskList.findIndex((task: any) => {
+            return task?.taskID == taskID;
+        })
+
+        if (idxToRm < 0) {
+            return { ok: false, message: "Task Not Found with ID: " + taskID }
+        } else {
+            parsedTaskList.splice(idxToRm, 1);
+            const res = await storeData(constants.TASK_LIST, JSON.stringify(parsedTaskList))
+            const ok = !res.error
+            const message = ok ? "Task Deleted Successfully" : res.error
+            return {
+                ok: ok,
+                message: `${message}`
+            }
+        }
+
+    } else {
+        const res = await deleteTaskFromCloud(email, taskID)
+        const ok = res.ok
+        const message = typeof res.message == "string" ? res.message : "No Message"
+
+        return {
+            ok: ok,
+            message: message
+        }
+    }
 }

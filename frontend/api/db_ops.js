@@ -254,10 +254,16 @@ export const createTask = async (email, task) => {
     // First: Add the document to the tasks collection
     try {
 
-        const taskDocRef = await addDoc(collection(db, "tasks"), task.getJSON());
+        const taskID = task.getTaskID()
+        const res = await updateTask(email, task, taskID)
 
+        if (!res.ok) {
+            return {
+                ok: false,
+                message: `Err: ${res.error}, ${res.message}`
+            }
+        }
 
-        const taskID = taskDocRef.id;
         // Add document to user-specific subcollection with the key = taskID
         const docRef = doc(db, "users", email, "tasks", taskID);
         await setDoc(docRef, {
@@ -275,16 +281,18 @@ export const createTask = async (email, task) => {
  * @param {Task} task
  * @param {string} taskID
  */
+
+// PROBLEM HERE: UPDATE TASK CALLED UPDATES IT IN THE TASKS COLLECTION BUT NOT IN USERS TASK ARRAY
 export const updateTask = async (email, task, taskID) => {
     const docRef = doc(db, "tasks", taskID)
 
     try {
         const res = await setDoc(docRef, task.getJSON(), { merge: true })
 
-        return { ok: true }
+        return { ok: true, message: "Task Updated Successfully" }
 
     } catch (error) {
-        return { error: error.code, message: error.message }
+        return { ok: false, error: error.code, message: error.message }
     }
 }
 
@@ -305,7 +313,6 @@ export const getTasksForUser = async (email, completed, sort) => {
         if (!allFilterOptions.has(sort)) return { error: "invalid sort parameter. Must be in: " + JSON.stringify(allFilterOptions) }
 
     }
-
     try {
 
         let tasksQuery;
@@ -313,7 +320,6 @@ export const getTasksForUser = async (email, completed, sort) => {
         tasksQuery = query(userTaskIDs);
         const querySnap = await getDocs(tasksQuery)
         let taskIDs = querySnap.docs.map(doc => doc.id);
-
 
         /**
          * This nested function is necessary because typescript has trouble respecting the "filter" in javascript files so I have to
@@ -344,6 +350,8 @@ export const getTasksForUser = async (email, completed, sort) => {
             if (sort) {
                 taskList = Task.sortTaskList(taskList, sort);
             }
+
+
 
             return taskList;
         }
@@ -424,9 +432,9 @@ export const deleteTask = async (email, taskID) => {
         const delFromUser = await deleteDoc(docInUserTasks);
         const delFromTasks = await deleteDoc(docInTasks);
 
-        return { error: false }
+        return { ok: true, message: "Successfully Deleted Task" }
 
     } catch (err) {
-        return { error: err.code, message: err.message }
+        return { ok: false, error: err.code, message: err.message }
     }
 }
