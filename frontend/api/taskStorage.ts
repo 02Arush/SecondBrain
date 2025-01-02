@@ -7,7 +7,6 @@ import { filterOptions } from "./types_and_utils";
 export const updateTask = async (email: string, task: Task, isNewTask: boolean = false): Promise<{ ok: boolean, message: string }> => {
 
     const offline = isAnonymous(email);
-
     if (offline) {
         const res = await updateLocalTaskList(task);
         return res;
@@ -25,10 +24,6 @@ export const updateTask = async (email: string, task: Task, isNewTask: boolean =
 
 
     }
-
-    // This function is meant to first: if online, update it in the cloud. If TASK NOT FOUND, INSERT IT. OTHERWISE, MODIFY IT TO NEW TASK
-    // If offline: IF NOT FOUND, INSERT IT. IF IT IS FOUND, THAN UPDATE IT.
-
 }
 
 // Updates local storage task list with new task. If task doesn't exist, it adds it. If it does exist, it inserts it.
@@ -208,7 +203,6 @@ export const getTaskFromLocalStorage = async (taskID: string): Promise<{ ok: boo
 }
 
 export const deleteTask = async (email: string, taskID: string): Promise<{ ok: boolean, message: string }> => {
-    const res: { ok: boolean, message: string } = { ok: false, message: "Nothing Happened" }
 
     if (isAnonymous(email)) {
 
