@@ -11,6 +11,7 @@ import Select from "@/components/Select";
 import { retrieveTasks } from "@/api/taskStorage";
 import { removeData } from "@/api/storage";
 import constants from "@/constants/constants";
+import { setCompletedStatus } from "@/api/taskStorage";
 
 const tasks = () => {
   const theme = useTheme();
@@ -55,9 +56,9 @@ const tasks = () => {
   };
 
   const handleCompleteTask = async (taskID: string, completedStatus = true) => {
-    const res = await setCompleted(email, taskID, completedStatus);
-    if (res.error) {
-      alert(res.error);
+    const res = await setCompletedStatus(email, taskID, completedStatus);
+    if (!res.ok) {
+      alert(res.message);
     } else {
       // Remove task from current displayed list of tasks
       const newTaskList = taskList.filter((task: Task) => {

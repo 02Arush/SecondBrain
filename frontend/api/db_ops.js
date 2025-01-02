@@ -404,6 +404,8 @@ export const getTaskItem = async (email, taskID) => {
  * @param {boolean} completedStatus 
  */
 export const setCompleted = async (email, taskID, completedStatus = True) => {
+
+
     try {
         const taskDocRef = doc(db, "tasks", taskID);
         await setDoc(taskDocRef, {

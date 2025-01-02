@@ -1,7 +1,7 @@
 import Task from "./task";
 import { storeData, retrieveData } from "./storage";
 import { isAnonymous, constants } from "@/constants/constants";
-import { getTasksForUser, deleteTask as deleteTaskFromCloud, getTaskItem, updateTask as updateTaskCloud, createTask as createTaskCloud } from "./db_ops";
+import { getTasksForUser, setCompleted, deleteTask as deleteTaskFromCloud, getTaskItem, updateTask as updateTaskCloud, createTask as createTaskCloud } from "./db_ops";
 import { filterOptions } from "./types_and_utils";
 
 export const updateTask = async (email: string, task: Task, isNewTask: boolean = false): Promise<{ ok: boolean, message: string }> => {
@@ -252,4 +252,38 @@ export const deleteTask = async (email: string, taskID: string): Promise<{ ok: b
             message: message
         }
     }
+}
+
+export const setCompletedStatus = async (email: string, taskID: string, completedStatus: boolean): Promise<{ ok: boolean, message: string }> => {
+    if (isAnonymous(email)) {
+        const res = await getTaskFromLocalStorage(taskID);
+        const task = res.data
+
+        if (task instanceof Task) {
+            task.setCompleted(completedStatus);
+            const res = await updateLocalTaskList(task);
+            if (res.ok) {
+                return {
+                    ok: true,
+                    message: "Task Set Completed Successfully"
+                }
+            } else {
+                return {
+                    ok: false,
+                    message: res.message
+                }
+            }
+
+        } else {
+            return { ok: false, message: "Failed to set Completed Status. The task ID could not be found in local storage" }
+
+        }
+
+    } else {
+        const res = await setCompleted(email, taskID, completedStatus);
+        const ok = !res.error
+        const message = `${res.message}, ${res.error}`
+        return { ok, message }
+    }
+
 }
