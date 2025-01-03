@@ -2,7 +2,14 @@
 export const constants = {
     ANONYMOUS: "Anonymous",
     NO_TASK_DEADLINE: "No Deadline",
-    TASK_LIST: "TaskList"
+    TASK_LIST: "TaskList",
+    HABIT_LIST: "habitList",
+    ROLE: {
+        OWNER: "owner",
+        ADMIN: "admin",
+        MEMBER: "member",
+        NONE: "none",
+    }
 }
 
 

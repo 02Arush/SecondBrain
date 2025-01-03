@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Habit from './habit';
 import { isAnonymous } from '@/constants/constants';
-import { getUserDataFromEmail, updateUserHabitList } from './db_ops';
-import { Task } from './task'
+import { getUserDataFromEmail, updateUserHabitList, createHabit as createHabitCloud, retrieveHabitListCloud, deleteHabit as deleteHabitCloud, getHabitFromID } from './db_ops';
+
 
 // Function to store data
 export const storeData = async (key, value) => {
@@ -86,8 +86,6 @@ export const updateHabitObject = async (habitJSONObject, email) => {
 
 
 
-
-
 // Retrieve Habit Object from habitList if habitList exists, otherwise use local storage: type Habit
 export const retrieveHabitObject = async (habitName, habitList) => {
     // If habitList is not explicityl defined, retrieve from local storage, otherwise retrieve the object from specified habit list
@@ -143,10 +141,7 @@ export const deleteHabitObject = async (habitJSONObject, email) => {
         }
     } else {
         habitList = await retrieveLocalHabitList();
-
-
     }
-
     // remove the habit object from the habitList;
     const newHabitList = Habit.deleteHabitFromHabitList(habit, habitList)
     let response;
@@ -167,6 +162,7 @@ export const deleteHabitObject = async (habitJSONObject, email) => {
 /**
  * 
  * @returns {Promise<Array<any>>}
+ * Returnss a JSON array of the habit list in local storage
  */
 export const retrieveLocalHabitList = async () => {
     try {
@@ -189,22 +185,118 @@ export const retrieveLocalHabitList = async () => {
 
 /**
  * 
- * @param {string} habitName 
- * @param {string} unit 
+ * @param {Habit} habit
+ * If habit exists, replace it. Otherwise, isnert it
  */
-export async function updateLocalStorageHabits(habitName, unit) {
+export async function insertHabitLocalStorage(habit) {
     const habitDataList = await retrieveLocalHabitList();
-    const habitExists = Habit.habitExistsInList(habitName, habitDataList);
+    const habitExists = Habit.habitExistsInList(habit, habitDataList);
 
     if (!habitExists) {
-        habitDataList.push(new Habit(habitName, unit).getJSON());
+        habitDataList.push(habit.getJSON());
         const res = await storeData("habitList", JSON.stringify(habitDataList));
         if (res.error) {
             return { error: res.error }
         }
         return { error: false }
     } else {
-        return { error: "Habit Already Exists" }
+        return { error: "Can Not Insert Habit into Local Storage: Habit Already Exists" }
+    }
+}
+
+/**
+ * 
+ * @param {string} email 
+ */
+const retrieveHabitList = async (email) => {
+    if (isAnonymous(email)) {
+        const localHabitList = retrieveLocalHabitList()
+        return {
+            ok: true,
+            data: localHabitList,
+            message: "Success"
+        }
+    } else {
+        const res = await retrieveHabitListCloud(email);
+        return res;
+    }
+}
+
+/**\
+ * @param {string} habitID
+ */
+const retrieveHabitFromLocalStorage = async (habitID) => {
+    const habitList = await retrieveLocalHabitList();
+
+    habitJSON = habitList.find(habit => {
+        return habit.habitID = habitID;
+    })
+
+    if (!habitJSON) {
+        return { ok: false, message: "Could not find habit with ID " + habitID }
+    }
+
+    const habit = Habit.parseHabit(habitJSON);
+
+    return {
+        ok: true,
+        message: "Retrieved habit from local storage successfully",
+        data: habit
+    }
+
+}
+
+
+/**
+ * @param {string} email 
+ * @param {Habit} habit
+ */
+export const createHabit = async (email, habit) => {
+    if (isAnonymous(email)) {
+        const res = await insertHabitLocalStorage(habit);
+        const ok = !res.error;
+        if (res.ok) {
+            return {
+                ok: true,
+                message: `Added Habit Locally: ${habit.getName()}`
+            }
+        } else {
+            return {
+                ok: false,
+                message: `Failed to Create Habit: ${res.error}`
+            }
+        }
+        // Create offline habit
+    } else {
+        const res = await createHabitCloud(email, habit);
+        return res;
+    }
+
+}
+
+/**
+ * @param {string} email
+ * @param {Habit} habit
+ */
+export const deleteHabit = async (email, habit) => {
+    const habitID = habit.getID();
+
+    if (isAnonymous(email)) {
+        const localHabits = await retrieveLocalHabitList();
+        const newLocalHabits = localHabits.filter(habit => {
+            return habit.habitID != habitID
+        })
+
+        storeData("habitList", JSON.stringify(newLocalHabits));
+        return {
+            ok: true,
+            message: `Deleted Habit ${habit.getName()}`
+        }
+
+    } else {
+        // delete habit from cloud
+        const res = await deleteHabitCloud(email, habit)
+        return res;
     }
 }
 
@@ -212,43 +304,16 @@ export async function updateLocalStorageHabits(habitName, unit) {
 /**
  * 
  * @param {string} email 
- * @returns {Promise<{ok: boolean, message: string}}
+ * @param {string} habitID 
  */
-export const uploadLocalStorageHabits = async (email) => {
+export const getHabit = async (email, habitID) => {
+    if (isAnonymous(email)) {
+        const res = await retrieveHabitFromLocalStorage(habitID);
+        return res;
 
 
-    const localHabitList = await retrieveLocalHabitList();
-    const remoteUserData = await getUserDataFromEmail(email);
-    const remoteHabitList = Array.isArray(remoteUserData["habitList"])
-        ? remoteUserData["habitList"]
-        : JSON.parse(remoteUserData["habitList"]);
-
-    if (!Array.isArray(remoteHabitList)) {
-        return {
-            ok: false,
-            message: "Remote Habit List is Not an Array",
-        };
-    }
-
-    // Merge the habit lists
-    if (remoteHabitList.length > 0) {
-        const mergedHabitList = Habit.mergeHabitLists(
-            remoteHabitList,
-            localHabitList
-        );
-        // set remote habit list to mergedHabitList
-        response = await updateUserHabitList(email, mergedHabitList);
     } else {
-        response = await updateUserHabitList(email, localHabitList);
+        const res = await getHabitFromID(email, habitID)
+        return res;
     }
-
-
-    // Merge the habit lists
-    if (response && response.error) {
-        const errMsg = "error " + response.error + "message " + response.message;
-        return { ok: false, message: errMsg };
-    } else {
-        return { ok: true, message: "Habit lists have been merged successfully" };
-    }
-
 }

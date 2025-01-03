@@ -8,12 +8,12 @@ import {
 import React, { useState, useContext } from "react";
 import { TextInput, Button } from "react-native-paper";
 import { router } from "expo-router";
-import { updateLocalStorageHabits } from "../../api/storage";
+import { createHabit, insertHabitLocalStorage } from "../../api/storage";
 import { AuthContext } from "@/contexts/authContext";
-import { addHabit as createHabit } from "@/api/db_ops";
 import { isAnonymous } from "@/constants/constants";
-import { HabitGoal } from "../../api/habit";
+import { HabitGoal, HabitJSON } from "../../api/habit";
 import OptionalGoal from "@/components/OptionalGoal";
+import Habit from "../../api/habit";
 const addHabit = () => {
   const [habitName, setHabitName] = useState("");
   const [unit, setUnit] = useState("");
@@ -31,19 +31,15 @@ const addHabit = () => {
       return;
     }
 
-    if (!isAnonymous(email)) {
-      const res = await createHabit(email, trimmedHabitName, trimmedUnit, goal);
-      if (res.success) {
-        router.replace("/");
-      } else {
-        alert("Error: " + res.error + " message: " + res.message);
-      }
-    } else {
-      const res = await updateLocalStorageHabits(trimmedHabitName, trimmedUnit);
-      if (res.error) {
-        alert(res.error);
-      }
-    }
+    const habitJSON = {
+      habitName: trimmedHabitName,
+      unit: trimmedUnit,
+      goal: goal,
+    };
+
+    const newHabit = Habit.parseHabit(habitJSON);
+    const res = await createHabit(email, newHabit);
+    alert(res?.message);
   };
 
   return (

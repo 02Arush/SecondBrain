@@ -10,20 +10,23 @@ export interface HabitJSON {
     "activityLog": { [key: string]: number },
     "goal"?: habitGoal
     "creationDate"?: Date
+    "habitID": string
 }
 
 export default class Habit {
 
     private habitName: string;
+    private habitID: string;
     private activityLog: Map<string, number>;
     private unit: string;
     private goal: HabitGoal | null = null;
     private creationDate: Date;
     private age: number; // Age in days
+    private sharedUsers: string[];
 
 
 
-    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date) {
+    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date, habitID?: string, sharedUsers?: string[]) {
         this.habitName = name;
         this.unit = unit;
         this.activityLog = activityLog;
@@ -34,7 +37,9 @@ export default class Habit {
             this.creationDate = creationDate;
         }
 
+        this.habitID = habitID || this.habitName + Math.floor((new Date().getTime() / 1000));
         this.age = Math.floor((new Date().getTime() - this.creationDate.getTime()) / (1000 * 60 * 60 * 24));
+        this.sharedUsers = sharedUsers || [];
     }
 
     getAge(): number {
@@ -48,6 +53,10 @@ export default class Habit {
             return firstDate;
         }
         return new Date();
+    }
+
+    getSharedUsers(): Array<string> {
+        return this.sharedUsers;
     }
 
     getCreationDate(): Date {
@@ -70,29 +79,36 @@ export default class Habit {
         }
 
 
+        const { habitName, unit, activityLog: activityLogData, creationDate, goal, habitID, } = habitJSON;
 
-        const { habitName, unit, activityLog: activityLogData, creationDate, goal } = habitJSON;
+        let activityLog;
+        try {
+            activityLog = activityLogData instanceof Map
+                ? activityLogData
+                : new Map<string, number>(Object.entries(activityLogData));
 
+        } catch (e) {
+            activityLog = new Map<string, number>();
+        }
         // Convert activityLogData to a Map
-        const activityLog = activityLogData instanceof Map
-            ? activityLogData
-            : new Map<string, number>(Object.entries(activityLogData));
 
         // Parse the goal if present
         const parsedHabitGoal = goal ? HabitGoal.parseJSON(goal) : undefined;
+        const newHabit = new Habit(habitName, unit || undefined, activityLog, parsedHabitGoal, creationDate, habitID);
 
         // Return new Habit instance
-        return new Habit(habitName, unit || undefined, activityLog, parsedHabitGoal, creationDate);
+        return newHabit
     };
 
-    static habitExistsInList(habitName: string, habitList: Array<any>) {
+    static habitExistsInList(habit: Habit, habitList: Array<any>) {
+        const habitID = habit.getID();
         if (!Array.isArray(habitList)) {
             throw new Error('Error: Habit List is not an Array. Type: ' + typeof habitList);
         }
 
 
         const habitExists = habitList.some(
-            (habit: any) => habit.habitName.toLowerCase() === habitName.toLowerCase()
+            (habit: any) => habitID == habit.habitID
         );
         return habitExists;
     }
@@ -334,10 +350,9 @@ export default class Habit {
         return values;
     }
 
-
-
-
-
+    getID(): string {
+        return this.habitID;
+    }
 
     getUnit() {
         return this.unit;
@@ -357,13 +372,22 @@ export default class Habit {
         this.activityLog.set(dateString, count);
     }
 
+    getActivityLog() {
+        return Object.fromEntries(this.activityLog)
+    }
+
+
+
     getJSON(): HabitJSON {
+
 
         const habitJSON: HabitJSON = {
             "habitName": this.habitName,
             "unit": this.unit,
             "activityLog": Object.fromEntries(this.activityLog),
             "creationDate": this.creationDate || this.getFirstActivityDate(),
+            "habitID": this.getID(),
+
         }
 
         if (this.goal) {
@@ -532,5 +556,9 @@ export class HabitGoal {
         const goalNumber = this.getGoalNumber();
         return goalNumber / days;
     }
+
+
+
 }
+
 

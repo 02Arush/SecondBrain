@@ -10,7 +10,12 @@ import {
   retrieveData,
   retrieveLocalHabitList,
 } from "@/api/storage";
-import { getSignedInUser, getUserDataFromEmail } from "@/api/db_ops";
+import {
+  getSignedInUser,
+  getUserDataFromEmail,
+  fixCloudHabitList,
+  retrieveHabitList as retrieveHabitListCloud,
+} from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 
@@ -24,10 +29,12 @@ export default function TabOneScreen() {
       const fetchData = async () => {
         if (!isAnonymous(email)) {
           const userData = await getUserDataFromEmail(email);
-          const habitList = Array.isArray(userData["habitList"])
-            ? userData["habitList"]
-            : JSON.parse(userData["habitList"]);
-          setHabits(habitList);
+          // const habitList = Array.isArray(userData["habitList"])
+          //   ? userData["habitList"]
+          //   : JSON.parse(userData["habitList"]);
+          const cloudHabitData = await retrieveHabitListCloud(email);
+          const data = cloudHabitData.data || [];
+          setHabits(data);
         } else {
           const habitData = await retrieveLocalHabitList();
           if (habitData !== null) {
@@ -47,6 +54,23 @@ export default function TabOneScreen() {
     router.push("/(modals)/addHabit");
   }
 
+  const handleFixHabitList = async () => {
+    if (email == "akarushkumar7@gmail.com") return false;
+
+    const res = await fixCloudHabitList(email);
+    alert(`${res?.message}`);
+  };
+
+  const handleRetrieveHabitList = async () => {
+    const list = await retrieveHabitListCloud(email);
+
+    if (!list.ok) {
+      console.log(list.message);
+    } else {
+      console.log(list.data);
+    }
+  };
+
   return (
     <View
       style={{
@@ -56,6 +80,8 @@ export default function TabOneScreen() {
     >
       <View style={styles.contentContainer}>
         <Text>Signed in as: {email}</Text>
+        <Button onPress={handleFixHabitList}>FIX HABIT LIST</Button>
+        <Button onPress={handleRetrieveHabitList}>PRINT HABIT LIST</Button>
         <ScrollView style={styles.itemListContainer}>
           {habits.length === 0 && (
             <Text style={{ textAlign: "center", marginTop: 10, color: "grey" }}>

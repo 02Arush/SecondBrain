@@ -15,6 +15,7 @@ import {
   retrieveHabitObject,
   updateHabitObject,
   deleteHabitObject,
+  deleteHabit,
 } from "@/api/storage";
 import { router, useFocusEffect } from "expo-router";
 import { isAnonymous } from "@/constants/constants";
@@ -143,6 +144,11 @@ const editHabit = () => {
   const shiftDate = (days: number) => {
     const newDate = shiftSimpleDate(dateToUpdate, days);
     handleSetDateToUpdate(newDate);
+  };
+
+  const handleDeleteHabit = async () => {
+    const res = await deleteHabit(email, habit);
+    alert(res.message);
   };
 
   return (
@@ -282,6 +288,7 @@ const editHabit = () => {
         >
           Reset
         </Button>
+        <Button onPress={handleDeleteHabit}>Delete Habit</Button>
       </View>
     </View>
   );

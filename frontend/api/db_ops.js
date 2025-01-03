@@ -15,6 +15,8 @@ import Task from "./task";
 import { isAnonymous } from "@/constants/constants";
 import { HabitGoal } from "./habit";
 import { filterOptions } from "./types_and_utils";
+import { retrieveLocalHabitList } from "./storage";
+import constants from "@/constants/constants";
 
 
 const firebaseConfig = {
@@ -27,6 +29,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+
+
 
 // This is here because on web, the local persistent storage of signed in userrs is handled automatically
 // But on mobile devices, ReactNativePersistence using asyncstorage is required
@@ -41,6 +46,15 @@ if (Platform.OS !== 'web') {
 
 
 const db = getFirestore(app);
+const habitsCollection = collection(db, "habits")
+
+const collections = {
+    habits: collection(db, "habits"),
+    tasks: collection(db, "tasks"),
+    users: collection(db, "users"),
+}
+
+
 
 
 export const attemptLogin = async (email, password) => {
@@ -131,52 +145,45 @@ export const getUserDataFromEmail = async (email) => {
 }
 
 
-/**
- *
- * @param {string} email
- * @param {string} habitName
- * @param {string | undefined} habitUnit
- * @param {HabitGoal | null} habitGoal
- */
-export const addHabit = async (email, habitName, habitUnit, habitGoal) => {
-    try {
-        const docRef = doc(db, "users", email);
-        const docSnap = await getDoc(docRef);
+// /**
+//  *
+//  * @param {string} email
+//  * @param {string} habitName
+//  * @param {string | undefined} habitUnit
+//  * @param {HabitGoal | null} habitGoal
+//  */
+// export const addHabit = async (email, habitName, habitUnit, habitGoal) => {
+//     try {
+//         const docRef = doc(db, "users", email);
+//         const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            const habitList = Array.isArray(data["habitList"]) ? data["habitList"] : JSON.parse(data["habitList"]);
-            const habitExists = Habit.habitExistsInList(habitName, habitList);
+//         if (docSnap.exists()) {
+//             const data = docSnap.data();
+//             const habitList = Array.isArray(data["habitList"]) ? data["habitList"] : JSON.parse(data["habitList"]);
+//             const habitExists = Habit.habitExistsInList(habitName, habitList);
 
-            if (!habitExists) {
-                const newHabit = new Habit(habitName, habitUnit, undefined, undefined, new Date());
-                if (habitGoal) {
-                    newHabit.setGoal(habitGoal);
-                }
-                habitList.push(newHabit.getJSON());
-                await setDoc(docRef, {
-                    "habitList": habitList
-                }, { merge: true })
+//             if (!habitExists) {
+//                 const newHabit = new Habit(habitName, habitUnit, undefined, undefined, new Date());
+//                 if (habitGoal) {
+//                     newHabit.setGoal(habitGoal);
+//                 }
+//                 habitList.push(newHabit.getJSON());
+//                 await setDoc(docRef, {
+//                     "habitList": habitList
+//                 }, { merge: true })
 
-                return { success: true, message: "Habit Successfully Updated" }
-            } else {
-                return { error: `Habit already exists: ${habitName} ` }
-            }
-        } else {
-            return { error: `Data not found for ${email}` }
-        }
+//                 return { success: true, message: "Habit Successfully Updated" }
+//             } else {
+//                 return { error: `Habit already exists: ${habitName} ` }
+//             }
+//         } else {
+//             return { error: `Data not found for ${email}` }
+//         }
 
-    } catch (err) {
-        return { error: err.code, message: err.message }
-    }
-
-
-}
-
-export const updateHabit = (email, habitItem, newHabitObject) => {
-
-}
-
+//     } catch (err) {
+//         return { error: err.code, message: err.message }
+//     }
+// }
 
 // Email: String, habitList: Array<any>
 export const updateUserHabitList = async (email, habitList) => {
@@ -232,6 +239,107 @@ export const deleteAccount = async (email, password) => {
         return { error: err.code, message: err.message };
     }
 };
+
+
+/**
+ * 
+ * @param {string} email 
+ * @returns {Promise<{ok: boolean, message: string}}
+ */
+export const uploadLocalStorageHabits = async (email) => {
+
+
+    const localHabitList = await retrieveLocalHabitList();
+    const remoteUserData = await getUserDataFromEmail(email);
+    const remoteHabitList = Array.isArray(remoteUserData["habitList"])
+        ? remoteUserData["habitList"]
+        : JSON.parse(remoteUserData["habitList"]);
+
+    if (!Array.isArray(remoteHabitList)) {
+        return {
+            ok: false,
+            message: "Remote Habit List is Not an Array",
+        };
+    }
+
+    // Merge the habit lists
+    if (remoteHabitList.length > 0) {
+        const mergedHabitList = Habit.mergeHabitLists(
+            remoteHabitList,
+            localHabitList
+        );
+        // set remote habit list to mergedHabitList
+        response = await updateUserHabitList(email, mergedHabitList);
+    } else {
+        response = await updateUserHabitList(email, localHabitList);
+    }
+
+
+    // Merge the habit lists
+    if (response && response.error) {
+        const errMsg = "error " + response.error + "message " + response.message;
+        return { ok: false, message: errMsg };
+    } else {
+        return { ok: true, message: "Habit lists have been merged successfully" };
+    }
+
+}
+
+/**
+ * 
+ * @param {string} senderEmail 
+ * @param {string} receiverEmail 
+ */
+export const inviteUserToHabit = async (senderEmail, receiverEmail) => {
+    // create a colleciton in users/userID/inivtes/inviteID
+    //                                                 // invite date, habitID, expirationDate,
+
+}
+
+// TEMP FCTN TO RESTRUCTURE CLOUD HABIT LISTS
+/** 
+    @param {string} email
+*/
+export const fixCloudHabitList = async (email) => {
+    if (email == "akarushkumar7@gmail.com") {
+        return { ok: false, message: "Don't mess with this email" }
+    }
+
+    try {
+        const currUserData = await getUserDataFromEmail(email);
+        const habitList = currUserData["habitList"]
+
+        if (!Array.isArray(habitList)) {
+            // try to parse the habit list as JSON
+        } else {
+
+            // create a collection users/userID/habits
+            const uploadHabits = habitList.map(
+                async (habit) => {
+                    const parsedHabit = Habit.parseHabit(habit);
+                    const res = await createHabit(email, parsedHabit);
+                    return res;
+                }
+            )
+
+            const res = await Promise.all(uploadHabits);
+            const ok = res.every((response) => {
+                const responseOk = response.ok == true;
+                if (!responseOk) {
+                    console.log(response.message);
+                }
+
+                return response.ok === true;
+            })
+
+            return { ok: ok, message: ok ? "SUCCESS" : "ERROR FIXING CLOUD HABITS" }
+
+        }
+
+    } catch (err) {
+        return { ok: false, message: err + " " + err.message }
+    }
+}
 
 export const removeHabit = (username, habitItem) => {
 
@@ -316,7 +424,7 @@ export const getTasksForUser = async (email, completed, sort) => {
     try {
 
         let tasksQuery;
-        const userTaskIDs = collection(db, "users", email, "tasks")
+        const userTaskIDs = collection(collections.users, email, "tasks")
         tasksQuery = query(userTaskIDs);
         const querySnap = await getDocs(tasksQuery)
         let taskIDs = querySnap.docs.map(doc => doc.id);
@@ -355,8 +463,6 @@ export const getTasksForUser = async (email, completed, sort) => {
 
             return taskList;
         }
-
-
         return { taskList: await getTaskList() }
     } catch (err) {
         return { error: err.code, message: err.message }
@@ -371,7 +477,7 @@ export const getTasksForUser = async (email, completed, sort) => {
  */
 export const getTaskItem = async (email, taskID) => {
     try {
-        const taskCollection = collection(db, "tasks");
+        const taskCollection = collections.tasks;
         const docRef = doc(taskCollection, taskID);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -424,11 +530,11 @@ export const setCompleted = async (email, taskID, completedStatus = True) => {
 export const deleteTask = async (email, taskID) => {
     try {
         // delete task from user's task collection
-        const userTaskCollection = collection(db, "users", email, "tasks");
+        const userTaskCollection = collection(collections.users, email, "tasks");
         const docInUserTasks = doc(userTaskCollection, taskID);
 
         // also delete task from tasks collection
-        const taskCollection = collection(db, "tasks");
+        const taskCollection = collections.tasks
         const docInTasks = doc(taskCollection, taskID);
 
         const delFromUser = await deleteDoc(docInUserTasks);
@@ -439,4 +545,244 @@ export const deleteTask = async (email, taskID) => {
     } catch (err) {
         return { ok: false, error: err.code, message: err.message }
     }
+}
+
+
+/**
+ * @param {string} email
+ * @param {Habit} habit 
+ * @return {Promise<{ok: boolean, message: string}>}
+ */
+export const createHabit = async (email, habit) => {
+    if (isAnonymous(email)) {
+        return { ok: false, message: "Anonymous User Can't Create New Habits In the Cloud" }
+    }
+
+    try {
+        const habitID = habit.getID();
+        // create in users collection
+        const usersCollection = getUserHabitsCollection(email);
+        const docRef = doc(usersCollection, habitID);
+        const dataForUser = {
+            userGoal: habit.getGoal()?.JSON() || null,
+            activityLog: habit.getActivityLog()
+        }
+        setDoc(docRef, dataForUser, { merge: true })
+
+        // create in habits collection
+        const docRefHabit = doc(habitsCollection, habitID);
+        const sharedUsers = [
+            { email: email, role: constants.ROLE.ADMIN, joinDate: new Date() }
+        ]
+
+        const docDataHabit = {
+            habitName: habit.getName(),
+            unit: habit.getUnit(),
+            creationDate: habit.getCreationDate(),
+            goal: habit.getGoal()?.JSON() || null,
+            habitID: habit.getID(),
+            sharedUsers: sharedUsers,
+        }
+
+        setDoc(docRefHabit, docDataHabit, { merge: true })
+        return {
+            ok: true,
+            message: `Habit ${habit.getName()} created with ID: ${habitID}`
+        }
+
+    } catch (err) {
+        return {
+            ok: false,
+            message: `Create Habit: Code: ${err.code}, Message: ${err.message}`
+        }
+    }
+
+    // create in habits collection
+}
+
+/**
+ * 
+ * @param {string} email 
+ */
+export const retrieveHabitList = async (email) => {
+    if (isAnonymous(email)) {
+        return { ok: false, message: "Error retrieving Habit List from Cloud: User is Signed Out" }
+
+    }
+
+    try {
+        const userHabitsCollection = getUserHabitsCollection(email);
+        const querySnap = await getDocs(userHabitsCollection);
+        const ids = querySnap.docs.map(doc => doc.id);
+        const getHabits = ids.map(async (id) => {
+            const res = await getHabitFromID(email, id);
+            if (res.data) {
+                return { ok: true, data: res.data, message: "Success" };
+            } else {
+                return { ok: false, data: null, message: res.message };
+            }
+        })
+
+        const responses = await Promise.all(getHabits)
+        const habits = responses.filter(response => {
+            return (response.ok == true && response.data != null);
+        }).map(response => {
+            return response.data;
+        })
+
+        let msg = responses.reduce((acc, response) => {
+            if (!response.ok) {
+                return acc + `${response.message}\n`;
+            } else {
+                return acc;
+            }
+        }, "");
+
+        if (msg.length > 0) {
+            return { ok: false, message: msg }
+        }
+
+        return { ok: true, message: "Retrieved Docs", data: habits }
+
+
+    } catch (err) {
+        return { ok: false, message: `ERROR: ${err.message}`, data: null }
+
+    }
+}
+
+/**
+ * 
+ * @param {string} email 
+ * @param {string} habitID 
+ */
+export const retrieveActivityLogForUser = async (email, habitID) => {
+    try {
+        const habitCollection = getUserHabitsCollection(email);
+        const docRef = doc(habitCollection, habitID);
+        const habitDoc = await getDoc(docRef);
+        const data = habitDoc.data();
+        const activityLog = data["activityLog"];
+
+        return { ok: true, data: activityLog, message: "Successfully retrieved user activities" }
+    } catch (err) {
+        return { ok: false, message: `ERROR Retrieving Activity Log: ${err.message}`, data: null }
+    }
+}
+
+
+
+/**
+ * @param {string} email
+ * @param {string} habitID
+ */
+export const getHabitFromID = async (email, id) => {
+    try {
+
+        const habitCollection = collections.habits;
+        const docRef = doc(habitCollection, id);
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+
+        const getActLog = await retrieveActivityLogForUser(email, id);
+        const activityLog = getActLog.data
+        // ERROR SOMEWHERE HERE: CAN NOT CONVERT UNDEFINED OR NULL TO OBJECT
+        const habitJSON = { ...data, activityLog }
+        const habit = Habit.parseHabit(habitJSON)
+
+        return { ok: true, message: "Retrieved Successfully", data: habit }
+
+    } catch (err) {
+        return { ok: false, message: `${err.message}` }
+
+    }
+}
+/**
+ * 
+ * @param {string} email 
+ * @param {Habit} habit 
+ */
+export const deleteHabit = async (email, habit) => {
+    if (isAnonymous(email)) {
+        return { ok: false, message: "Error Deleting Habit from Cloud: User Not Signed In." }
+    }
+
+    try {
+        const id = habit.getID();
+
+        // First, delete it from the user's habit Array
+        const habitCollectionForUser = getUserHabitsCollection(email)
+        const docToDelete = doc(habitCollectionForUser, id);
+        await deleteDoc(docToDelete);
+
+        // Now, remove the user from the sharedUsers array in habit
+        const sharedUsersRes = await getSharedUsersForHabit(id);
+
+        if (!sharedUsersRes.data || !Array.isArray(sharedUsersRes.data)) {
+            return { ok: false, message: sharedUsersRes.message }
+        }
+
+        const sharedUsers = sharedUsersRes.data;
+
+        const newSharedUsers = sharedUsers.filter((userItem) => {
+            return userItem["email"] != email;
+        })
+
+
+        if (newSharedUsers.length <= 0) {
+            await deleteDoc(collections.habits, id);
+        } else {
+            const newData = { sharedUsers: newSharedUsers }
+            await setDoc(collections.habits, id, newData, { merge: true })
+        }
+
+        return { ok: true, message: `Successfully Deleted Habit: ${habit.getName()}` }
+
+
+
+    } catch (err) {
+        return {
+            ok: false,
+            message: `Error Deleting Habit: ${habit} for Email: ${email}. ERROR MESSAGE: ${err.message}`
+        }
+    }
+
+}
+
+const getUserHabitsCollection = (email) => {
+    return collection(collections.users, email, 'habits')
+}
+
+
+/**
+ * 
+ * @param {string} habitID 
+ */
+const getSharedUsersForHabit = async (habitID) => {
+    const habitDocRef = doc(collections.habits, habitID);
+    const docSnap = await getDoc(habitDocRef);
+
+    if (!docSnap.exists()) {
+        return { ok: false, message: `Error Getting Shared Users. Doc with habit ID: ${habitID} does not exist.` }
+    }
+
+    const habitData = docSnap.data();
+    const sharedUsers = habitData["sharedUsers"];
+
+    if (sharedUsers && Array.isArray(sharedUsers)) {
+        const addedDatesToSharedUsers = sharedUsers.map((user) => {
+            if (!user.joinDate) {
+                return { ...user, joinDate: new Date() }
+            } else {
+                return user;
+            }
+        })
+        return { ok: true, message: `Retrieved Shared Users for habit: ${habitID}`, data: sharedUsers }
+    } else {
+        return { ok: false, message: `Shared Users does not exist, or is not an array for habit: ${habitID}` }
+    }
+
+
+
+
 }

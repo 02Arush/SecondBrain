@@ -16,13 +16,11 @@ import { router, useFocusEffect } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
 import OutlineModal from "@/components/OutlineModal";
 import { isAnonymous } from "@/constants/constants";
-import {
-  retrieveLocalHabitList,
-  uploadLocalStorageHabits,
-} from "@/api/storage";
+import { retrieveLocalHabitList } from "@/api/storage";
 import Habit from "@/api/habit";
 import { uploadLocalTasks } from "@/api/taskStorage";
 import { useEffect } from "react";
+import { uploadLocalStorageHabits } from "@/api/db_ops";
 
 const register = () => {
   // This is here such that the "sync local storage to new account" modal never initially displays
