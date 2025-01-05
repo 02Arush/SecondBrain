@@ -39,7 +39,11 @@ const addHabit = () => {
 
     const newHabit = Habit.parseHabit(habitJSON);
     const res = await createHabit(email, newHabit);
-    alert(res?.message);
+    if (res.ok) {
+      router.back();
+    } else {
+      alert(res.message);
+    }
   };
 
   return (

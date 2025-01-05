@@ -1,19 +1,19 @@
 import { StyleSheet, View } from "react-native";
 import React, { useState, useCallback, useContext } from "react";
 import { Slot, router } from "expo-router";
-import { useRouteInfo } from "expo-router/build/hooks";
+import { useLocalSearchParams, useRouteInfo } from "expo-router/build/hooks";
 import { Text, IconButton, Icon, useTheme } from "react-native-paper";
 import { useFocusEffect } from "expo-router";
 import Habit from "@/api/habit";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
-import { retrieveHabitObject } from "@/api/storage";
+import { getHabit } from "@/api/storage";
 import { HabitProvider } from "@/contexts/habitContext";
 
 const ViewHabitLogLayout = () => {
   const route = useRouteInfo();
-  const habitName = route.params.habitName;
+  const { habitID } = useLocalSearchParams<{ habitID: string }>();
   const { email } = useContext(AuthContext);
 
   const [habit, setHabit] = useState(new Habit("NULL_HABIT", "NULL_UNIT"));
@@ -21,22 +21,16 @@ const ViewHabitLogLayout = () => {
   useFocusEffect(
     useCallback(() => {
       async function getHabitData() {
-        let habitList = null;
-        if (!isAnonymous(email)) {
-          const userData = await getUserDataFromEmail(email);
-          habitList = Array.isArray(userData["habitList"])
-            ? userData["habitList"]
-            : JSON.parse(userData["habitList"]);
-        }
-
-        const currHabit = await retrieveHabitObject(habitName, habitList);
+        const res = await getHabit(email, habitID);
+        const currHabit = res.data;
         if (currHabit instanceof Habit) {
           setHabit(currHabit);
         } else {
-          alert(currHabit.error);
+          alert(res.message);
         }
       }
       getHabitData();
+     
     }, [email])
   );
 
@@ -44,7 +38,7 @@ const ViewHabitLogLayout = () => {
     router.replace({
       pathname: "/(modals)/viewHabitLog/editHabit",
       params: {
-        habitName: habitName,
+        habitID: habitID,
       },
     });
   };
@@ -53,7 +47,7 @@ const ViewHabitLogLayout = () => {
     router.replace({
       pathname: "/(modals)/viewHabitLog/barCharts",
       params: {
-        habitName: habitName,
+        habitID: habitID,
       },
     });
   };
@@ -62,7 +56,7 @@ const ViewHabitLogLayout = () => {
     router.replace({
       pathname: "/(modals)/viewHabitLog/averages",
       params: {
-        habitName: habitName,
+        habitID: habitID,
       },
     });
   };
@@ -76,7 +70,7 @@ const ViewHabitLogLayout = () => {
           <View style={styles.heading}>
             <View style={styles.habitInfo}>
               <Text>
-                {habitName}
+                {habit.getName()}
                 <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
               </Text>
               <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>

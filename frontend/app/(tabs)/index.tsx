@@ -90,14 +90,7 @@ export default function TabOneScreen() {
           )}
           {habits.map((habit: string, index: number) => {
             const habitObject = Habit.parseHabit(habit);
-            return (
-              <HabitItem
-                key={index}
-                name={habitObject.getName()}
-                dailyCount={habitObject.getTodayCount()}
-                totalCount={habitObject.getCountPastXDays(7, "total")}
-              />
-            );
+            return <HabitItem key={index} habit={habitObject} />;
           })}
         </ScrollView>
         <View style={styles.addButton}>

@@ -3,14 +3,31 @@ import React from "react";
 import { Button, Icon, IconButton, Text } from "react-native-paper";
 import { router, useRouter } from "expo-router";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
-const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
+
+/**
+ *
+ * @param {Habit} habit
+ * @returns
+ */
+const HabitItem = ({ habit }) => {
   const router = useRouter();
+  const habitID = habit.getID();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+  const sevenDayCount = habit.getCountFromDateRange(
+    new Date().setDate(new Date().getDate() - 6),
+    new Date(),
+    true
+  );
+
+  const todayCount = habit.getTodayCount();
 
   function handleEditHabit() {
     router.push({
       pathname: "/(modals)/viewHabitLog/editHabit",
       params: {
-        habitName: name,
+        habitID: habitID,
       },
     });
   }
@@ -19,7 +36,7 @@ const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
     router.push({
       pathname: "/(modals)/viewHabitLog/averages",
       params: {
-        habitName: name,
+        habitID: habitID,
       },
     });
   }
@@ -27,10 +44,10 @@ const HabitItem = ({ name, dailyCount, totalCount: sevenDayCount }) => {
   return (
     <Surface style={styles.container}>
       <View style={styles.nameSection}>
-        <Text>{name}</Text>
+        <Text>{habit.getName()}</Text>
       </View>
       <View style={styles.actionSection}>
-        <Text>Today: {dailyCount} </Text>
+        <Text>Today: {todayCount} </Text>
         <Text>Week: {sevenDayCount}</Text>
         <IconButton
           icon="clipboard-edit-outline"

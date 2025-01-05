@@ -36,8 +36,8 @@ export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, me
         // If currTasks Array isn't created, it should be created.
         const tasks = JSON.stringify([]);
         const res = await storeData(constants.TASK_LIST, tasks);
-        if (res.error) {
-            return { ok: false, message: `${res.error}` }
+        if (!res.ok) {
+            return { ok: false, message: `${res.message}` }
         }
     }
 
@@ -75,8 +75,8 @@ export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, me
 
 
     const res = await storeData(constants.TASK_LIST, JSON.stringify(tasks))
-    if (res.error) {
-        return { ok: false, message: `${res.error}` }
+    if (!res.ok) {
+        return { ok: false, message: `${res.message}` }
     } else {
         return { ok: true, message: "Task Updated Successfully" }
     }
@@ -172,7 +172,7 @@ export const getTaskFromLocalStorage = async (taskID: string): Promise<{ ok: boo
     const taskList = res.data;
 
     if (!Array.isArray(taskList)) {
-        storeData(constants.TASK_LIST, JSON.stringify([]));
+        await storeData(constants.TASK_LIST, JSON.stringify([]));
         return { ok: true, message: "Task Not Found, Task List is Not an Array", data: null };
     }
 
@@ -226,8 +226,8 @@ export const deleteTask = async (email: string, taskID: string): Promise<{ ok: b
         } else {
             parsedTaskList.splice(idxToRm, 1);
             const res = await storeData(constants.TASK_LIST, JSON.stringify(parsedTaskList))
-            const ok = !res.error
-            const message = ok ? "Task Deleted Successfully" : res.error
+            const ok = res.ok;
+            const message = ok ? "Task Deleted Successfully" : res.message
             return {
                 ok: ok,
                 message: `${message}`

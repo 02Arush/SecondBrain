@@ -87,7 +87,7 @@ export const getDateFromSimpleDate = (simpleDate: { year: number, month: number,
 
 export const getElapsedDays = (startDate: Date, endDate: Date): number => {
     const elapsedMS = endDate.getTime() - startDate.getTime();
-    const elapsedConverted = elapsedMS /(1000 * 60 * 60 * 24);
+    const elapsedConverted = elapsedMS / (1000 * 60 * 60 * 24);
     const rounded = Math.round(elapsedConverted);
     return rounded;
 
@@ -98,6 +98,14 @@ export const getSimpleDateFromDate = (date: Date): SimpleDate => {
         day: date.getDate(),
         month: date.getMonth() + 1,
         year: date.getFullYear()
+    }
+}
+
+export const copySimpleDate = (date: SimpleDate): SimpleDate => {
+    return {
+        day: date.day,
+        month: date.month,
+        year: date.year
     }
 }
 
@@ -194,3 +202,5 @@ export interface DataPoint {
 export const roundToTwoDecimals = (num: number): number => {
     return Math.round(num * 100) / 100;
 };
+
+export type habitModificationType = "log" | "modify"

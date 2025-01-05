@@ -13,8 +13,7 @@ import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from "react-native";
 import Task from "./task";
 import { isAnonymous } from "@/constants/constants";
-import { HabitGoal } from "./habit";
-import { filterOptions } from "./types_and_utils";
+import { filterOptions, habitModificationType } from "./types_and_utils";
 import { retrieveLocalHabitList } from "./storage";
 import constants from "@/constants/constants";
 
@@ -31,8 +30,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 
-
-
 // This is here because on web, the local persistent storage of signed in userrs is handled automatically
 // But on mobile devices, ReactNativePersistence using asyncstorage is required
 let auth;
@@ -46,8 +43,6 @@ if (Platform.OS !== 'web') {
 
 
 const db = getFirestore(app);
-const habitsCollection = collection(db, "habits")
-
 const collections = {
     habits: collection(db, "habits"),
     tasks: collection(db, "tasks"),
@@ -186,6 +181,74 @@ export const getUserDataFromEmail = async (email) => {
 // }
 
 // Email: String, habitList: Array<any>
+
+
+
+/**
+ * 
+ * @param {string} email 
+ * @param {Habit} habit 
+ * @param {habitModificationType } type
+ */
+export const updateHabit = async (email, habit, type) => {
+    if (type == "log") {
+        const res = await logHabitActivity(email, habit);
+        return res;
+
+    } else if (type == "modify") {
+        return {
+            ok: false,
+            message: "Not Yet Implemented"
+        }
+
+    } else {
+        return {
+            ok: false,
+            message: `Invalid Habit update type: ${type}`
+        }
+
+    }
+}
+
+/**
+ * 
+ * @param {string} email 
+ * @param {Habit} habit 
+ */
+const logHabitActivity = async (email, habit) => {
+    try {
+
+        const habitID = habit.getID();
+        const userHabitCollection = getUserHabitsCollection(email);
+        const userHabitDoc = doc(userHabitCollection, habitID);
+        const newActivityLog = habit.getActivityLog();
+
+        await setDoc(userHabitDoc, {
+            activityLog: newActivityLog,
+        }, { merge: true })
+
+        return { ok: true, message: "Activity log updated." }
+
+
+    } catch (err) {
+        return { ok: false, message: `Error logging habit activity: ${err.message}` }
+    }
+
+
+}
+
+export const updateHabitDetails = async (email, habit) => {
+
+}
+
+export const changeUserRole = async (email, habit, emailToChange, newRole) => {
+
+}
+
+export const kickUser = async (email, habit, emailToKick) => {
+
+}
+
 export const updateUserHabitList = async (email, habitList) => {
     if (!Array.isArray(habitList)) {
         return { error: `habitList must be of type: Array. Current type: ${typeof habitList}` }
@@ -570,7 +633,7 @@ export const createHabit = async (email, habit) => {
         setDoc(docRef, dataForUser, { merge: true })
 
         // create in habits collection
-        const docRefHabit = doc(habitsCollection, habitID);
+        const docRefHabit = doc(collections.habits, habitID);
         const sharedUsers = [
             { email: email, role: constants.ROLE.ADMIN, joinDate: new Date() }
         ]
@@ -730,15 +793,15 @@ export const deleteHabit = async (email, habit) => {
 
 
         if (newSharedUsers.length <= 0) {
-            await deleteDoc(collections.habits, id);
+            const habitDocToDel = doc(collections.habits, id);
+            await deleteDoc(habitDocToDel);
         } else {
             const newData = { sharedUsers: newSharedUsers }
-            await setDoc(collections.habits, id, newData, { merge: true })
+            const habitDocToModify = doc(collections.habits, id);
+            await setDoc(habitDocToModify, newData, { merge: true })
         }
 
         return { ok: true, message: `Successfully Deleted Habit: ${habit.getName()}` }
-
-
 
     } catch (err) {
         return {
@@ -752,7 +815,6 @@ export const deleteHabit = async (email, habit) => {
 const getUserHabitsCollection = (email) => {
     return collection(collections.users, email, 'habits')
 }
-
 
 /**
  * 
@@ -781,8 +843,4 @@ const getSharedUsersForHabit = async (habitID) => {
     } else {
         return { ok: false, message: `Shared Users does not exist, or is not an array for habit: ${habitID}` }
     }
-
-
-
-
 }

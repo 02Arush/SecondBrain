@@ -1,16 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Habit from './habit';
 import { isAnonymous } from '@/constants/constants';
-import { getUserDataFromEmail, updateUserHabitList, createHabit as createHabitCloud, retrieveHabitListCloud, deleteHabit as deleteHabitCloud, getHabitFromID } from './db_ops';
+import {
+    getUserDataFromEmail, updateUserHabitList,
+    createHabit as createHabitCloud, retrieveHabitListCloud, deleteHabit as deleteHabitCloud, getHabitFromID,
+    updateHabit as updateHabitCloud
+} from './db_ops';
 
-
+import { habitModificationType } from './types_and_utils';
 // Function to store data
 export const storeData = async (key, value) => {
     try {
         await AsyncStorage.setItem(key, value);
-        return { error: false }
+        return { ok: true, message: "Successfully stored to " + key }
     } catch (e) {
-        return { error: "AsyncStorage: Failed to save the data to the storage" + e }
+        return { ok: false, message: "AsyncStorage: Failed to save the data to the storage" + e }
     }
 }
 
@@ -51,7 +55,7 @@ export const updateHabitObject = async (habitJSONObject, email) => {
     if (!isAnonymous(email)) {
         try {
             const userData = await getUserDataFromEmail(email);
-            const habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
+            habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
 
             const newHabitList = Habit.updateHabitInHabitList(habit, habitList);
             const response = await updateUserHabitList(email, newHabitList);
@@ -66,98 +70,8 @@ export const updateHabitObject = async (habitJSONObject, email) => {
     }
 
     // Update habit object in local storage
-    try {
-        habitList = await retrieveLocalHabitList();
-        if (habitList) {
-            const newHabitList = Habit.updateHabitInHabitList(habit, habitList);
-            const res = await storeData("habitList", JSON.stringify(newHabitList));
-            if (res.error) {
-                return { error: res.error };
-            } else {
-                return { error: false };
-            }
-        } else {
-            return { error: "Habit Object Update Error" };
-        }
-    } catch (e) {
-        return { error: `Local update failed: ${e.message}` };
-    }
+
 };
-
-
-
-// Retrieve Habit Object from habitList if habitList exists, otherwise use local storage: type Habit
-export const retrieveHabitObject = async (habitName, habitList) => {
-    // If habitList is not explicityl defined, retrieve from local storage, otherwise retrieve the object from specified habit list
-    if (!habitList) {
-        habitList = await retrieveLocalHabitList();
-    } else {
-        if (!Array.isArray(habitList)) {
-            return { error: `Retrieve Habit Object Error: habitList is not of type array. type: ${typeof habitList}` }
-        }
-
-        // habitList is properly defined as an array
-    }
-
-    // By this point, habit list must be an array
-    const thisHabit = habitList.find((habit) => {
-        return habit.habitName.localeCompare(habitName) === 0;
-    })
-
-    if (thisHabit) {
-        try {
-            return Habit.parseHabit(thisHabit)
-        } catch (e) {
-            return { error: "Failed Parsing Habit " + habitName }
-        }
-    } else {
-        return { error: "Habit Not Found: " + habitName }
-    }
-}
-
-// WORK IN PROGRESS
-export const deleteHabitObject = async (habitJSONObject, email) => {
-    let habit;
-    try {
-        habit = Habit.parseHabit(habitJSONObject);
-    } catch (e) {
-        return { error: "storage.js/deleteHabitObject: Failing parsing into habit " + habitJSONObject }
-    }
-
-    let habitList;
-    // get the habit list
-    if (!isAnonymous(email)) {
-        try {
-
-            const userData = await getUserDataFromEmail(email);
-            habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
-
-            if (!Array.isArray(habitList)) {
-                throw new Error("habitList is not an array. habitList: " + typeof habitList)
-            }
-
-        } catch (e) {
-            return { error: "storage.js/deleteHabitObject: " + e }
-        }
-    } else {
-        habitList = await retrieveLocalHabitList();
-    }
-    // remove the habit object from the habitList;
-    const newHabitList = Habit.deleteHabitFromHabitList(habit, habitList)
-    let response;
-    // if signed in, store it back into the cloud. otherwise, store it back into local storage
-    if (!isAnonymous(email)) {
-        response = await updateUserHabitList(email, newHabitList);
-    } else {
-        response = await storeData("habitList", JSON.stringify(newHabitList));
-    }
-    if (response.error) {
-        return { error: response.error }
-    } else {
-        return { error: false }
-    }
-}
-
 
 /**
  * 
@@ -189,18 +103,25 @@ export const retrieveLocalHabitList = async () => {
  * If habit exists, replace it. Otherwise, isnert it
  */
 export async function insertHabitLocalStorage(habit) {
-    const habitDataList = await retrieveLocalHabitList();
-    const habitExists = Habit.habitExistsInList(habit, habitDataList);
 
-    if (!habitExists) {
-        habitDataList.push(habit.getJSON());
-        const res = await storeData("habitList", JSON.stringify(habitDataList));
-        if (res.error) {
-            return { error: res.error }
+    try {
+        const habitDataList = await retrieveLocalHabitList();
+        const habitExists = Habit.habitExistsInList(habit, habitDataList);
+
+        if (!habitExists) {
+            habitDataList.push(habit.getJSON());
+            const res = await storeData("habitList", JSON.stringify(habitDataList));
+            return res;
+        } else {
+            return { ok: false, message: "Can Not Insert Habit into Local Storage: Habit Already Exists" }
         }
-        return { error: false }
-    } else {
-        return { error: "Can Not Insert Habit into Local Storage: Habit Already Exists" }
+
+    } catch (err) {
+        return {
+            ok: false,
+            message: `Failed to insert into local storage. Error: ${err.message}`
+        }
+
     }
 }
 
@@ -226,10 +147,18 @@ const retrieveHabitList = async (email) => {
  * @param {string} habitID
  */
 const retrieveHabitFromLocalStorage = async (habitID) => {
+
+    if (!habitID) {
+        return {
+            ok: false,
+            error: "Habit ID is undefined"
+        }
+    }
+
     const habitList = await retrieveLocalHabitList();
 
-    habitJSON = habitList.find(habit => {
-        return habit.habitID = habitID;
+    const habitJSON = habitList.find(habit => {
+        return habit.habitID.localeCompare(habitID) == 0;
     })
 
     if (!habitJSON) {
@@ -287,10 +216,11 @@ export const deleteHabit = async (email, habit) => {
             return habit.habitID != habitID
         })
 
-        storeData("habitList", JSON.stringify(newLocalHabits));
-        return {
-            ok: true,
-            message: `Deleted Habit ${habit.getName()}`
+        const res = await storeData("habitList", JSON.stringify(newLocalHabits));
+        if (res.ok) {
+            return { ok: true, message: `Deleted Habit ${habit.getName()}` }
+        } else {
+            return { ok: false, message: `Error Deleting Habit: ${res.message}` }
         }
 
     } else {
@@ -299,7 +229,6 @@ export const deleteHabit = async (email, habit) => {
         return res;
     }
 }
-
 
 /**
  * 
@@ -311,9 +240,43 @@ export const getHabit = async (email, habitID) => {
         const res = await retrieveHabitFromLocalStorage(habitID);
         return res;
 
-
     } else {
         const res = await getHabitFromID(email, habitID)
         return res;
     }
+}
+
+/**
+ * 
+ * @param {string} email 
+ * @param {Habit} habit 
+ * @param {habitModificationType} modificationType
+ */
+export const updateHabit = async (email, habit, modificationType) => {
+    if (isAnonymous(email)) {
+        try {
+            const habitList = await retrieveLocalHabitList();
+            if (habitList) {
+
+                // TODO: UPDATE HABIT IN HABIT LIST, SHARED USERS?
+                const newHabitList = Habit.updateHabitInHabitList(habit, habitList);
+                const res = await storeData("habitList", JSON.stringify(newHabitList));
+                if (res.error) {
+                    return { ok: false, message: res.error };
+                } else {
+                    return { ok: true, message: "Success. Habit updated locally" };
+                }
+            } else {
+                return { ok: false, message: "Error Retrieving Habits from Local Storage" };
+            }
+        } catch (e) {
+            return { ok: false, message: `Local update habit list failed: ${e.message}` };
+        }
+    } else {
+        // update habit in cloud
+        const res = await updateHabitCloud(email, habit, modificationType);
+        return res;
+
+    }
+
 }

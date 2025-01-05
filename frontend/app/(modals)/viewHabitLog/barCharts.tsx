@@ -5,10 +5,7 @@ import { BarChart } from "react-native-chart-kit";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { AuthContext } from "@/contexts/authContext";
 import Habit from "@/api/habit";
-import { useFocusEffect } from "expo-router";
-import { isAnonymous } from "@/constants/constants";
-import { getUserDataFromEmail } from "@/api/db_ops";
-import { retrieveHabitObject } from "@/api/storage";
+
 import { HabitContext } from "@/contexts/habitContext";
 import DateRangePicker from "@/components/DateRangePicker";
 import { DateRange, getElapsedDays } from "@/api/types_and_utils";
@@ -18,7 +15,7 @@ const barCharts = () => {
   const scheme = useColorScheme();
   const theme = useTheme();
   const route = useRouteInfo();
-  const habitName = route.params.habitName.toString().toUpperCase();
+
   const today = new Date();
   const startDate = new Date(today); // Create a copy of today's date
   startDate.setDate(today.getDate() - 7); // Past 7 wdays including day
@@ -34,6 +31,7 @@ const barCharts = () => {
 
   // const { habit } = useContext(HabitContext);
   const habit = useContext(HabitContext);
+  const habitName = habit.getName();
 
   const handleSelectTimeRangeButton = (value: string) => {
     const elapsedDays = Number(value);

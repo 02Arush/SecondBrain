@@ -1,6 +1,6 @@
 import { StyleSheet, View, TouchableOpacity } from "react-native";
 import React, { useState, useContext, useCallback, useEffect } from "react";
-import { useRouteInfo } from "expo-router/build/hooks";
+import { useRouteInfo, useRouter } from "expo-router/build/hooks";
 import Habit, { HabitJSON } from "@/api/habit";
 import {
   Text,
@@ -11,17 +11,10 @@ import {
   Divider,
   TextInput,
 } from "react-native-paper";
-import {
-  retrieveHabitObject,
-  updateHabitObject,
-  deleteHabitObject,
-  deleteHabit,
-} from "@/api/storage";
-import { router, useFocusEffect } from "expo-router";
-import { isAnonymous } from "@/constants/constants";
+import { updateHabitObject, deleteHabit, updateHabit } from "@/api/storage";
 import { AuthContext } from "@/contexts/authContext";
-import { getUserDataFromEmail } from "@/api/db_ops";
 import {
+  copySimpleDate,
   filterTextToDecimal,
   filterTextToInteger,
   getDateFromSimpleDate,
@@ -45,6 +38,7 @@ const editHabit = () => {
   const todayDate = new Date();
   const route = useRouteInfo();
   const theme = useTheme();
+  const router = useRouter();
 
   //   const habit = useContext(HabitContext);
 
@@ -64,8 +58,10 @@ const editHabit = () => {
 
   useEffect(() => {
     // This is here to ensure that whenever I update the date, or update qtyToSet, I allow myself to save unsaved changes
+    const countOfDate = habit.getCountOfDate(dateToUpdate);
+    const currQtyToSet = Number(qtyToSet);
 
-    const isDifferent = habit.getCountOfDate(dateToUpdate) !== Number(qtyToSet);
+    const isDifferent = countOfDate != currQtyToSet;
     setHasUnsavedSetChanges(isDifferent);
   }, [dateToUpdate, qtyToSet]);
 
@@ -91,7 +87,7 @@ const editHabit = () => {
       alert("Error updating: Invalid date to increment");
     }
 
-    await handleUpdateHabit();
+    await handleLogHabitData();
   };
 
   const handleEditChangeQty = (text: string) => {
@@ -119,9 +115,16 @@ const editHabit = () => {
 
   const handleUpdateHabit = async () => {
     const response = await updateHabitObject(habit.getJSON(), email);
-    if (response.error) {
+    if (response && response.error) {
       alert("Submission response error: " + response.error);
     } else {
+      handleSetDateToUpdate(getSimpleDateFromDate(new Date()));
+    }
+  };
+
+  const handleLogHabitData = async () => {
+    const res = await updateHabit(email, habit, "log");
+    if (res.ok) {
       const newQty = habit.getCountOfDate(dateToUpdate);
       const dateUpdated =
         getDateFromSimpleDate(dateToUpdate)?.toDateString() ||
@@ -132,7 +135,10 @@ const editHabit = () => {
         `Habit: ${habit.getName()}, Date: ${dateUpdated}, Quantity Set: ${newQty} ${habit.getUnit()}`
       );
 
-      handleSetDateToUpdate(getSimpleDateFromDate(new Date()));
+      // This is here to ensure that the submit button disables every time the date update is changed
+      setHasUnsavedSetChanges(false);
+    } else {
+      alert(`${res.message}`);
     }
   };
 
@@ -148,7 +154,11 @@ const editHabit = () => {
 
   const handleDeleteHabit = async () => {
     const res = await deleteHabit(email, habit);
-    alert(res.message);
+    if (res.ok) {
+      router.navigate("/");
+    } else {
+      alert(res.message);
+    }
   };
 
   return (
@@ -265,14 +275,6 @@ const editHabit = () => {
         />
       </View>
       <View style={styles.col}>
-        {/* <Button
-          mode="contained"
-          style={{ flex: 1 }}
-          // style={{ display: hasUnsavedSetChanges ? "flex" : "none" }}
-          onPress={handleSubmitSet}
-        >
-          Submit Changes
-        </Button> */}
         <Button
           mode="contained"
           disabled={!hasUnsavedSetChanges}

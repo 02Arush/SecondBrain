@@ -6,7 +6,6 @@ import { AuthContext } from "@/contexts/authContext";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import Habit from "@/api/habit";
 import { useRouteInfo } from "expo-router/build/hooks";
-import { retrieveHabitObject } from "@/api/storage";
 import { DataTable } from "react-native-paper";
 import { timeFrameConverter } from "@/api/types_and_utils";
 import {
