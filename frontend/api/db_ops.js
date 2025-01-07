@@ -67,17 +67,38 @@ export const attemptLogin = async (email, password) => {
     }
 }
 
+
+/**
+ * 
+ * @param {string} email 
+ * @param {any} password 
+ * @returns 
+ */
 export const registerAccount = async (email, password) => {
     try {
+
+        // TODO: GET "NICKNAME" AS EMAIL FOLLOWED BY TIMEMILLIS
+
+        const symbol = "@";
+        const emailTxt = email.split("@")[0];
+        const maxNameLength = Math.min(emailTxt.length, 10);
+
+        const nickname = emailTxt.substring(0, maxNameLength)
+
+
         const credentials = await createUserWithEmailAndPassword(auth, email, password);
         const user = credentials.user;
+        const registeredEmail = user.email;
 
-        // Add dummy data to firestore
-        await setDoc(doc(db, 'users', user.email), {
-            habitList: [],
+
+        const docRef = doc(collections.users, email)
+        await setDoc(docRef, {
+            nickname: nickname,
+            createDate: new Date(),
+
         })
 
-        return { status: 200, message: "User Successfully Registered", email: user.email }
+        return { status: 200, message: "User Successfully Registered", email: registeredEmail }
 
     } catch (err) {
         let errorMessage = "Error";
@@ -306,50 +327,6 @@ export const deleteAccount = async (email, password) => {
 
 /**
  * 
- * @param {string} email 
- * @returns {Promise<{ok: boolean, message: string}}
- */
-export const uploadLocalStorageHabits = async (email) => {
-
-
-    const localHabitList = await retrieveLocalHabitList();
-    const remoteUserData = await getUserDataFromEmail(email);
-    const remoteHabitList = Array.isArray(remoteUserData["habitList"])
-        ? remoteUserData["habitList"]
-        : JSON.parse(remoteUserData["habitList"]);
-
-    if (!Array.isArray(remoteHabitList)) {
-        return {
-            ok: false,
-            message: "Remote Habit List is Not an Array",
-        };
-    }
-
-    // Merge the habit lists
-    if (remoteHabitList.length > 0) {
-        const mergedHabitList = Habit.mergeHabitLists(
-            remoteHabitList,
-            localHabitList
-        );
-        // set remote habit list to mergedHabitList
-        response = await updateUserHabitList(email, mergedHabitList);
-    } else {
-        response = await updateUserHabitList(email, localHabitList);
-    }
-
-
-    // Merge the habit lists
-    if (response && response.error) {
-        const errMsg = "error " + response.error + "message " + response.message;
-        return { ok: false, message: errMsg };
-    } else {
-        return { ok: true, message: "Habit lists have been merged successfully" };
-    }
-
-}
-
-/**
- * 
  * @param {string} senderEmail 
  * @param {string} receiverEmail 
  */
@@ -364,9 +341,9 @@ export const inviteUserToHabit = async (senderEmail, receiverEmail) => {
     @param {string} email
 */
 export const fixCloudHabitList = async (email) => {
-    if (email == "akarushkumar7@gmail.com") {
-        return { ok: false, message: "Don't mess with this email" }
-    }
+    // if (email == "akarushkumar7@gmail.com") {
+    //     return { ok: false, message: "Don't mess with this email" }
+    // }
 
     try {
         const currUserData = await getUserDataFromEmail(email);

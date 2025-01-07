@@ -26,11 +26,12 @@ const ViewHabitLogLayout = () => {
         if (currHabit instanceof Habit) {
           setHabit(currHabit);
         } else {
-          alert(res.message);
+          /* This is here because on refreshing the page, email and habitID automatically set to anonymous and undefined, so
+           At that point just go back to the home page. This prevents errors. */
+          router.navigate("/");
         }
       }
       getHabitData();
-     
     }, [email])
   );
 

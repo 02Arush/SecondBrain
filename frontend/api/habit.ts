@@ -430,8 +430,8 @@ export default class Habit {
     getCountPastXDays(numDays: number, mode: "total" | "average" = "total"): number {
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(endDate.getDate() - numDays);  // Today is included, and day
-        const total = this.getCountFromDateRange(startDate, endDate);
+        startDate.setDate(endDate.getDate() - (numDays - 1));  // Today is included, and day
+        const total = this.getCountFromDateRange(startDate, endDate, true);
         return mode === "average" ? this.calculateAverage(total, numDays) : total;
     }
 

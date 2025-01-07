@@ -7,11 +7,7 @@ import {
 } from "react-native";
 import React, { useCallback, useContext, useState } from "react";
 import { Text, useTheme, TextInput, Button } from "react-native-paper";
-import {
-  getUserDataFromEmail,
-  registerAccount,
-  updateUserHabitList,
-} from "@/api/db_ops";
+import { registerAccount } from "@/api/db_ops";
 import { router, useFocusEffect } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
 import OutlineModal from "@/components/OutlineModal";
@@ -20,7 +16,7 @@ import { retrieveLocalHabitList } from "@/api/storage";
 import Habit from "@/api/habit";
 import { uploadLocalTasks } from "@/api/taskStorage";
 import { useEffect } from "react";
-import { uploadLocalStorageHabits } from "@/api/db_ops";
+import { uploadLocalStorageHabits } from "@/api/storage";
 
 const register = () => {
   // This is here such that the "sync local storage to new account" modal never initially displays
@@ -48,6 +44,8 @@ const register = () => {
 
     if (validEmail && validPassword) {
       const res = await registerAccount(emailTxt, password);
+
+      // REGISTERING ACCOUNT NOT SHOWING PROPER ERROR MESSAGES
       if (res.error) {
         alert(res.message);
       } else {

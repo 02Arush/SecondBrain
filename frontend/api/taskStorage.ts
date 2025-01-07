@@ -305,6 +305,11 @@ export const uploadLocalTasks = async (email: string) => {
     }
 
     const uploads = taskList.map(async (task: Task) => {
+
+        task.clearSharedUsers();
+        task.addSharedUser(
+            { email: email, permission: constants.ROLE.OWNER }
+        )
         const res = await updateTask(email, task, true)
         return res;
     })

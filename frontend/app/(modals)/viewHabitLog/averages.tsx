@@ -27,8 +27,7 @@ const averages = () => {
   const theme = useTheme();
   const [timeFrame, setTimeFrame] = useState<timeFrame>("day");
   // const { habit } = useContext(HabitContext);
-  const  habit  = useContext(HabitContext);
-
+  const habit = useContext(HabitContext);
 
   // useFocusEffect(
   //   useCallback(() => {
@@ -125,9 +124,7 @@ const averages = () => {
           break;
 
         case "7 Days":
-          total = roundToTwoDecimals(
-            habit.getCountOverTimeFrame(1, "week", "total")
-          );
+          total = roundToTwoDecimals(habit.getCountPastXDays(7, "total"));
           average =
             habit.getAveragePerTimeFrameOverTimeFrame(
               1,

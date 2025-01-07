@@ -1,4 +1,5 @@
 import { getColor } from "@/constants/Colors";
+import { constants } from "@/constants/constants"
 
 /**
  * STRINGS

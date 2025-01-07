@@ -55,7 +55,7 @@ export default function TabOneScreen() {
   }
 
   const handleFixHabitList = async () => {
-    if (email == "akarushkumar7@gmail.com") return false;
+    // if (email == "akarushkumar7@gmail.com") return false;
 
     const res = await fixCloudHabitList(email);
     alert(`${res?.message}`);
@@ -80,8 +80,6 @@ export default function TabOneScreen() {
     >
       <View style={styles.contentContainer}>
         <Text>Signed in as: {email}</Text>
-        <Button onPress={handleFixHabitList}>FIX HABIT LIST</Button>
-        <Button onPress={handleRetrieveHabitList}>PRINT HABIT LIST</Button>
         <ScrollView style={styles.itemListContainer}>
           {habits.length === 0 && (
             <Text style={{ textAlign: "center", marginTop: 10, color: "grey" }}>

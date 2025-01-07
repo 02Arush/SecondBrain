@@ -280,3 +280,41 @@ export const updateHabit = async (email, habit, modificationType) => {
     }
 
 }
+
+
+
+/**
+ * 
+ * @param {string} email 
+ * @returns {Promise<{ok: boolean, message: string}}
+ */
+export const uploadLocalStorageHabits = async (email) => {
+
+    const localHabitList = await retrieveLocalHabitList();
+
+    const uploads = localHabitList.map(async (habitJSON) => {
+        const habit = Habit.parseHabit(habitJSON);
+        const res = await createHabitCloud(email, habit);
+        return res;
+
+    })
+
+    const responses = await Promise.all(uploads);
+
+    const ok = responses.every((res) => {
+        return res.ok
+    })
+
+    let message = "Successfully Uploaded Habits To Cloud";
+
+    if (!ok) {
+        message = responses.reduce((acc, response) => {
+            const msgToConcat = !(response.ok) ? `${response.message}\n` : "";
+            return `${acc}${msgToConcat}`
+        }, "")
+    }
+
+    return { ok, message }
+
+
+}

@@ -138,7 +138,7 @@ const editHabit = () => {
       // This is here to ensure that the submit button disables every time the date update is changed
       setHasUnsavedSetChanges(false);
     } else {
-      alert(`${res.message}`);
+      alert(`Error Logging Habit Data: \n${res.message}`);
     }
   };
 
@@ -157,7 +157,7 @@ const editHabit = () => {
     if (res.ok) {
       router.navigate("/");
     } else {
-      alert(res.message);
+      alert("Error Deleting Habit\n" + res.message);
     }
   };
 

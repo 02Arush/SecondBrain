@@ -2,7 +2,7 @@ import constants from "@/constants/constants"
 import { filterOptions } from "./types_and_utils"
 type TaskUser = {
     email: string,
-    permission: "admin" | "standard"
+    permission: string,
 }
 
 type taskProperty = "Name" | "Description" | "Importance" | "Deadline"
@@ -45,10 +45,10 @@ export default class Task {
             return task;
 
         } catch (err) {
-            console.log("===INVALID TAStK JSON===")
-            console.log("ID " + id)
-            console.log(JSON.stringify(taskObject));
-            console.log(err);
+            // console.log("===INVALID TASK JSON===")
+            // console.log("ID " + id)
+            // console.log(JSON.stringify(taskObject));
+            // console.log(err);
             return null;
         }
 
@@ -145,7 +145,15 @@ export default class Task {
 
     addSharedUser(user: TaskUser) {
         this.sharedUsers.push(user);
+    }
 
+    removeSharedUser(userToRm: TaskUser) {
+        const newSharedUsers = this.sharedUsers.filter(user => user.email.localeCompare(userToRm.email) != 0)
+        this.sharedUsers = newSharedUsers;
+    }
+
+    clearSharedUsers() {
+        this.sharedUsers = [];
     }
 
     getTaskID(): string {
