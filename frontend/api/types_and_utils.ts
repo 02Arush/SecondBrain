@@ -18,6 +18,14 @@ export const limitStringLength = (text: string, length: number = 6): string => {
     return trimmedString;
 }
 
+export const getNicknameFromEmail = (email: string) : string => {
+    const emailTxt = email.split("@")[0];
+    const maxNameLength = Math.min(emailTxt.length, 9);
+
+    const nickname = emailTxt.substring(0, maxNameLength)
+    return nickname;
+}
+
 
 
 
@@ -205,3 +213,5 @@ export const roundToTwoDecimals = (num: number): number => {
 };
 
 export type habitModificationType = "log" | "modify"
+
+

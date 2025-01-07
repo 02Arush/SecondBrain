@@ -62,6 +62,21 @@ const ViewHabitLogLayout = () => {
     });
   };
 
+  const handleNavigateToSharedUsers = () => {
+    if (isAnonymous(email)) {
+      alert(
+        "Anonymous or offline users can not share their stats! Please log in."
+      );
+    } else {
+      router.replace({
+        pathname: "/(modals)/viewHabitLog/sharedUsers",
+        params: {
+          habitID: habitID,
+        },
+      });
+    }
+  };
+
   const theme = useTheme();
 
   return (
@@ -100,6 +115,16 @@ const ViewHabitLogLayout = () => {
                 onPress={handleNavigateToChart}
                 iconColor={
                   route.pathname.localeCompare("/viewHabitLog/barCharts") === 0
+                    ? theme.colors.tertiary
+                    : "grey"
+                }
+              />
+              <IconButton
+                icon="account-group-outline"
+                onPress={handleNavigateToSharedUsers}
+                iconColor={
+                  route.pathname.localeCompare("/viewHabitLog/sharedUsers") ===
+                  0
                     ? theme.colors.tertiary
                     : "grey"
                 }

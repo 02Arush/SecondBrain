@@ -1,11 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import React, { useState, useCallback, useContext } from "react";
 import { Text, useTheme } from "react-native-paper";
-import { useFocusEffect } from "expo-router";
-import { AuthContext } from "@/contexts/authContext";
-import { getUserDataFromEmail } from "@/api/db_ops";
-import Habit from "@/api/habit";
-import { useRouteInfo } from "expo-router/build/hooks";
 import { DataTable } from "react-native-paper";
 import { timeFrameConverter } from "@/api/types_and_utils";
 import {
@@ -17,38 +12,13 @@ import {
 import { HabitContext } from "@/contexts/habitContext";
 
 const averages = () => {
-  const { email } = useContext(AuthContext);
   // const [habit, setHabit] = useState<Habit>(
   //   new Habit("NULL_NAME", "NULL_UNIT")
   // );
-  const routeInfo = useRouteInfo();
-  const habitName = routeInfo.params.habitName;
-  const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const [timeFrame, setTimeFrame] = useState<timeFrame>("day");
   // const { habit } = useContext(HabitContext);
   const habit = useContext(HabitContext);
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     setLoading(true);
-
-  //     (async () => {
-  //       // Get user data on page focus
-  //       const data = await getUserDataFromEmail(email);
-  //       const habitList = data["habitList"];
-  //       const habit = await retrieveHabitObject(habitName, habitList);
-
-  //       if (habit instanceof Habit) {
-  //         setHabit(habit);
-  //       } else {
-  //         alert(`ERROR: ${habit.error}`);
-  //       }
-  //     })();
-
-  //     setLoading(false);
-  //   }, [])
-  // );
 
   const TableRows = () => {
     const tableTimeframes = [

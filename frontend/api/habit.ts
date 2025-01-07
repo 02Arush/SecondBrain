@@ -10,6 +10,7 @@ export interface HabitJSON {
     "activityLog": { [key: string]: number },
     "goal"?: habitGoal
     "creationDate"?: Date
+    "sharedUsers"?: string[],
     "habitID": string
 }
 
@@ -392,6 +393,10 @@ export default class Habit {
 
         if (this.goal) {
             habitJSON["goal"] = this.goal.JSON()
+        }
+
+        if (this.sharedUsers) {
+            habitJSON["sharedUsers"] = this.getSharedUsers();
         }
 
         return habitJSON

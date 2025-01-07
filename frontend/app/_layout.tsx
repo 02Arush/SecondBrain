@@ -130,6 +130,14 @@ function RootLayoutNav() {
               title: "Task Visualizer", presentation: "card",
             }}
           />
+
+          <Stack.Screen
+            
+            name="(modals)/viewHabitLog/sharedUsers"
+            redirect = {true}
+          />
+
+
         </Stack>
       </AuthProvider>
     </PaperProvider>

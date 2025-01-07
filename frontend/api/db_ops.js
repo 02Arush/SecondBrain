@@ -13,7 +13,7 @@ import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from "react-native";
 import Task from "./task";
 import { isAnonymous } from "@/constants/constants";
-import { filterOptions, habitModificationType } from "./types_and_utils";
+import { filterOptions, getNicknameFromEmail, habitModificationType } from "./types_and_utils";
 import { retrieveLocalHabitList } from "./storage";
 import constants from "@/constants/constants";
 
@@ -68,6 +68,7 @@ export const attemptLogin = async (email, password) => {
 }
 
 
+
 /**
  * 
  * @param {string} email 
@@ -78,13 +79,7 @@ export const registerAccount = async (email, password) => {
     try {
 
         // TODO: GET "NICKNAME" AS EMAIL FOLLOWED BY TIMEMILLIS
-
-        const symbol = "@";
-        const emailTxt = email.split("@")[0];
-        const maxNameLength = Math.min(emailTxt.length, 10);
-
-        const nickname = emailTxt.substring(0, maxNameLength)
-
+        const nickname = getNicknameFromEmail(email);
 
         const credentials = await createUserWithEmailAndPassword(auth, email, password);
         const user = credentials.user;
@@ -145,19 +140,55 @@ export const logOut = async () => {
 }
 
 export const getUserDataFromEmail = async (email) => {
-
     try {
-        const docRef = doc(db, "users", email);
+        const docRef = doc(collections.users, email);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const userData = docSnap.data();
-            return userData;
+            // ASSURE THAT ALL THE FIELDS I WANT ARE FILLED IN:
+            let nickname = userData["nickname"];
+            if (!nickname) {
+                nickname = getNicknameFromEmail(email);
+                const res = await updateUserDoc(docRef, { nickname: nickname });
+                if (!res.ok) {
+                    return { ok: false, message: "Error getting user data from Email\n" + res.message }
+                }
+            }
+
+            return { ...userData, nickname: nickname };
         } else {
             return { error: "Error: Habit Data not found for " + email }
         }
     } catch (err) {
         return { error: err.message }
     }
+}
+
+
+/**
+ * 
+ * @param {string} email 
+ * @param {object} updates 
+ */
+export const updateUserDoc = async (email, updates) => {
+    if (isAnonymous(email)) {
+        return { ok: false, message: "Anonymous or offline users can not update data in the cloud." }
+    }
+
+    try {
+        const docRef = doc(collections.users, email);
+        await setDoc(docRef, updates, { merge: true })
+
+        return { ok: true, message: `Updated User Document Successfully for email: ${email}` }
+
+
+    } catch (err) {
+        return {
+            ok: false,
+            message: `Error updating user doc for email: ${email}\nMessage: ${err.message}`
+        }
+    }
+
 }
 
 
@@ -334,51 +365,6 @@ export const inviteUserToHabit = async (senderEmail, receiverEmail) => {
     // create a colleciton in users/userID/inivtes/inviteID
     //                                                 // invite date, habitID, expirationDate,
 
-}
-
-// TEMP FCTN TO RESTRUCTURE CLOUD HABIT LISTS
-/** 
-    @param {string} email
-*/
-export const fixCloudHabitList = async (email) => {
-    // if (email == "akarushkumar7@gmail.com") {
-    //     return { ok: false, message: "Don't mess with this email" }
-    // }
-
-    try {
-        const currUserData = await getUserDataFromEmail(email);
-        const habitList = currUserData["habitList"]
-
-        if (!Array.isArray(habitList)) {
-            // try to parse the habit list as JSON
-        } else {
-
-            // create a collection users/userID/habits
-            const uploadHabits = habitList.map(
-                async (habit) => {
-                    const parsedHabit = Habit.parseHabit(habit);
-                    const res = await createHabit(email, parsedHabit);
-                    return res;
-                }
-            )
-
-            const res = await Promise.all(uploadHabits);
-            const ok = res.every((response) => {
-                const responseOk = response.ok == true;
-                if (!responseOk) {
-                    console.log(response.message);
-                }
-
-                return response.ok === true;
-            })
-
-            return { ok: ok, message: ok ? "SUCCESS" : "ERROR FIXING CLOUD HABITS" }
-
-        }
-
-    } catch (err) {
-        return { ok: false, message: err + " " + err.message }
-    }
 }
 
 export const removeHabit = (username, habitItem) => {
@@ -599,6 +585,17 @@ export const createHabit = async (email, habit) => {
     }
 
     try {
+
+        const userData = await getUserDataFromEmail(email);
+        let nickname = userData["nickname"]
+        if (!nickname || nickname.length == 0) {
+            nickname = getNicknameFromEmail(email);
+            const res = await updateUserDoc(email, { nickname: nickname })
+            if (!res.ok) {
+                return { ok: false, message: "Couldn't Update Nickname\n" + res.message }
+            }
+        }
+
         const habitID = habit.getID();
         // create in users collection
         const usersCollection = getUserHabitsCollection(email);
@@ -612,7 +609,7 @@ export const createHabit = async (email, habit) => {
         // create in habits collection
         const docRefHabit = doc(collections.habits, habitID);
         const sharedUsers = [
-            { email: email, role: constants.ROLE.ADMIN, joinDate: new Date() }
+            { email: email, role: constants.ROLE.OWNER, joinDate: new Date(), nickname: nickname }
         ]
 
         const docDataHabit = {
@@ -797,7 +794,7 @@ const getUserHabitsCollection = (email) => {
  * 
  * @param {string} habitID 
  */
-const getSharedUsersForHabit = async (habitID) => {
+export const getSharedUsersForHabit = async (habitID) => {
     const habitDocRef = doc(collections.habits, habitID);
     const docSnap = await getDoc(habitDocRef);
 
@@ -809,15 +806,18 @@ const getSharedUsersForHabit = async (habitID) => {
     const sharedUsers = habitData["sharedUsers"];
 
     if (sharedUsers && Array.isArray(sharedUsers)) {
-        const addedDatesToSharedUsers = sharedUsers.map((user) => {
-            if (!user.joinDate) {
-                return { ...user, joinDate: new Date() }
-            } else {
-                return user;
-            }
-        })
         return { ok: true, message: `Retrieved Shared Users for habit: ${habitID}`, data: sharedUsers }
     } else {
         return { ok: false, message: `Shared Users does not exist, or is not an array for habit: ${habitID}` }
     }
+}
+
+/**
+ * 
+ * @param {string} newUserEmail 
+ * @param {Habit} habit 
+ */
+export const inviteUsertoHabit = async (newUserEmail, habit) => {
+    const habitID = habit.getID()
+
 }

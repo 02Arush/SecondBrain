@@ -257,7 +257,6 @@ export const updateHabit = async (email, habit, modificationType) => {
         try {
             const habitList = await retrieveLocalHabitList();
             if (habitList) {
-
                 // TODO: UPDATE HABIT IN HABIT LIST, SHARED USERS?
                 const newHabitList = Habit.updateHabitInHabitList(habit, habitList);
                 const res = await storeData("habitList", JSON.stringify(newHabitList));

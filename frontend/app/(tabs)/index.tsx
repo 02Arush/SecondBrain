@@ -2,18 +2,18 @@ import { useCallback } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import HabitItem from "@/components/HabitItem";
 import { useState, useEffect, useContext } from "react";
-import { Button, Text, useTheme } from "react-native-paper";
+import {
+  Button,
+  Text,
+  useTheme,
+  TextInput,
+  IconButton,
+} from "react-native-paper";
 import { router, useFocusEffect } from "expo-router";
 import Habit from "@/api/habit";
+import { retrieveLocalHabitList } from "@/api/storage";
 import {
-  removeData,
-  retrieveData,
-  retrieveLocalHabitList,
-} from "@/api/storage";
-import {
-  getSignedInUser,
   getUserDataFromEmail,
-  fixCloudHabitList,
   retrieveHabitList as retrieveHabitListCloud,
 } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
@@ -23,6 +23,7 @@ export default function TabOneScreen() {
   const theme = useTheme();
   const [habits, setHabits] = useState<any[]>([]);
   const { email, setEmail } = useContext(AuthContext);
+  const [cloudUserData, setCloudUserData] = useState<any>({});
 
   useFocusEffect(
     useCallback(() => {
@@ -34,6 +35,7 @@ export default function TabOneScreen() {
           //   : JSON.parse(userData["habitList"]);
           const cloudHabitData = await retrieveHabitListCloud(email);
           const data = cloudHabitData.data || [];
+          setCloudUserData(userData);
           setHabits(data);
         } else {
           const habitData = await retrieveLocalHabitList();
@@ -54,21 +56,8 @@ export default function TabOneScreen() {
     router.push("/(modals)/addHabit");
   }
 
-  const handleFixHabitList = async () => {
-    // if (email == "akarushkumar7@gmail.com") return false;
-
-    const res = await fixCloudHabitList(email);
-    alert(`${res?.message}`);
-  };
-
-  const handleRetrieveHabitList = async () => {
-    const list = await retrieveHabitListCloud(email);
-
-    if (!list.ok) {
-      console.log(list.message);
-    } else {
-      console.log(list.data);
-    }
+  const handleNavigateViewInvites = () => {
+    alert("View Invites: Not implemented");
   };
 
   return (
@@ -79,7 +68,19 @@ export default function TabOneScreen() {
       }}
     >
       <View style={styles.contentContainer}>
-        <Text>Signed in as: {email}</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text>
+            Signed in As:&nbsp;
+            {cloudUserData?.nickname || email}
+          </Text>
+          <IconButton icon={"email"} onPress={handleNavigateViewInvites} />
+        </View>
         <ScrollView style={styles.itemListContainer}>
           {habits.length === 0 && (
             <Text style={{ textAlign: "center", marginTop: 10, color: "grey" }}>
