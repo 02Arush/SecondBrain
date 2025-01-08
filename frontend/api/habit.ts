@@ -1,6 +1,6 @@
 
 
-import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays } from "./types_and_utils";
+import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays, sharedItemType } from "./types_and_utils";
 
 
 
@@ -64,6 +64,10 @@ export default class Habit {
         return this.creationDate
     }
 
+    addSharedUser(sharedHabitUser: any) {
+        this.sharedUsers.push(sharedHabitUser)
+    }
+
     static parseHabit = (json: object | string): Habit => {
         let habitJSON: HabitJSON;
 
@@ -80,7 +84,7 @@ export default class Habit {
         }
 
 
-        const { habitName, unit, activityLog: activityLogData, creationDate, goal, habitID, } = habitJSON;
+        const { habitName, unit, activityLog: activityLogData, creationDate, goal, habitID, sharedUsers} = habitJSON;
 
         let activityLog;
         try {
@@ -95,7 +99,7 @@ export default class Habit {
 
         // Parse the goal if present
         const parsedHabitGoal = goal ? HabitGoal.parseJSON(goal) : undefined;
-        const newHabit = new Habit(habitName, unit || undefined, activityLog, parsedHabitGoal, creationDate, habitID);
+        const newHabit = new Habit(habitName, unit || undefined, activityLog, parsedHabitGoal, creationDate, habitID, sharedUsers);
 
         // Return new Habit instance
         return newHabit
@@ -561,6 +565,10 @@ export class HabitGoal {
         const goalNumber = this.getGoalNumber();
         return goalNumber / days;
     }
+
+
+
+
 
 
 

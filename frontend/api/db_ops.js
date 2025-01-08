@@ -5,17 +5,21 @@
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, setPersistence, getReactNativePersistence, initializeAuth, deleteUser } from 'firebase/auth';
-import { addDoc, getDocs, getFirestore, query, where } from 'firebase/firestore'
+import {
+    getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
+    signInWithEmailAndPassword, signOut, setPersistence, getReactNativePersistence, initializeAuth, deleteUser
+} from 'firebase/auth';
+import { getDocs, getFirestore, query, where } from 'firebase/firestore'
 import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
 import Habit from "./habit";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from "react-native";
 import Task from "./task";
 import { isAnonymous } from "@/constants/constants";
-import { filterOptions, getNicknameFromEmail, habitModificationType } from "./types_and_utils";
-import { retrieveLocalHabitList } from "./storage";
+import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail } from "./types_and_utils";
+import { sharedItemType } from "./types_and_utils";
 import constants from "@/constants/constants";
+
 
 
 const firebaseConfig = {
@@ -192,55 +196,19 @@ export const updateUserDoc = async (email, updates) => {
 }
 
 
-// /**
-//  *
-//  * @param {string} email
-//  * @param {string} habitName
-//  * @param {string | undefined} habitUnit
-//  * @param {HabitGoal | null} habitGoal
-//  */
-// export const addHabit = async (email, habitName, habitUnit, habitGoal) => {
-//     try {
-//         const docRef = doc(db, "users", email);
-//         const docSnap = await getDoc(docRef);
-
-//         if (docSnap.exists()) {
-//             const data = docSnap.data();
-//             const habitList = Array.isArray(data["habitList"]) ? data["habitList"] : JSON.parse(data["habitList"]);
-//             const habitExists = Habit.habitExistsInList(habitName, habitList);
-
-//             if (!habitExists) {
-//                 const newHabit = new Habit(habitName, habitUnit, undefined, undefined, new Date());
-//                 if (habitGoal) {
-//                     newHabit.setGoal(habitGoal);
-//                 }
-//                 habitList.push(newHabit.getJSON());
-//                 await setDoc(docRef, {
-//                     "habitList": habitList
-//                 }, { merge: true })
-
-//                 return { success: true, message: "Habit Successfully Updated" }
-//             } else {
-//                 return { error: `Habit already exists: ${habitName} ` }
-//             }
-//         } else {
-//             return { error: `Data not found for ${email}` }
-//         }
-
-//     } catch (err) {
-//         return { error: err.code, message: err.message }
-//     }
-// }
-
-// Email: String, habitList: Array<any>
-
-
+export const updateUserHabitCollection = (email, newHabit) => {
+    const userHabitCollection = getUserHabitsCollection(email)
+}
 
 /**
  * 
  * @param {string} email 
  * @param {Habit} habit 
  * @param {habitModificationType } type
+ * 
+ * EITHER:
+ * 1) LOG NEW DATA FOR A USER ON A HABIT
+ * 2) MODIFY THE DOCUMENT OF A HABIT, IN ITS OWN COLLECTION
  */
 export const updateHabit = async (email, habit, type) => {
     if (type == "log") {
@@ -248,9 +216,15 @@ export const updateHabit = async (email, habit, type) => {
         return res;
 
     } else if (type == "modify") {
+        const ID = habit.getID();
+        const habitDocRef = doc(collections.habits, ID);
+        const newHabitJSON = habit.getJSON();
+
+        await setDoc(habitDocRef, newHabitJSON, { merge: true })
+
         return {
-            ok: false,
-            message: "Not Yet Implemented"
+            ok: true,
+            message: "Modification Complete"
         }
 
     } else {
@@ -285,12 +259,6 @@ const logHabitActivity = async (email, habit) => {
     } catch (err) {
         return { ok: false, message: `Error logging habit activity: ${err.message}` }
     }
-
-
-}
-
-export const updateHabitDetails = async (email, habit) => {
-
 }
 
 export const changeUserRole = async (email, habit, emailToChange, newRole) => {
@@ -333,7 +301,6 @@ export const deleteAccount = async (email, password) => {
         return { error: err.code, message: err.message };
     }
 
-
     const user = auth.currentUser;
     // Ensure the React state auth context email matches the Firebase signed-in email
     if (user.email !== email) {
@@ -341,7 +308,6 @@ export const deleteAccount = async (email, password) => {
             error: `Auth state email doesn't match Firebase email:\nFirebase email: ${user.email}\nAuth-state email: ${email}`
         };
     }
-
     try {
         // Remove from Firebase Auth
         await deleteUser(user);
@@ -355,17 +321,6 @@ export const deleteAccount = async (email, password) => {
     }
 };
 
-
-/**
- * 
- * @param {string} senderEmail 
- * @param {string} receiverEmail 
- */
-export const inviteUserToHabit = async (senderEmail, receiverEmail) => {
-    // create a colleciton in users/userID/inivtes/inviteID
-    //                                                 // invite date, habitID, expirationDate,
-
-}
 
 export const removeHabit = (username, habitItem) => {
 
@@ -573,6 +528,33 @@ export const deleteTask = async (email, taskID) => {
     }
 }
 
+/**
+ * 
+ * @param {email} email 
+ * @param {Habit} habit 
+ * POTENTIAL ERROR: ACTIVITY LOGS MIGHT BE SHARED IN THE FUTURE
+ */
+const createHabitInUserCollection = async (email, habit) => {
+    try {
+        const habitID = habit.getID()
+        // create in users collection
+        const usersCollection = getUserHabitsCollection(email);
+        const docRef = doc(usersCollection, habitID);
+        const dataForUser = {
+            userGoal: habit.getGoal()?.JSON() || null,
+            activityLog: habit.getActivityLog()
+        }
+        await setDoc(docRef, dataForUser, { merge: true })
+        return {
+            ok: true, message: "Added habit to user's collection."
+        }
+
+    } catch (err) {
+        const message = "Error Creating Habit In User Collection\n" + err.message
+        return { ok: false, message }
+    }
+}
+
 
 /**
  * @param {string} email
@@ -590,21 +572,16 @@ export const createHabit = async (email, habit) => {
         let nickname = userData["nickname"]
         if (!nickname || nickname.length == 0) {
             nickname = getNicknameFromEmail(email);
-            const res = await updateUserDoc(email, { nickname: nickname })
-            if (!res.ok) {
-                return { ok: false, message: "Couldn't Update Nickname\n" + res.message }
+        }
+        const habitID = habit.getID();
+
+        const res = await createHabitInUserCollection(email, habit);
+        if (!res.ok) {
+            return {
+                ok: false,
+                message: "Couldn't Create Habit\n" + res.message
             }
         }
-
-        const habitID = habit.getID();
-        // create in users collection
-        const usersCollection = getUserHabitsCollection(email);
-        const docRef = doc(usersCollection, habitID);
-        const dataForUser = {
-            userGoal: habit.getGoal()?.JSON() || null,
-            activityLog: habit.getActivityLog()
-        }
-        setDoc(docRef, dataForUser, { merge: true })
 
         // create in habits collection
         const docRefHabit = doc(collections.habits, habitID);
@@ -621,7 +598,7 @@ export const createHabit = async (email, habit) => {
             sharedUsers: sharedUsers,
         }
 
-        setDoc(docRefHabit, docDataHabit, { merge: true })
+        await setDoc(docRefHabit, docDataHabit, { merge: true })
         return {
             ok: true,
             message: `Habit ${habit.getName()} created with ID: ${habitID}`
@@ -703,7 +680,7 @@ export const retrieveActivityLogForUser = async (email, habitID) => {
 
         return { ok: true, data: activityLog, message: "Successfully retrieved user activities" }
     } catch (err) {
-        return { ok: false, message: `ERROR Retrieving Activity Log: ${err.message}`, data: null }
+        return { ok: false, message: `ERROR Retrieving Activity Log: ${err.message}`, data: {} }
     }
 }
 
@@ -720,6 +697,8 @@ export const getHabitFromID = async (email, id) => {
         const docRef = doc(habitCollection, id);
         const docSnap = await getDoc(docRef);
         const data = docSnap.data();
+
+
 
         const getActLog = await retrieveActivityLogForUser(email, id);
         const activityLog = getActLog.data
@@ -814,10 +793,214 @@ export const getSharedUsersForHabit = async (habitID) => {
 
 /**
  * 
- * @param {string} newUserEmail 
- * @param {Habit} habit 
+ * @param {string} sender
+ * @param {string} recipient
+ * @param {Habit | Task} sharedItem 
+ * @param {string?} role
  */
-export const inviteUsertoHabit = async (newUserEmail, habit) => {
-    const habitID = habit.getID()
+
+export const createInvite = async (sender, recipient, sharedItem, role = constants.ROLE.MEMBER) => {
+    try {
+
+        let emailErrMsg = "";
+        if (!isValidEmail(sender)) {
+            emailErrMsg += "Invalid Email: " + sender + "\n";
+        }
+
+        if (!isValidEmail(recipient)) {
+            emailErrMsg += "Invalid Email: " + recipient + "\n";
+        }
+
+        if (emailErrMsg.length > 0) {
+            return {
+                ok: false,
+                error: emailErrMsg,
+            }
+        }
+
+        let ID;
+        let name;
+        if (sharedItem instanceof Habit) {
+            const habit = sharedItem;
+            ID = habit.getID();
+            name = habit.getName();
+
+        } else {
+            const task = sharedItem;
+            ID = task.getTaskID();
+            name = task.getName();
+        }
+
+
+        const invitesCollection = getUserInvitesCollection(recipient);
+        const itemType = sharedItem instanceof Habit ? "habit" : "task"
+
+        const docRef = doc(invitesCollection, ID);
+
+        const inviteInfo = {
+            sender: sender,
+            recipient: recipient,
+            itemType: itemType,
+            itemName: name,
+            itemID: ID,
+            role: role,
+        }
+
+        // If a user is updated multiple times, 
+        await setDoc(docRef, inviteInfo);
+        return {
+            ok: true,
+            message: "Successfully Invited User"
+        }
+
+    } catch (err) {
+        return {
+            ok: false,
+            message: `Failed to create Invite\n` + err.message
+        }
+    }
+}
+
+/**
+ * @param {string} recipient
+ * @param {string} inviteID
+ * @param {"accept" | "reject"} actionType
+ */
+export const invitationAction = async (recipient, inviteID, actionType) => {
+    const invitesCollection = getUserInvitesCollection(recipient);
+    const inviteDoc = doc(invitesCollection, inviteID)
+    const inviteDocSnap = await getDoc(inviteDoc);
+
+    if (!inviteDocSnap.exists()) {
+        return {
+            ok: false,
+            message: "Action rejected: invite ID not found."
+        }
+    }
+
+    const itemData = inviteDocSnap.data();
+    const { itemType, itemID, role } = itemData;
+
+    if (actionType == "accept") {
+        if (itemType == "habit") {
+            const habitID = itemID;
+
+            const habitRes = await getHabitFromID(recipient, habitID);
+            if (!habitRes.ok || !habitRes.data) {
+                return {
+                    ok: false,
+                    message: "Habit not found with ID " + habitID
+                }
+            }
+
+            const habit = habitRes.data;
+            habit.addSharedUser({
+                email: recipient,
+                joinDate: new Date(),
+                role: role
+            })
+
+            /*This is here because we changed the sharedUsers field to the habit, so we must ensure the modification
+             Takes place in the database
+             */
+            let message = "Error Accepting Invite For Habit\n";
+            const updateRes = await updateHabit(recipient, habit, "modify")
+            message += updateRes.message + "\n";
+
+            // Add the Habit to the recipient's habit collection
+            const userCollectionRes = await createHabitInUserCollection(recipient, habit);
+            message += userCollectionRes.message + "\n";
+
+            if (!updateRes.ok || !userCollectionRes.ok) {
+                return {
+                    ok: false, message: message
+                }
+            }
+
+
+        } else if (itemType == "task") {
+            const taskID = itemID;
+            return {
+                ok: false,
+                message: "Task Invitatinos not yet implemented"
+            }
+            // ADD USER TO TASK- TO IMPLEMENT SOON
+
+        } else {
+            return {
+                ok: false,
+                message: "itemType must be 'habit' or 'task'"
+            }
+
+        }
+        // update shared user for habit or task, and remove the invite from the invites collection
+    }
+
+    const delRes = await deleteInvite(recipient, inviteID);
+    if (!delRes.ok) {
+        return {
+            ok: false,
+            message: "Invite Action Error\n" + delRes.message
+        }
+    }
+
+    return {
+        ok: true,
+        message: "Invite status: " + actionType + " Success"
+    }
+
+}
+
+/**
+ * @param {string} recipient 
+ */
+export const getUserInvitesCollection = (recipient) => {
+    return collection(collections.users, recipient, "invites");
+}
+
+/**
+ * @param {string} recipient 
+ * @param {string} inviteID 
+ */
+export const deleteInvite = async (recipient, inviteID) => {
+    try {
+        const invitesCollection = getUserInvitesCollection(recipient)
+        const docRef = doc(invitesCollection, inviteID)
+        await deleteDoc(docRef);
+        return { ok: true, message: "Invite delete success" }
+    } catch (err) {
+        return {
+            ok: false,
+            message: "Error Deleting Invite\n" + err.message,
+        }
+    }
+}
+
+
+/**
+ * 
+ * @param {string} email 
+ */
+export const getInvitesForUser = async (email) => {
+    let data = [];
+    if (isAnonymous(email)) {
+        return {
+            ok: false,
+            data,
+            message: "Anonymous users have no invites"
+        }
+    }
+
+
+    const invitesCollection = getUserInvitesCollection(email);
+    const inviteDocs = await getDocs(invitesCollection);
+    const invites = inviteDocs.docs.map(doc => doc.data())
+    data = invites;
+
+    return {
+        ok: true,
+        data: data,
+        message: "Retrieved Invitations"
+    }
 
 }

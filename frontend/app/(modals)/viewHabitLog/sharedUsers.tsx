@@ -12,8 +12,8 @@ import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { router, useRouter, useFocusEffect } from "expo-router";
 import { useRootNavigationState, Redirect } from "expo-router";
-import { getSharedUsersForHabit } from "@/api/db_ops";
-import { getNicknameFromEmail } from "@/api/types_and_utils";
+import { createInvite, getSharedUsersForHabit } from "@/api/db_ops";
+import { getNicknameFromEmail, isValidEmail } from "@/api/types_and_utils";
 
 const sharedUsers = () => {
   const habit = useContext(HabitContext);
@@ -22,6 +22,7 @@ const sharedUsers = () => {
   const [sharedUsers, setSharedUsers] = useState<Array<any>>([]);
   const habitID = habit.getID();
   const [showingAddEmail, setShowingAddEmail] = useState(false);
+  const [emailRecipient, setEmailRecipient] = useState<string>("");
 
   useFocusEffect(
     useCallback(() => {
@@ -50,7 +51,12 @@ const sharedUsers = () => {
     setShowingAddEmail(false);
   };
 
-  const handleSubmitInviteEmail = () => {
+  const handleSubmitInviteEmail = async () => {
+    const recipient = emailRecipient;
+
+    const res = await createInvite(email, recipient, habit);
+    alert(res.message);
+
     setShowingAddEmail(false);
   };
 
@@ -99,7 +105,13 @@ const sharedUsers = () => {
           display: showingAddEmail ? "flex" : "none",
         }}
       >
-        <TextInput dense label={"Email"} />
+        <TextInput
+          value={emailRecipient}
+          onChangeText={(text) => setEmailRecipient(text)}
+          keyboardType="email-address"
+          dense
+          label={"Email"}
+        />
         <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
           <IconButton icon={"close"} onPress={handleCloseShowingEmail} />
           <IconButton icon={"check"} onPress={handleSubmitInviteEmail} />

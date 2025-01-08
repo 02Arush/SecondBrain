@@ -57,7 +57,7 @@ export default function TabOneScreen() {
   }
 
   const handleNavigateViewInvites = () => {
-    alert("View Invites: Not implemented");
+    router.push("/(modals)/viewInvites");
   };
 
   return (
@@ -77,9 +77,9 @@ export default function TabOneScreen() {
         >
           <Text>
             Signed in As:&nbsp;
-            {cloudUserData?.nickname || email}
+            {!isAnonymous(email) ? (cloudUserData?.nickname || email) : email}
           </Text>
-          <IconButton icon={"email"} onPress={handleNavigateViewInvites} />
+          
         </View>
         <ScrollView style={styles.itemListContainer}>
           {habits.length === 0 && (

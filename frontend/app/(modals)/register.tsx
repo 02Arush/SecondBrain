@@ -17,6 +17,7 @@ import Habit from "@/api/habit";
 import { uploadLocalTasks } from "@/api/taskStorage";
 import { useEffect } from "react";
 import { uploadLocalStorageHabits } from "@/api/storage";
+import { isValidEmail } from "@/api/types_and_utils";
 
 const register = () => {
   // This is here such that the "sync local storage to new account" modal never initially displays
@@ -38,7 +39,7 @@ const register = () => {
   useEffect(() => {}, [email]);
 
   const handleRegister = async () => {
-    const validEmail = emailTxt.length > 0;
+    const validEmail = isValidEmail(emailTxt);
     const validPassword =
       password.length > 0 && password.localeCompare(confirmPassword) === 0;
 
@@ -52,6 +53,8 @@ const register = () => {
         setEmail(emailTxt);
         setShowingLocalStorageSyncModal(true);
       }
+    } else {
+      alert("Ensure the email is valid, and both passwords match.");
     }
   };
 

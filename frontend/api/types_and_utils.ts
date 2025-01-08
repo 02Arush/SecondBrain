@@ -18,7 +18,7 @@ export const limitStringLength = (text: string, length: number = 6): string => {
     return trimmedString;
 }
 
-export const getNicknameFromEmail = (email: string) : string => {
+export const getNicknameFromEmail = (email: string): string => {
     const emailTxt = email.split("@")[0];
     const maxNameLength = Math.min(emailTxt.length, 9);
 
@@ -26,8 +26,11 @@ export const getNicknameFromEmail = (email: string) : string => {
     return nickname;
 }
 
+export const isValidEmail = (email?: string): boolean => {
+    if (!email) return false;
 
-
+    return email.length > 0 && email.includes("@")
+}
 
 /**
  * DATES/TIME
@@ -215,3 +218,4 @@ export const roundToTwoDecimals = (num: number): number => {
 export type habitModificationType = "log" | "modify"
 
 
+export type sharedItemType = "habit" | "task"

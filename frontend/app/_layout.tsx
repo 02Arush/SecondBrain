@@ -131,13 +131,7 @@ function RootLayoutNav() {
             }}
           />
 
-          <Stack.Screen
-            
-            name="(modals)/viewHabitLog/sharedUsers"
-            redirect = {true}
-          />
-
-
+        
         </Stack>
       </AuthProvider>
     </PaperProvider>

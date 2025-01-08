@@ -20,6 +20,23 @@ export default function TabLayout() {
   const theme = useTheme();
   const style = createNavStyle(theme);
 
+  const invitesIcon = () => {
+    return (
+      <Pressable>
+        {({ pressed }) => (
+          <Button
+            icon="email"
+            onPress={() => {
+              router.push("/(modals)/viewInvites");
+            }}
+          >
+            Invites
+          </Button>
+        )}
+      </Pressable>
+    );
+  };
+
   return (
     <Tabs
       screenOptions={{
@@ -40,21 +57,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="calendar" color={color} />
           ),
-          headerRight: () => (
-            <Pressable>
-              {({ pressed }) => (
-                <Button
-                  icon="delete-forever"
-                  textColor={theme.colors.error}
-                  onPress={() => {
-                    router.push("/(modals)/deleteAll");
-                  }}
-                >
-                  Delete All
-                </Button>
-              )}
-            </Pressable>
-          ),
+          headerRight: invitesIcon,
         }}
       />
       <Tabs.Screen
@@ -62,6 +65,7 @@ export default function TabLayout() {
         options={{
           title: "Tasks",
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
+          headerRight: invitesIcon,
         }}
       />
       <Tabs.Screen

@@ -297,22 +297,17 @@ export const uploadLocalStorageHabits = async (email) => {
         return res;
 
     })
-
     const responses = await Promise.all(uploads);
-
     const ok = responses.every((res) => {
         return res.ok
     })
-
     let message = "Successfully Uploaded Habits To Cloud";
-
     if (!ok) {
         message = responses.reduce((acc, response) => {
             const msgToConcat = !(response.ok) ? `${response.message}\n` : "";
             return `${acc}${msgToConcat}`
         }, "")
     }
-
     return { ok, message }
 
 
