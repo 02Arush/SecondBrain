@@ -97,18 +97,12 @@ function RootLayoutNav() {
               headerBackTitle: "Home",
             }}
           />
+          
           <Stack.Screen
             name="(modals)/viewHabitLog"
             options={{ title: "Habit Log", headerBackTitle: "Home" }}
           />
-          <Stack.Screen
-            name="(modals)/deleteAll"
-            options={{
-              title: "Clear All?",
-              headerBackTitle: "Home",
-            }}
-          />
-
+      
           <Stack.Screen
             name="(modals)/register"
             options={{
@@ -129,6 +123,10 @@ function RootLayoutNav() {
             options={{
               title: "Task Visualizer", presentation: "card",
             }}
+          />
+
+          <Stack.Screen 
+            name="(modals)/viewInvites"
           />
 
         

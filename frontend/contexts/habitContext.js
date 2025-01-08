@@ -7,6 +7,7 @@ import Habit from '@/api/habit';
 const HabitProvider = ({ initialHabit, children }) => {
 
     const habit = initialHabit instanceof Habit ? initialHabit : new Habit("NULL_HABIT", "NULL_UNIT")
+    
 
     return (
         <HabitContext.Provider value={habit}>

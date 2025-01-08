@@ -2,7 +2,8 @@
 
 import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays, sharedItemType } from "./types_and_utils";
 
-
+import { sharedUser } from "./types_and_utils";
+// TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
 
 export interface HabitJSON {
     "habitName": string,
@@ -10,7 +11,7 @@ export interface HabitJSON {
     "activityLog": { [key: string]: number },
     "goal"?: habitGoal
     "creationDate"?: Date
-    "sharedUsers"?: string[],
+    "sharedUsers"?: sharedUser[],
     "habitID": string
 }
 
@@ -23,11 +24,11 @@ export default class Habit {
     private goal: HabitGoal | null = null;
     private creationDate: Date;
     private age: number; // Age in days
-    private sharedUsers: string[];
+    private sharedUsers: sharedUser[];
 
 
 
-    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date, habitID?: string, sharedUsers?: string[]) {
+    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date, habitID?: string, sharedUsers?: sharedUser[]) {
         this.habitName = name;
         this.unit = unit;
         this.activityLog = activityLog;
@@ -56,7 +57,7 @@ export default class Habit {
         return new Date();
     }
 
-    getSharedUsers(): Array<string> {
+    getSharedUsers(): Array<sharedUser> {
         return this.sharedUsers;
     }
 
@@ -84,7 +85,7 @@ export default class Habit {
         }
 
 
-        const { habitName, unit, activityLog: activityLogData, creationDate, goal, habitID, sharedUsers} = habitJSON;
+        const { habitName, unit, activityLog: activityLogData, creationDate, goal, habitID, sharedUsers } = habitJSON;
 
         let activityLog;
         try {

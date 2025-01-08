@@ -1,5 +1,6 @@
 import { getColor } from "@/constants/Colors";
 import { constants } from "@/constants/constants"
+import { Timestamp } from "firebase/firestore";
 
 /**
  * STRINGS
@@ -217,5 +218,11 @@ export const roundToTwoDecimals = (num: number): number => {
 
 export type habitModificationType = "log" | "modify"
 
-
 export type sharedItemType = "habit" | "task"
+
+export type sharedUser = {
+    nickname: string,
+    email: string,
+    role: string,
+    joinDate: Date,
+}

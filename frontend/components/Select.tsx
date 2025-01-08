@@ -19,10 +19,15 @@ import React from "react";
 type props = {
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  items: Array<string>;
+  items: Array<selectItem> | Array<string>;
   selectedItem: string;
   setSelectedItem: (item: string) => void;
   mode?: "text" | "button" | "button-box";
+};
+
+export type selectItem = {
+  label?: string;
+  value: string;
 };
 
 const Select = ({
@@ -126,6 +131,15 @@ const Select = ({
                     style={{ width: "100%", borderRadius: itemBorderRadius }}
                   >
                     {items.map((item, index) => {
+                      // const label = item.label || item.value;
+                      // const value = item.value;
+
+                      const label =
+                        typeof item == "string"
+                          ? item
+                          : item.label || item.value;
+                      const value = typeof item == "string" ? item : item.value;
+
                       return (
                         <TouchableRipple
                           key={index}
@@ -133,7 +147,7 @@ const Select = ({
                             height: 40,
                           }}
                           onPress={() => {
-                            closeMenu(item);
+                            closeMenu(value);
                           }}
                         >
                           <View
@@ -156,7 +170,7 @@ const Select = ({
                             <Text
                               style={{ height: "100%", textAlign: "center" }}
                             >
-                              {item}
+                              {label}
                             </Text>
                           </View>
                         </TouchableRipple>
