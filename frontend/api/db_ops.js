@@ -702,6 +702,7 @@ export const getHabitFromID = async (email, id) => {
         // ERROR SOMEWHERE HERE: CAN NOT CONVERT UNDEFINED OR NULL TO OBJECT
         const habitJSON = { ...data, activityLog }
         const habit = Habit.parseHabit(habitJSON)
+        habit.ensureOwnerExists();
 
         return { ok: true, message: "Retrieved Successfully", data: habit }
 
@@ -788,6 +789,7 @@ export const getSharedUsersForHabit = async (habitID) => {
     }
 
     if (sharedUsers) {
+
         return { ok: true, message: `Retrieved Shared Users for habit: ${habitID}`, data: sharedUsers }
     } else {
         return { ok: false, message: `Shared Users does not exist for habit: ${habitID}` }
@@ -1020,7 +1022,7 @@ export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, habi
     if (ROLE_POWERS[newRole] > ROLE_POWERS[signedInUserRole]) {
         return {
             ok: false,
-            message: "You can not assign a user a role of higher power than your own."
+            message: `As a ${signedInUserRole}, you can not change a user to the role ${newRole} because that role is of higher rank than your own. `
         }
     }
 
@@ -1046,6 +1048,14 @@ export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, habi
     }
 
     habit.changeRoleOfUser(modifiedUser, newRole)
+    const newRoleOfUserRes = habit.getRoleOfUser(modifiedUser);
+    const newRoleOfUser = newRoleOfUserRes.data;
+    const roleStayedSame = newRoleOfUser.localeCompare(modifiedUserRole) == 0
+
+    if (roleStayedSame) {
+        return { ok: true, message: "Could not update role of user. Habit needs at least one OWNER." }
+    }
+
     const res = await updateHabit(signedInUser, habit, "modify");
     if (res.ok) {
         return {

@@ -3,6 +3,7 @@ import {
   Text,
   DataTable,
   Button,
+  Portal,
   IconButton,
   TextInput,
 } from "react-native-paper";
@@ -26,6 +27,7 @@ import {
   email,
   getNicknameFromEmail,
   isValidEmail,
+  ensureJSDate,
   sharedUser,
 } from "@/api/types_and_utils";
 import Select, { selectItem } from "@/components/Select";
@@ -86,6 +88,8 @@ const sharedUsers = () => {
     setShowingAddEmail(false);
   };
 
+
+  // TODO: NOTIFY USER IF THEY TRY TO DEMOTE THEMSELVES AS OWNER BUT CAN'T
   const handleChangeRoleOfUser = async (
     modifiedUser: email,
     newRole: string
@@ -97,6 +101,7 @@ const sharedUsers = () => {
       newRole,
       habit
     );
+
     alert(res.message);
     fetchSharedUserData();
   };
@@ -107,18 +112,22 @@ const sharedUsers = () => {
     setVisible: (visible: boolean) => void,
     handleSelectRole: (role: string) => void
   ) => {
-    const email = sharedUser.email;
+    const userEmail = sharedUser.email;
     const role = sharedUser.role;
-    const nickname = getNicknameFromEmail(email);
+    const nickname = getNicknameFromEmail(userEmail);
+    const joinDate = ensureJSDate(sharedUser.joinDate);
     const roles: Array<selectItem> = [
       { label: "OWNER", value: constants.ROLE.OWNER },
       { label: "ADMIN", value: constants.ROLE.ADMIN },
       { label: "MEMBER", value: constants.ROLE.MEMBER },
-      { label: "REMOVE", value: constants.ROLE.NONE },
     ];
 
+    if (userEmail.localeCompare(email) != 0) {
+      roles.push({ label: "REMOVE", value: constants.ROLE.NONE });
+    }
+
     return (
-      <DataTable.Row key={email}>
+      <DataTable.Row key={userEmail}>
         <DataTable.Cell style={styles.nickCell}>{nickname}</DataTable.Cell>
         <DataTable.Cell style={styles.roleCell}>
           {/* <Button onPress={() => handleChangeRoleOfUser(email)}>
@@ -134,8 +143,14 @@ const sharedUsers = () => {
         </DataTable.Cell>
         <DataTable.Cell>
           <View style={styles.actionsCell}>
-            <IconButton size={18} icon={"eye"} />
-            <IconButton size={18} icon={"pencil"} />
+            <IconButton
+              size={18}
+              icon={"eye"}
+              onPress={() => {
+                alert(`Nickname: ${nickname}\nEMAIL: ${userEmail}\nRole: ${role.toUpperCase()}\nJoin Date: ${joinDate.toDateString()}
+              `);
+              }}
+            />
           </View>
         </DataTable.Cell>
       </DataTable.Row>
@@ -164,6 +179,7 @@ const sharedUsers = () => {
 
           const handleSelectRole = async (role: string) => {
             const res = await handleChangeRoleOfUser(email, role);
+            return res;
           };
 
           return TableRow(sharedUser, visible, setVisible, handleSelectRole);
@@ -200,8 +216,6 @@ const styles = StyleSheet.create({
   componentContainer: {
     width: "100%",
     flexDirection: "column",
-    borderWidth: 1,
-    borderColor: "red",
     flex: 1,
   },
 

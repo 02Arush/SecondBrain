@@ -141,6 +141,10 @@ export const isEqualSimpleDate = (date1: SimpleDate, date2: SimpleDate): boolean
     return date1.day === date2.day && date1.month === date2.month && date1.year === date2.year
 }
 
+export const ensureJSDate = (date: Date | Timestamp): Date => {
+    return date instanceof Date ? date : date.toDate();
+}
+
 // MAKE THIS MORE EFFICIENT
 export const stringToTimeFrame = (s: string): timeFrame | null => {
     s = s.trim().toLowerCase();

@@ -1,7 +1,11 @@
 
 
 import constants, { ROLE_POWERS } from "@/constants/constants";
-import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays, sharedItemType } from "./types_and_utils";
+import {
+    stringToTimeFrame,
+    ensureJSDate,
+    timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays, sharedItemType
+} from "./types_and_utils";
 
 import { sharedUser, email } from "./types_and_utils";
 // TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
@@ -523,8 +527,9 @@ export default class Habit {
         if (email in this.sharedUsers) {
             this.sharedUsers[email].role = newRole
         }
-
         this.ensureOwnerExists();
+
+
     }
 
 
@@ -535,11 +540,11 @@ export default class Habit {
 
             // joinDate is either a date or a timestamp: force it to be a date object
 
-            
+
 
             if (roleDiff == 0) {
-                const aJoinDate = a.joinDate instanceof Date? a.joinDate.getTime() : Number(a.joinDate);
-                const bJoinDate = b.joinDate instanceof Date? b.joinDate.getTime() : Number(b.joinDate);
+                const aJoinDate = ensureJSDate(a.joinDate).getTime();
+                const bJoinDate = ensureJSDate(b.joinDate).getTime();
                 // If A's Join Date < B's Join Date, it should come earleir in the list
                 return aJoinDate - bJoinDate;
             } else {
