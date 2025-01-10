@@ -1,8 +1,9 @@
 
 
+import constants, { ROLE_POWERS } from "@/constants/constants";
 import { stringToTimeFrame, timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays, sharedItemType } from "./types_and_utils";
 
-import { sharedUser } from "./types_and_utils";
+import { sharedUser, email } from "./types_and_utils";
 // TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
 
 export interface HabitJSON {
@@ -11,7 +12,7 @@ export interface HabitJSON {
     "activityLog": { [key: string]: number },
     "goal"?: habitGoal
     "creationDate"?: Date
-    "sharedUsers"?: sharedUser[],
+    "sharedUsers"?: { [key: email]: sharedUser },
     "habitID": string
 }
 
@@ -24,11 +25,9 @@ export default class Habit {
     private goal: HabitGoal | null = null;
     private creationDate: Date;
     private age: number; // Age in days
-    private sharedUsers: sharedUser[];
+    private sharedUsers: { [key: email]: sharedUser };
 
-
-
-    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date, habitID?: string, sharedUsers?: sharedUser[]) {
+    constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date, habitID?: string, sharedUsers?: { [key: email]: sharedUser }) {
         this.habitName = name;
         this.unit = unit;
         this.activityLog = activityLog;
@@ -41,7 +40,7 @@ export default class Habit {
 
         this.habitID = habitID || this.habitName + Math.floor((new Date().getTime() / 1000));
         this.age = Math.floor((new Date().getTime() - this.creationDate.getTime()) / (1000 * 60 * 60 * 24));
-        this.sharedUsers = sharedUsers || [];
+        this.sharedUsers = sharedUsers || {};
     }
 
     getAge(): number {
@@ -57,7 +56,7 @@ export default class Habit {
         return new Date();
     }
 
-    getSharedUsers(): Array<sharedUser> {
+    getSharedUsers(): { [key: email]: sharedUser } {
         return this.sharedUsers;
     }
 
@@ -65,8 +64,9 @@ export default class Habit {
         return this.creationDate
     }
 
-    addSharedUser(sharedHabitUser: any) {
-        this.sharedUsers.push(sharedHabitUser)
+    addSharedUser(sharedHabitUser: sharedUser) {
+        const email = sharedHabitUser.email;
+        this.sharedUsers[email] = sharedHabitUser;
     }
 
     static parseHabit = (json: object | string): Habit => {
@@ -386,14 +386,12 @@ export default class Habit {
 
     getJSON(): HabitJSON {
 
-
         const habitJSON: HabitJSON = {
             "habitName": this.habitName,
             "unit": this.unit,
             "activityLog": Object.fromEntries(this.activityLog),
             "creationDate": this.creationDate || this.getFirstActivityDate(),
             "habitID": this.getID(),
-
         }
 
         if (this.goal) {
@@ -500,6 +498,61 @@ export default class Habit {
         return sum / days;
     }
 
+    getRoleOfUser(email: email): { ok: boolean, data: string, message: string } {
+
+        try {
+            const sharedUser = this.sharedUsers[email];
+            const role = sharedUser.role;
+            return { ok: true, data: role, message: "Role found successfully" }
+        } catch (e) {
+            return {
+                ok: false,
+                data: constants.ROLE.MEMBER,
+                message: `Role not found for user: ${email}, habit: ${this.getName()}`
+            }
+        }
+    }
+
+
+    removeSharedUser(email: email) {
+        delete this.sharedUsers[email]
+        this.ensureOwnerExists();
+    }
+
+    changeRoleOfUser(email: email, newRole: string) {
+        if (email in this.sharedUsers) {
+            this.sharedUsers[email].role = newRole
+        }
+
+        this.ensureOwnerExists();
+    }
+
+
+    ensureOwnerExists(): void {
+        const compareSharedUsers = (a: sharedUser, b: sharedUser) => {
+            // If A's Power is higher than B, it should come earlier in the list
+            const roleDiff = ROLE_POWERS[b.role] - ROLE_POWERS[a.role];
+
+            // joinDate is either a date or a timestamp: force it to be a date object
+
+            
+
+            if (roleDiff == 0) {
+                const aJoinDate = a.joinDate instanceof Date? a.joinDate.getTime() : Number(a.joinDate);
+                const bJoinDate = b.joinDate instanceof Date? b.joinDate.getTime() : Number(b.joinDate);
+                // If A's Join Date < B's Join Date, it should come earleir in the list
+                return aJoinDate - bJoinDate;
+            } else {
+                return roleDiff
+            }
+        }
+
+        const values = Object.values(this.getSharedUsers()).sort(compareSharedUsers);
+        const highestPriorityUser = values[0].email;
+        this.sharedUsers[highestPriorityUser].role = constants.ROLE.OWNER
+
+    }
+
 }
 
 
@@ -515,7 +568,6 @@ export class HabitGoal {
         this.timeFrameCount = timeFrameCount;
         this.timeFrameLabel = timeFrameLabel;
     }
-
 
 
     JSON(): habitGoal {
@@ -566,11 +618,6 @@ export class HabitGoal {
         const goalNumber = this.getGoalNumber();
         return goalNumber / days;
     }
-
-
-
-
-
 
 
 }

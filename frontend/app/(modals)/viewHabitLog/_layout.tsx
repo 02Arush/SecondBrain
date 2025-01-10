@@ -10,10 +10,10 @@ import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { getHabit } from "@/api/storage";
 import { HabitProvider } from "@/contexts/habitContext";
-import { ActivityLogProvider } from "@/contexts/activitylogContext";
 import Select from "@/components/Select";
 import { sharedUser } from "@/api/types_and_utils";
 import { selectItem } from "@/components/Select";
+import { email } from "@/api/types_and_utils";
 
 const ViewHabitLogLayout = () => {
   const route = useRouteInfo();
@@ -28,8 +28,8 @@ const ViewHabitLogLayout = () => {
   const [selectedUser, setSelectedUser] = useState(email);
   const [selectedActivityLog, setSelectedActivityLog] = useState({});
 
-  const getEmails = (users: sharedUser[]) => {
-    return users.map((user) => user.email);
+  const getEmails = (users: { [key: string]: sharedUser }) => {
+    return Object.keys(users);
   };
 
   useFocusEffect(
@@ -41,14 +41,7 @@ const ViewHabitLogLayout = () => {
         if (currHabit instanceof Habit) {
           setHabit(currHabit);
           setSharedUsers(getEmails(currHabit.getSharedUsers()));
-          // setSharedUsers(
-          //   currHabit.getSharedUsers().map((user) => {
-          //     return { value: user.email, label: user.nickname || user.email };
-          //   })
-          // );
         } else {
-          /* This is here because on refreshing the page, email and habitID automatically set to anonymous and undefined, so
-           At that point just go back to the home page. This prevents errors. */
           router.navigate("/");
         }
       }
@@ -57,7 +50,6 @@ const ViewHabitLogLayout = () => {
   );
 
   const handleNavigateToEditHabit = async () => {
-    // SWITCH HABIT BACK TO EMAIL'S HABIT
     const initialHabit = await getHabit(email, habit.getID());
     if (initialHabit.data) {
       setHabit(initialHabit.data);
@@ -74,7 +66,13 @@ const ViewHabitLogLayout = () => {
     });
   };
 
-  const handleNavigateToChart = () => {
+  const matchHabitToSelectedUser = async () => {
+    const selectedHabitRes = await getHabit(selectedUser, habit.getID());
+    if (selectedHabitRes.data) setHabit(selectedHabitRes.data);
+  };
+
+  const handleNavigateToChart = async () => {
+    matchHabitToSelectedUser();
     router.replace({
       pathname: "/(modals)/viewHabitLog/barCharts",
       params: {
@@ -84,6 +82,8 @@ const ViewHabitLogLayout = () => {
   };
 
   const handleNavigateToAverages = () => {
+    matchHabitToSelectedUser();
+
     router.replace({
       pathname: "/(modals)/viewHabitLog/averages",
       params: {
@@ -127,29 +127,27 @@ const ViewHabitLogLayout = () => {
 
   return (
     <HabitProvider initialHabit={habit}>
-      <ActivityLogProvider initialActivityLog={selectedActivityLog}>
-        <View style={styles.pageContainer}>
-          <View style={styles.contentContainer}>
-            <View style={styles.heading}>
-              <View style={styles.habitInfo}>
-                {/* Left, habit info */}
-                <View>
-                  <Text>
-                    {habit.getName()}
-                    <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
-                  </Text>
-                  <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
-                </View>
-                {/* Select, Habit Info */}
-                <View
-                  style={{
-                    display:
-                      isPath("averages") || isPath("barCharts")
-                        ? "flex"
-                        : "none",
-                  }}
-                >
-                  {/* HERE: ENABLE USERS TO SELECT A USER TO VIEW */}
+      <View style={styles.pageContainer}>
+        <View style={styles.contentContainer}>
+          <View style={styles.heading}>
+            <View style={styles.habitInfo}>
+              {/* Left, habit info */}
+              <View>
+                <Text>
+                  {habit.getName()}
+                  <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
+                </Text>
+                <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
+              </View>
+              {/* Select, Habit Info */}
+              <View
+                style={{
+                  display:
+                    isPath("averages") || isPath("barCharts") ? "flex" : "none",
+                }}
+              >
+                {/* HERE: ENABLE USERS TO SELECT A USER TO VIEW */}
+                {!isAnonymous(email) && (
                   <Select
                     mode="button-box"
                     visible={sharedUserSelectOpen}
@@ -158,46 +156,40 @@ const ViewHabitLogLayout = () => {
                     selectedItem={selectedUser}
                     setSelectedItem={handleSelectUser}
                   />
-                </View>
-              </View>
-              <View style={styles.habitNavigation}>
-                <IconButton
-                  iconColor={
-                    isPath("editHabit") ? theme.colors.tertiary : "grey"
-                  }
-                  icon="clipboard-edit-outline"
-                  onPress={handleNavigateToEditHabit}
-                />
-                <IconButton
-                  icon="timetable"
-                  onPress={handleNavigateToAverages}
-                  iconColor={
-                    isPath("averages") ? theme.colors.tertiary : "grey"
-                  }
-                ></IconButton>
-                <IconButton
-                  icon="chart-bar"
-                  onPress={handleNavigateToChart}
-                  iconColor={
-                    isPath("barCharts") ? theme.colors.tertiary : "grey"
-                  }
-                />
-                <IconButton
-                  icon="account-group-outline"
-                  onPress={handleNavigateToSharedUsers}
-                  iconColor={
-                    isPath("sharedUsers") ? theme.colors.tertiary : "grey"
-                  }
-                />
+                )}
               </View>
             </View>
-
-            <View style={styles.slotContainer}>
-              <Slot />
+            <View style={styles.habitNavigation}>
+              <IconButton
+                iconColor={isPath("editHabit") ? theme.colors.tertiary : "grey"}
+                icon="clipboard-edit-outline"
+                onPress={handleNavigateToEditHabit}
+              />
+              <IconButton
+                icon="timetable"
+                onPress={handleNavigateToAverages}
+                iconColor={isPath("averages") ? theme.colors.tertiary : "grey"}
+              ></IconButton>
+              <IconButton
+                icon="chart-bar"
+                onPress={handleNavigateToChart}
+                iconColor={isPath("barCharts") ? theme.colors.tertiary : "grey"}
+              />
+              <IconButton
+                icon="account-group-outline"
+                onPress={handleNavigateToSharedUsers}
+                iconColor={
+                  isPath("sharedUsers") ? theme.colors.tertiary : "grey"
+                }
+              />
             </View>
           </View>
+
+          <View style={styles.slotContainer}>
+            <Slot />
+          </View>
         </View>
-      </ActivityLogProvider>
+      </View>
     </HabitProvider>
   );
 };
@@ -210,8 +202,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    // borderWidth: 1,
-    // borderColor: "red",
+
     padding: 8,
     overflowX: "none",
     overflowY: "scroll",

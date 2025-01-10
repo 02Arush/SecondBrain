@@ -18,7 +18,9 @@ import React from "react";
 
 type props = {
   visible: boolean;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setVisible:
+    | React.Dispatch<React.SetStateAction<boolean>>
+    | ((visible: boolean) => void);
   items: Array<selectItem> | Array<string>;
   selectedItem: string;
   setSelectedItem: (item: string) => void;
@@ -72,9 +74,7 @@ const Select = ({
             borderRadius: 4,
             marginHorizontal: 2,
           }}
-          contentStyle={{
-            height: 24,
-          }}
+          contentStyle={{}}
           buttonColor={theme.colors.surfaceVariant}
           textColor={theme.colors.onSurfaceVariant}
           onPress={openMenu}
@@ -119,7 +119,6 @@ const Select = ({
               style={{
                 width: "100%",
                 maxWidth: 700,
-                maxHeight: "50%",
                 borderRadius: itemBorderRadius,
                 justifyContent: "flex-end",
                 flexDirection: "column",

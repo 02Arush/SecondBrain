@@ -107,6 +107,7 @@ export const retrieveTasks = async (email: string, completed: boolean = false, f
 
 export const retrieveLocalStorageTasks = async (completed: boolean | undefined = undefined, filterOption: string = filterOptions.DATE_EARLIEST): Promise<{ ok: boolean, data: any, message: string }> => {
     const taskJSONS = await retrieveData(constants.TASK_LIST);
+
     if (typeof taskJSONS === "string") {
 
         const taskObjArray = JSON.parse(taskJSONS);
@@ -135,12 +136,8 @@ export const retrieveLocalStorageTasks = async (completed: boolean | undefined =
 
     } else {
 
-        const errMsg = `ERR: ${taskJSONS?.error} // Error Retrieving Local Tasks`
-        return {
-            ok: false,
-            data: null,
-            message: errMsg
-        }
+        storeData(constants.TASK_LIST, JSON.stringify([]))
+        return { ok: true, data: [], message: "Task List Initialized" }
     }
 }
 

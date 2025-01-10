@@ -127,6 +127,9 @@ function RootLayoutNav() {
 
           <Stack.Screen 
             name="(modals)/viewInvites"
+            options={{
+              title: "Viewing Invites", presentation: "modal",
+            }}
           />
 
         

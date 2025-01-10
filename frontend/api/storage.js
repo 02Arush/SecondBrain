@@ -42,36 +42,6 @@ export const removeData = async (key) => {
     }
 }
 
-// response: { error: message | false }, otherwise habitObject would be updated on the cloud if the user is signed in, otherwise in local storage
-export const updateHabitObject = async (habitJSONObject, email) => {
-    let habit;
-    try {
-        habit = Habit.parseHabit(habitJSONObject);
-    } catch (e) {
-        return { error: `Invalid habitJSONObject: storage.js/updateHabitObject \n${e}` };
-    }
-
-    let habitList;
-    if (!isAnonymous(email)) {
-        try {
-            const userData = await getUserDataFromEmail(email);
-            habitList = Array.isArray(userData["habitList"]) ? userData["habitList"] : JSON.parse(userData["habitList"]);
-
-            const newHabitList = Habit.updateHabitInHabitList(habit, habitList);
-            const response = await updateUserHabitList(email, newHabitList);
-            if (response.error) {
-                return { error: response.error };
-            } else {
-                return { error: false };
-            }
-        } catch (e) {
-            return { error: `Cloud update failed: ${e.message}` };
-        }
-    }
-
-    // Update habit object in local storage
-
-};
 
 /**
  * 
@@ -158,7 +128,9 @@ const retrieveHabitFromLocalStorage = async (habitID) => {
     const habitList = await retrieveLocalHabitList();
 
     const habitJSON = habitList.find(habit => {
-        return habit.habitID.localeCompare(habitID) == 0;
+
+
+        return habit.habitID && habit.habitID.localeCompare(habitID) == 0;
     })
 
     if (!habitJSON) {
@@ -183,7 +155,6 @@ const retrieveHabitFromLocalStorage = async (habitID) => {
 export const createHabit = async (email, habit) => {
     if (isAnonymous(email)) {
         const res = await insertHabitLocalStorage(habit);
-        const ok = !res.error;
         if (res.ok) {
             return {
                 ok: true,
@@ -195,7 +166,6 @@ export const createHabit = async (email, habit) => {
                 message: `Failed to Create Habit: ${res.error}`
             }
         }
-        // Create offline habit
     } else {
         const res = await createHabitCloud(email, habit);
         return res;

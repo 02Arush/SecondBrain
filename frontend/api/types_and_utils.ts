@@ -221,8 +221,9 @@ export type habitModificationType = "log" | "modify"
 export type sharedItemType = "habit" | "task"
 
 export type sharedUser = {
-    nickname: string,
     email: string,
     role: string,
     joinDate: Date,
 }
+
+export type email = string; 

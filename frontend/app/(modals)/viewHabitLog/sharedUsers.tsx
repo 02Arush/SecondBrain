@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import {
   Text,
   DataTable,
@@ -6,42 +6,68 @@ import {
   IconButton,
   TextInput,
 } from "react-native-paper";
-import React, { useContext, useState, useCallback } from "react";
+import React, {
+  useContext,
+  useState,
+  useCallback,
+  SetStateAction,
+} from "react";
 import { HabitContext } from "@/contexts/habitContext";
 import { AuthContext } from "@/contexts/authContext";
-import { isAnonymous } from "@/constants/constants";
+import constants, { isAnonymous } from "@/constants/constants";
 import { router, useRouter, useFocusEffect } from "expo-router";
 import { useRootNavigationState, Redirect } from "expo-router";
-import { createInvite, getSharedUsersForHabit } from "@/api/db_ops";
-import { getNicknameFromEmail, isValidEmail } from "@/api/types_and_utils";
+import {
+  changeRoleOfUser,
+  createInvite,
+  getSharedUsersForHabit,
+} from "@/api/db_ops";
+import {
+  email,
+  getNicknameFromEmail,
+  isValidEmail,
+  sharedUser,
+} from "@/api/types_and_utils";
+import Select, { selectItem } from "@/components/Select";
 
 const sharedUsers = () => {
   const habit = useContext(HabitContext);
   const { email } = useContext(AuthContext);
   const router = useRouter();
-  const [sharedUsers, setSharedUsers] = useState<Array<any>>([]);
+  const [sharedUsers, setSharedUsers] = useState<{
+    [key: string]: sharedUser;
+  }>({});
   const habitID = habit.getID();
   const [showingAddEmail, setShowingAddEmail] = useState(false);
   const [emailRecipient, setEmailRecipient] = useState<string>("");
+  type userSelectMap = Map<email, boolean>;
+  const [selectVisibilities, setSelectVisibilities] = useState<userSelectMap>();
 
   useFocusEffect(
     useCallback(() => {
       if (isAnonymous(email)) {
         router.back();
+      } else {
+        fetchSharedUserData();
       }
-
-      // Get Shared Users
-      (async () => {
-        const res = await getSharedUsersForHabit(habitID);
-        if (res.ok) {
-          const sharedUsersCloud = res.data || [];
-          setSharedUsers(sharedUsersCloud);
-        } else {
-          alert("Error Retrieving Shared Users:\n" + res.message);
-        }
-      })();
     }, [])
   );
+
+  const fetchSharedUserData = async () => {
+    const res = await getSharedUsersForHabit(habitID);
+    if (res.ok) {
+      const sharedUsersCloud = res.data || {};
+      setSharedUsers(sharedUsersCloud);
+      const keys = Object.keys(sharedUsersCloud);
+      const values = Array(keys.length).fill(false);
+      const newVisibilities = new Map(
+        keys.map((key, index) => [key, values[index]])
+      );
+      setSelectVisibilities(newVisibilities);
+    } else {
+      alert("Error Retrieving Shared Users:\n" + res.message);
+    }
+  };
 
   const handleOpenInviteEmail = () => {
     setShowingAddEmail(true);
@@ -60,19 +86,54 @@ const sharedUsers = () => {
     setShowingAddEmail(false);
   };
 
-  const TableRow = (sharedUser: any) => {
+  const handleChangeRoleOfUser = async (
+    modifiedUser: email,
+    newRole: string
+  ) => {
+    const signedInUser = email;
+    const res = await changeRoleOfUser(
+      signedInUser,
+      modifiedUser,
+      newRole,
+      habit
+    );
+    alert(res.message);
+    fetchSharedUserData();
+  };
+
+  const TableRow = (
+    sharedUser: sharedUser,
+    visible: boolean,
+    setVisible: (visible: boolean) => void,
+    handleSelectRole: (role: string) => void
+  ) => {
     const email = sharedUser.email;
     const role = sharedUser.role;
-    const nickname = sharedUser.nickname || getNicknameFromEmail(email);
+    const nickname = getNicknameFromEmail(email);
+    const roles: Array<selectItem> = [
+      { label: "OWNER", value: constants.ROLE.OWNER },
+      { label: "ADMIN", value: constants.ROLE.ADMIN },
+      { label: "MEMBER", value: constants.ROLE.MEMBER },
+      { label: "REMOVE", value: constants.ROLE.NONE },
+    ];
 
     return (
       <DataTable.Row key={email}>
-        <DataTable.Cell style={{ flex: 3 }}>{nickname}</DataTable.Cell>
-        <DataTable.Cell style={{ flex: 1 }}>
-          <Text>{role.toUpperCase()}</Text>
+        <DataTable.Cell style={styles.nickCell}>{nickname}</DataTable.Cell>
+        <DataTable.Cell style={styles.roleCell}>
+          {/* <Button onPress={() => handleChangeRoleOfUser(email)}>
+            {role.toUpperCase()}
+          </Button> */}
+          <Select
+            visible={visible}
+            items={roles}
+            setVisible={setVisible}
+            selectedItem={sharedUser.role.toUpperCase()}
+            setSelectedItem={handleSelectRole}
+          />
         </DataTable.Cell>
         <DataTable.Cell>
-          <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+          <View style={styles.actionsCell}>
             <IconButton size={18} icon={"eye"} />
             <IconButton size={18} icon={"pencil"} />
           </View>
@@ -85,15 +146,27 @@ const sharedUsers = () => {
     <View style={styles.componentContainer}>
       <DataTable>
         <DataTable.Header>
-          <DataTable.Cell style={{ flex: 3 }}>Nickname</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 1 }}>Role</DataTable.Cell>
-          <DataTable.Cell style={{ flex: 1, justifyContent: "flex-end" }}>
-            Actions
-          </DataTable.Cell>
+          <DataTable.Cell style={styles.nickCell}>Nickname</DataTable.Cell>
+          <DataTable.Cell style={styles.roleCell}>Role</DataTable.Cell>
+          <DataTable.Cell style={styles.actionsCell}>Actions</DataTable.Cell>
           {/* TODO: In Future, role should be dropdown that lets you change the user's role */}
         </DataTable.Header>
-        {sharedUsers.map((sharedUser) => {
-          return TableRow(sharedUser);
+        {Object.values(sharedUsers).map((sharedUser) => {
+          const email = sharedUser.email;
+          const visible = selectVisibilities?.get(email) || false;
+          const setVisible = (visible: boolean) => {
+            setSelectVisibilities((prev) => {
+              const newMap = new Map(prev || new Map());
+              newMap.set(email, visible);
+              return newMap;
+            });
+          };
+
+          const handleSelectRole = async (role: string) => {
+            const res = await handleChangeRoleOfUser(email, role);
+          };
+
+          return TableRow(sharedUser, visible, setVisible, handleSelectRole);
         })}
       </DataTable>
       <Button onPress={handleOpenInviteEmail}>Invite New User</Button>
@@ -134,9 +207,15 @@ const styles = StyleSheet.create({
 
   row: {},
 
-  nickCell: {},
+  nickCell: { flex: 2 },
 
-  roleCell: {},
+  roleCell: { flex: 1 },
+
+  actionsCell: {
+    flexDirection: "row",
+    flex: 1,
+    justifyContent: "center",
+  },
 
   emailCell: {},
 });

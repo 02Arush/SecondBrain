@@ -9,17 +9,17 @@ import {
     getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
     signInWithEmailAndPassword, signOut, setPersistence, getReactNativePersistence, initializeAuth, deleteUser
 } from 'firebase/auth';
-import { getDocs, getFirestore, query, where } from 'firebase/firestore'
+import { getDocs, getFirestore, query, updateDoc, where } from 'firebase/firestore'
 import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
 import Habit from "./habit";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from "react-native";
 import Task from "./task";
-import { isAnonymous } from "@/constants/constants";
+import { ROLE_POWERS, isAnonymous } from "@/constants/constants";
 import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail } from "./types_and_utils";
 import { sharedItemType } from "./types_and_utils";
 import constants from "@/constants/constants";
-
+import { sharedUser } from "./types_and_utils";
 
 
 const firebaseConfig = {
@@ -222,6 +222,7 @@ export const updateHabit = async (email, habit, type) => {
 
         await setDoc(habitDocRef, newHabitJSON, { merge: true })
 
+
         return {
             ok: true,
             message: "Modification Complete"
@@ -320,11 +321,6 @@ export const deleteAccount = async (email, password) => {
         return { error: err.code, message: err.message };
     }
 };
-
-
-export const removeHabit = (username, habitItem) => {
-
-}
 
 /**
  * 
@@ -585,9 +581,10 @@ export const createHabit = async (email, habit) => {
 
         // create in habits collection
         const docRefHabit = doc(collections.habits, habitID);
-        const sharedUsers = [
-            { email: email, role: constants.ROLE.OWNER, joinDate: new Date(), nickname: nickname }
-        ]
+
+        const sharedUsers = {
+            [email]: { email: email, role: constants.ROLE.OWNER, joinDate: new Date() }
+        }
 
         const docDataHabit = {
             habitName: habit.getName(),
@@ -732,26 +729,18 @@ export const deleteHabit = async (email, habit) => {
         await deleteDoc(docToDelete);
 
         // Now, remove the user from the sharedUsers array in habit
-        const sharedUsersRes = await getSharedUsersForHabit(id);
-
-        if (!sharedUsersRes.data || !Array.isArray(sharedUsersRes.data)) {
-            return { ok: false, message: sharedUsersRes.message }
-        }
-
-        const sharedUsers = sharedUsersRes.data;
-
-        const newSharedUsers = sharedUsers.filter((userItem) => {
-            return userItem["email"] != email;
-        })
 
 
-        if (newSharedUsers.length <= 0) {
+        habit.removeSharedUser(email);
+        if (Object.keys(habit.getSharedUsers()).length <= 0) {
             const habitDocToDel = doc(collections.habits, id);
             await deleteDoc(habitDocToDel);
         } else {
-            const newData = { sharedUsers: newSharedUsers }
-            const habitDocToModify = doc(collections.habits, id);
-            await setDoc(habitDocToModify, newData, { merge: true })
+
+            const sharedUsers = habit.getSharedUsers();
+            const docRef = doc(collections.habits, id);
+            await updateDoc(docRef, { sharedUsers: sharedUsers })
+
         }
 
         return { ok: true, message: `Successfully Deleted Habit: ${habit.getName()}` }
@@ -762,7 +751,6 @@ export const deleteHabit = async (email, habit) => {
             message: `Error Deleting Habit: ${habit} for Email: ${email}. ERROR MESSAGE: ${err.message}`
         }
     }
-
 }
 
 const getUserHabitsCollection = (email) => {
@@ -784,10 +772,25 @@ export const getSharedUsersForHabit = async (habitID) => {
     const habitData = docSnap.data();
     const sharedUsers = habitData["sharedUsers"];
 
-    if (sharedUsers && Array.isArray(sharedUsers)) {
+    if (Array.isArray(sharedUsers)) {
+        const sharedMap = {};
+        sharedUsers.forEach((sharedUser) => {
+            const { email } = sharedUser;
+            sharedMap[email] = sharedUser;
+        })
+
+        await setDoc(habitDocRef, {
+            sharedUsers: sharedMap
+        }, { merge: true })
+
+        return getSharedUsersForHabit(habitID);
+
+    }
+
+    if (sharedUsers) {
         return { ok: true, message: `Retrieved Shared Users for habit: ${habitID}`, data: sharedUsers }
     } else {
-        return { ok: false, message: `Shared Users does not exist, or is not an array for habit: ${habitID}` }
+        return { ok: false, message: `Shared Users does not exist for habit: ${habitID}` }
     }
 }
 
@@ -991,7 +994,6 @@ export const getInvitesForUser = async (email) => {
         }
     }
 
-
     const invitesCollection = getUserInvitesCollection(email);
     const inviteDocs = await getDocs(invitesCollection);
     const invites = inviteDocs.docs.map(doc => doc.data())
@@ -1004,3 +1006,59 @@ export const getInvitesForUser = async (email) => {
     }
 
 }
+
+/**
+ * @param {email} signedInUser
+ * @param {email} modifiedUser
+ * @param {string} newRole
+ * @param {Habit} habit
+ */
+export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, habit) => {
+    const signedInUserRole = habit.getRoleOfUser(signedInUser).data;
+    const modifiedUserRole = habit.getRoleOfUser(modifiedUser).data;
+
+    if (ROLE_POWERS[newRole] > ROLE_POWERS[signedInUserRole]) {
+        return {
+            ok: false,
+            message: "You can not assign a user a role of higher power than your own."
+        }
+    }
+
+    const userRoleHighEnough = ROLE_POWERS[signedInUserRole] > ROLE_POWERS[modifiedUserRole]
+    const userIsOwner = signedInUserRole == constants.ROLE.OWNER
+
+    if (!(userRoleHighEnough || userIsOwner)) {
+        return {
+            ok: false,
+            message: `You do not have the power to complete this operation.\n
+            Your role: ${signedInUserRole.toUpperCase()}, ${modifiedUser}'s role: ${modifiedUserRole.toUpperCase()}`
+        }
+    }
+
+    if (newRole == constants.ROLE.NONE) {
+        const res = await deleteHabit(modifiedUser, habit)
+        if (!res.ok) {
+            return { ok: false, message: "Unable to remove from habit:\n" + res.message }
+        } else {
+
+            return { ok: true, message: "Successfully removed user from habit" }
+        }
+    }
+
+    habit.changeRoleOfUser(modifiedUser, newRole)
+    const res = await updateHabit(signedInUser, habit, "modify");
+    if (res.ok) {
+        return {
+            ok: true,
+            message: `Successfully Changed ${modifiedUser}'s role to ${newRole}`
+        }
+
+    } else {
+        return {
+            ok: false,
+            message: "Failed to modify user role.\n" + res.message
+        }
+    }
+
+}
+

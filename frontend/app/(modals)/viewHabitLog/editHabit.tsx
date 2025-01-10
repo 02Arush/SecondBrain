@@ -11,11 +11,9 @@ import {
   Divider,
   TextInput,
 } from "react-native-paper";
-import { updateHabitObject, deleteHabit, updateHabit } from "@/api/storage";
+import { deleteHabit, updateHabit } from "@/api/storage";
 import { AuthContext } from "@/contexts/authContext";
 import {
-  copySimpleDate,
-  filterTextToDecimal,
   filterTextToInteger,
   getDateFromSimpleDate,
   getSimpleDateFromDate,
@@ -111,15 +109,6 @@ const editHabit = () => {
     const currSetQty = Number(qtyToSet) || 0;
     const newSetQty = currSetQty + changeAmount;
     handleEditSetQty(newSetQty.toString());
-  };
-
-  const handleUpdateHabit = async () => {
-    const response = await updateHabitObject(habit.getJSON(), email);
-    if (response && response.error) {
-      alert("Submission response error: " + response.error);
-    } else {
-      handleSetDateToUpdate(getSimpleDateFromDate(new Date()));
-    }
   };
 
   const handleLogHabitData = async () => {
