@@ -9,6 +9,7 @@ import {
   timeFrame,
 } from "@/api/types_and_utils";
 
+import Select from "@/components/Select";
 import { HabitContext } from "@/contexts/habitContext";
 
 const averages = () => {
@@ -16,9 +17,18 @@ const averages = () => {
   //   new Habit("NULL_NAME", "NULL_UNIT")
   // );
   const theme = useTheme();
-  const [timeFrame, setTimeFrame] = useState<timeFrame>("day");
   // const { habit } = useContext(HabitContext);
   const habit = useContext(HabitContext);
+  const [selectOpen, setSelectOpen] = useState(false);
+  const timeFrames: timeFrame[] = ["day", "week", "month", "year"];
+  const [timeFrame, setTimeFrame] = useState<timeFrame>(timeFrames[0]);
+
+  const handleChangeTimeFrame = (newTimeFrame: string) => {
+    const tf = newTimeFrame as timeFrame;
+    if (timeFrames.includes(tf)) {
+      setTimeFrame(tf);
+    }
+  };
 
   const TableRows = () => {
     const tableTimeframes = [
@@ -210,7 +220,19 @@ const averages = () => {
           <DataTable.Header>
             <DataTable.Title>Time Window</DataTable.Title>
             <DataTable.Title>Total</DataTable.Title>
-            <DataTable.Title>Avg/TimeFrame</DataTable.Title>
+            <DataTable.Title>
+              <Text>
+                Avg/
+                <Select
+                  mode="text"
+                  visible={selectOpen}
+                  setVisible={setSelectOpen}
+                  items={timeFrames}
+                  selectedItem={timeFrame}
+                  setSelectedItem={handleChangeTimeFrame}
+                />
+              </Text>
+            </DataTable.Title>
           </DataTable.Header>
           <TableRows />
         </DataTable>

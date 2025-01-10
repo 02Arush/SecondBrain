@@ -608,7 +608,6 @@ export const createHabit = async (email, habit) => {
         }
     }
 
-    // create in habits collection
 }
 
 /**
