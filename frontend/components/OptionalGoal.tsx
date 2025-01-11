@@ -18,7 +18,7 @@ type props = {
   viewStyle?: object;
 };
 
-const OptionalGoal = ({ goal, setGoal, unit, viewStyle }: props) => {
+const OptionalGoal = ({ goal, setGoal, unit = "unit", viewStyle }: props) => {
   const [timeFrameSelectVisible, setTimeFrameSelectVisible] = useState(false);
   const [goalChecked, setGoalChecked] = useState<"checked" | "unchecked">(
     "checked"
@@ -77,7 +77,7 @@ const OptionalGoal = ({ goal, setGoal, unit, viewStyle }: props) => {
             onPress={toggleGoalChecked}
           />
           <Text variant="bodyLarge" style={{ fontWeight: "bold" }}>
-            Goal Frequency
+            Set Goal?
           </Text>
         </View>
         {goalChecked.localeCompare("checked") === 0 && (
@@ -136,13 +136,14 @@ const OptionalGoal = ({ goal, setGoal, unit, viewStyle }: props) => {
                 );
               }}
             />
+            &nbsp;
             <Select
               visible={timeFrameSelectVisible}
               setVisible={setTimeFrameSelectVisible}
               items={["Day", "Week", "Month", "Year"]}
               selectedItem={selectedTimeFrame.toUpperCase()}
               setSelectedItem={handleSelectItem}
-              mode="button"
+              mode="text"
             />
           </View>
         )}

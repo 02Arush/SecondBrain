@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, Tabs, router } from "expo-router";
 import { Pressable } from "react-native";
 import { createNavStyle } from "@/components/createNavigationStyle";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
-import { Button, Icon, IconButton, useTheme } from "react-native-paper";
+import { Button, Icon, IconButton, useTheme, Badge } from "react-native-paper";
 import { useColorScheme } from "react-native";
-
+import { AuthContext } from "@/contexts/authContext";
+import { getInvitesForUser } from "@/api/db_ops";
+import { View } from "react-native";
+import { useFocusEffect } from "expo-router";
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>["name"];
@@ -19,21 +22,31 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
   const style = createNavStyle(theme);
+  const { email } = useContext(AuthContext);
+  const [numInvites, setNumInvites] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const invitesRes = await getInvitesForUser(email);
+        setNumInvites(invitesRes.data.length);
+      })();
+    }, [email])
+  );
 
   const invitesIcon = () => {
     return (
-      <Pressable>
-        {({ pressed }) => (
-          <Button
-            icon="email"
-            onPress={() => {
-              router.push("/(modals)/viewInvites");
-            }}
-          >
-            Invites
-          </Button>
-        )}
-      </Pressable>
+      <View>
+        {numInvites > 0 && <Badge>{numInvites}</Badge>}
+        <IconButton
+          style={{ marginTop: -10 }}
+          icon="email"
+          onPress={() => {
+            router.push("/(modals)/viewInvites");
+          }}
+          size={30}
+        />
+      </View>
     );
   };
 

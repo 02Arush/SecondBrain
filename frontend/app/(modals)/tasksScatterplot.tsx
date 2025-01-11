@@ -11,7 +11,6 @@ import { useFocusEffect } from "expo-router";
 import { DataPoint } from "@/api/types_and_utils";
 import { isAnonymous } from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
-import { getTasksForUser } from "@/api/db_ops";
 import { retrieveTasks } from "@/api/taskStorage";
 import Task from "@/api/task";
 import ScatterPlot from "@/components/Scatterplot";
@@ -38,7 +37,7 @@ const tasksScatterplot = () => {
             const currDate = new Date();
 
             // MORE urgent is CLOSER to ZERO (Because we want it on the LEFT side)
-            let urgency: number = 10; // Default urgency if no deadline is provided (Furthest Right)
+            let urgency: number = 9; // Default urgency if no deadline is provided (Furthest Right)
 
             if (deadline) {
               const deadlineDate = new Date(deadline); // Ensure the deadline is a Date object
@@ -48,7 +47,7 @@ const tasksScatterplot = () => {
 
               // Normalize to a 0-10 scale
               urgency = Math.max(0, daysUntilDeadline); // If past deadline, move urgency to zero
-              urgency = Math.min(urgency, 9); // If > 10 days til deadline, move urgency to 10
+              urgency = Math.min(urgency, 8); // If >= 8 days til deadline, move urgency to 8
 
               // 10 days or more gives it further right on urgency
             }
