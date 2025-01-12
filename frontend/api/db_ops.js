@@ -303,7 +303,7 @@ export const deleteAccount = async (email, password) => {
     }
 
     const user = auth.currentUser;
-    
+
     // Ensure the React state auth context email matches the Firebase signed-in email
     if (user.email !== email) {
         return {

@@ -520,7 +520,9 @@ export default class Habit {
 
     removeSharedUser(email: email) {
         delete this.sharedUsers[email]
-        this.ensureOwnerExists();
+
+        if (Object.keys(this.sharedUsers).length > 0)
+            this.ensureOwnerExists();
     }
 
     changeRoleOfUser(email: email, newRole: string) {
@@ -539,8 +541,6 @@ export default class Habit {
             const roleDiff = ROLE_POWERS[b.role] - ROLE_POWERS[a.role];
 
             // joinDate is either a date or a timestamp: force it to be a date object
-
-
 
             if (roleDiff == 0) {
                 const aJoinDate = ensureJSDate(a.joinDate).getTime();
