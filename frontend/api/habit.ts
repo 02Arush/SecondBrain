@@ -14,7 +14,7 @@ export interface HabitJSON {
     "habitName": string,
     "unit": string | null,
     "activityLog": { [key: string]: number },
-    "goal"?: habitGoal
+    "goal"?: habitGoal | null,
     "creationDate"?: Date
     "sharedUsers"?: { [key: email]: sharedUser },
     "habitID": string
@@ -45,6 +45,10 @@ export default class Habit {
         this.habitID = habitID || this.habitName + Math.floor((new Date().getTime() / 1000));
         this.age = Math.floor((new Date().getTime() - this.creationDate.getTime()) / (1000 * 60 * 60 * 24));
         this.sharedUsers = sharedUsers || {};
+    }
+
+    setName(name: string) {
+        this.habitName = name;
     }
 
     getAge(): number {
@@ -400,6 +404,8 @@ export default class Habit {
 
         if (this.goal) {
             habitJSON["goal"] = this.goal.JSON()
+        } else {
+            habitJSON["goal"] = null;
         }
 
         if (this.sharedUsers) {

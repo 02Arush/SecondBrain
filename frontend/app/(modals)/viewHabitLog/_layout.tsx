@@ -1,20 +1,29 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState, useCallback, useContext } from "react";
+import React, { useState, useCallback, useContext, useEffect } from "react";
 import { Slot, router } from "expo-router";
 import { useLocalSearchParams, useRouteInfo } from "expo-router/build/hooks";
-import { Text, IconButton, Icon, useTheme } from "react-native-paper";
+import { CustomSurface as Surface } from "@/components/CustomSurface";
+import {
+  Text,
+  IconButton,
+  Icon,
+  useTheme,
+  TextInput,
+  Button,
+} from "react-native-paper";
 import { useFocusEffect } from "expo-router";
 import Habit from "@/api/habit";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
-import { getHabit } from "@/api/storage";
+import { getHabit, updateHabit } from "@/api/storage";
 import { HabitProvider } from "@/contexts/habitContext";
 import Select from "@/components/Select";
 import { sharedUser } from "@/api/types_and_utils";
 import { selectItem } from "@/components/Select";
 import { email } from "@/api/types_and_utils";
-
+import OptionalGoal from "@/components/OptionalGoal";
+import OutlineModal from "@/components/OutlineModal";
 const ViewHabitLogLayout = () => {
   const route = useRouteInfo();
   const { habitID } = useLocalSearchParams<{ habitID: string }>();
@@ -26,11 +35,21 @@ const ViewHabitLogLayout = () => {
   // const [sharedUsers, setSharedUsers] = useState<selectItem[]>([]);
   const [sharedUsers, setSharedUsers] = useState<string[]>([]);
   const [selectedUser, setSelectedUser] = useState(email);
-  const [selectedActivityLog, setSelectedActivityLog] = useState({});
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [habitNameTxt, setHabitNameTxt] = useState(habit.getName());
+  const [habitUnitTxt, setHabitUnitTxt] = useState(habit.getUnit());
+  const [goal, setGoal] = useState(habit.getGoal());
 
   const getEmails = (users: { [key: string]: sharedUser }) => {
     return Object.keys(users);
   };
+
+  useEffect(() => {
+    setHabitNameTxt(habit.getName());
+    setHabitUnitTxt(habit.getUnit());
+    setSharedUsers(getEmails(habit.getSharedUsers()));
+    setGoal(habit.getGoal());
+  }, [habit]);
 
   useFocusEffect(
     useCallback(() => {
@@ -40,7 +59,6 @@ const ViewHabitLogLayout = () => {
         setSelectedUser(email);
         if (currHabit instanceof Habit) {
           setHabit(currHabit);
-          setSharedUsers(getEmails(currHabit.getSharedUsers()));
         } else {
           router.navigate("/");
         }
@@ -118,9 +136,30 @@ const ViewHabitLogLayout = () => {
     if (relativeHabitRes.ok && relativeHabitRes.data) {
       const habit = relativeHabitRes.data;
       const respectiveActivityLog = habit.getActivityLog();
-      setSelectedActivityLog(respectiveActivityLog);
       setHabit(habit);
     }
+  };
+
+  const handleCancelEdits = () => {
+    setEditModalOpen(false);
+  };
+
+  const handleCloseEditsModal = async (save: boolean) => {
+    if (save) {
+      // Get the field data
+      const newName = habitNameTxt;
+      const newUnit = habitUnitTxt;
+      const newGoal = goal;
+
+      habit.setUnit(newUnit);
+      habit.setGoal(newGoal);
+      habit.setName(newName);
+
+      const res = await updateHabit(email, habit, "modify");
+      alert(res.message);
+    }
+
+    setEditModalOpen(false);
   };
 
   const theme = useTheme();
@@ -130,12 +169,21 @@ const ViewHabitLogLayout = () => {
       <View style={styles.pageContainer}>
         <View style={styles.contentContainer}>
           <View style={styles.heading}>
+            {/* Habit Info */}
             <View style={styles.habitInfo}>
-              <Text variant="bodyLarge">
-                {habit.getName()}
-                <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
-              </Text>
-              <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
+              <View style={styles.habitInfoLeft}>
+                <Text variant="bodyLarge">
+                  {habit.getName()}
+                  <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
+                </Text>
+                <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
+              </View>
+              <View style={styles.habitInfoRight}>
+                <IconButton
+                  icon="pencil"
+                  onPress={() => setEditModalOpen(true)}
+                />
+              </View>
             </View>
             <View
               style={{
@@ -192,6 +240,30 @@ const ViewHabitLogLayout = () => {
           </View>
         </View>
       </View>
+      <OutlineModal showing={editModalOpen}>
+        <Surface style={{ padding: 12 }}>
+          <TextInput
+            label={"Habit Name"}
+            value={habitNameTxt}
+            onChangeText={setHabitNameTxt}
+          />
+          <TextInput
+            label={"Unit"}
+            value={habitUnitTxt}
+            onChangeText={setHabitUnitTxt}
+          />
+          <OptionalGoal goal={goal} setGoal={setGoal} unit={habitUnitTxt} />
+          <View style={styles.editModalActions}>
+            <Button onPress={() => handleCloseEditsModal(false)}>Cancel</Button>
+            <Button
+              onPress={() => handleCloseEditsModal(true)}
+              mode="contained"
+            >
+              Save
+            </Button>
+          </View>
+        </Surface>
+      </OutlineModal>
     </HabitProvider>
   );
 };
@@ -231,10 +303,22 @@ const styles = StyleSheet.create({
   },
 
   habitInfo: {
-    flexDirection: "column",
-    justifyContent: "flex-start",
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
     marginBottom: 4,
+  },
+
+  habitInfoLeft: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  habitInfoRight: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   habitNavigation: {
@@ -252,5 +336,11 @@ const styles = StyleSheet.create({
   selectEmailContainer: {
     flexDirection: "row",
     justifyContent: "center",
+  },
+
+  editModalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
 });

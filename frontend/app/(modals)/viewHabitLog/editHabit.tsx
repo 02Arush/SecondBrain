@@ -22,9 +22,6 @@ import {
 } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import { SimpleDate } from "@/api/types_and_utils";
-import OptionalGoal from "@/components/OptionalGoal";
-import { HabitGoal } from "@/api/habit";
-import OutlineModal from "@/components/OutlineModal";
 // import { SegmentedButtons } from "react-native-paper";
 import SegmentedButtons from "@/components/SegmentedButtons";
 import { HabitContext } from "@/contexts/habitContext";
@@ -53,6 +50,8 @@ const editHabit = () => {
   const [qtyToSet, setQtyToSet] = useState(
     habit.getCountOfDate(dateToUpdate).toString()
   );
+
+  const [editModalOpen, setEditModalOpen] = useState(true);
 
   useEffect(() => {
     // This is here to ensure that whenever I update the date, or update qtyToSet, I allow myself to save unsaved changes
@@ -159,9 +158,6 @@ const editHabit = () => {
 
           justifyContent: "flex-start",
           alignItems: "center",
-          //   borderBottomWidth: 1,
-          //   borderBottomColor: "grey",
-          //   marginBottom: 2,
         }}
       >
         <View style={styles.row}>
@@ -289,8 +285,6 @@ export default editHabit;
 
 const styles = StyleSheet.create({
   container: {
-    // borderWidth: 1,
-    // borderColor: "red",
     flexDirection: "column",
     paddingVertical: 8,
     paddingHorizontal: 16,

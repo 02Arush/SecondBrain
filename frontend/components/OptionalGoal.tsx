@@ -21,7 +21,7 @@ type props = {
 const OptionalGoal = ({ goal, setGoal, unit = "unit", viewStyle }: props) => {
   const [timeFrameSelectVisible, setTimeFrameSelectVisible] = useState(false);
   const [goalChecked, setGoalChecked] = useState<"checked" | "unchecked">(
-    "checked"
+    goal instanceof HabitGoal ? "checked" : "unchecked"
   );
 
   const respectedGoal = goal ? goal : new HabitGoal(1, "Units", 1, "day");
