@@ -63,7 +63,7 @@ const Select = ({
           }}
           onPress={openMenu}
         >
-          {selectedItem}
+          {selectedItem.toUpperCase()}
         </Text>
       );
     } else if (mode === "button-box") {
@@ -74,12 +74,13 @@ const Select = ({
             borderRadius: 4,
             marginHorizontal: 2,
           }}
-          contentStyle={{}}
+          icon={"chevron-down"}
+          contentStyle={{ flexDirection: "row-reverse" }}
           buttonColor={theme.colors.surfaceVariant}
           textColor={theme.colors.onSurfaceVariant}
           onPress={openMenu}
         >
-          {selectedItem}
+          {selectedItem.toUpperCase()}
         </Button>
       );
     } else {
@@ -169,7 +170,7 @@ const Select = ({
                             <Text
                               style={{ height: "100%", textAlign: "center" }}
                             >
-                              {label}
+                              {label.toUpperCase()}
                             </Text>
                           </View>
                         </TouchableRipple>

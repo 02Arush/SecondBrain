@@ -220,9 +220,17 @@ const averages = () => {
           <DataTable.Header>
             <DataTable.Title>Time Window</DataTable.Title>
             <DataTable.Title>Total</DataTable.Title>
-            <DataTable.Title>
-              <Text>
-                Avg/
+            <DataTable.Title
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <View>
+                <Text>Avg/</Text>
+              </View>
+              <View>
                 <Select
                   mode="text"
                   visible={selectOpen}
@@ -231,7 +239,7 @@ const averages = () => {
                   selectedItem={timeFrame}
                   setSelectedItem={handleChangeTimeFrame}
                 />
-              </Text>
+              </View>
             </DataTable.Title>
           </DataTable.Header>
           <TableRows />

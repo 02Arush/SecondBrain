@@ -136,7 +136,8 @@ const OptionalGoal = ({ goal, setGoal, unit = "unit", viewStyle }: props) => {
                 );
               }}
             />
-            &nbsp;
+            <Text>&nbsp;</Text>
+
             <Select
               visible={timeFrameSelectVisible}
               setVisible={setTimeFrameSelectVisible}

@@ -131,33 +131,30 @@ const ViewHabitLogLayout = () => {
         <View style={styles.contentContainer}>
           <View style={styles.heading}>
             <View style={styles.habitInfo}>
-              {/* Left, habit info */}
-              <View>
-                <Text>
-                  {habit.getName()}
-                  <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
-                </Text>
-                <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
-              </View>
-              {/* Select, Habit Info */}
-              <View
-                style={{
-                  display:
-                    isPath("averages") || isPath("barCharts") ? "flex" : "none",
-                }}
-              >
-                {/* HERE: ENABLE USERS TO SELECT A USER TO VIEW */}
-                {!isAnonymous(email) && (
-                  <Select
-                    mode="button-box"
-                    visible={sharedUserSelectOpen}
-                    setVisible={setSharedUserSelectOpen}
-                    items={sharedUsers}
-                    selectedItem={selectedUser}
-                    setSelectedItem={handleSelectUser}
-                  />
-                )}
-              </View>
+              <Text variant="bodyLarge">
+                {habit.getName()}
+                <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
+              </Text>
+              <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
+            </View>
+            <View
+              style={{
+                display:
+                  isPath("averages") || isPath("barCharts") ? "flex" : "none",
+                ...styles.selectEmailContainer,
+              }}
+            >
+              {/* HERE: ENABLE USERS TO SELECT A USER TO VIEW */}
+              {!isAnonymous(email) && (
+                <Select
+                  mode="button-box"
+                  visible={sharedUserSelectOpen}
+                  setVisible={setSharedUserSelectOpen}
+                  items={sharedUsers}
+                  selectedItem={selectedUser}
+                  setSelectedItem={handleSelectUser}
+                />
+              )}
             </View>
             <View style={styles.habitNavigation}>
               <IconButton
@@ -182,6 +179,11 @@ const ViewHabitLogLayout = () => {
                   isPath("sharedUsers") ? theme.colors.tertiary : "grey"
                 }
               />
+            </View>
+            <View style={styles.habitInfo}>
+              {/* Left, habit info */}
+              <View></View>
+              {/* Select, Habit Info */}
             </View>
           </View>
 
@@ -229,9 +231,10 @@ const styles = StyleSheet.create({
   },
 
   habitInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "column",
+    justifyContent: "flex-start",
     alignItems: "center",
+    marginBottom: 4,
   },
 
   habitNavigation: {
@@ -244,5 +247,10 @@ const styles = StyleSheet.create({
     flex: 1,
     // borderWidth: 1,
     // borderColor: "red",
+  },
+
+  selectEmailContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });
