@@ -43,7 +43,7 @@ const OptionalGoal = ({ goal, setGoal, unit = "unit", viewStyle }: props) => {
       )
     );
   };
-
+  
   const toggleGoalChecked = () => {
     if (goalChecked === "checked") {
       setGoalChecked("unchecked");
@@ -62,6 +62,8 @@ const OptionalGoal = ({ goal, setGoal, unit = "unit", viewStyle }: props) => {
   };
 
   const theme = useTheme();
+
+
 
   return (
     <>

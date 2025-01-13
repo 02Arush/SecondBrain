@@ -600,6 +600,10 @@ export class HabitGoal {
         }
     }
 
+    setUnit(unit: string) {
+        this.unit = unit;
+    }
+
     getGoalNumber(): number {
         return this.goalNumber;
     }

@@ -5,7 +5,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { TextInput, Button } from "react-native-paper";
 import { router } from "expo-router";
 import { createHabit, insertHabitLocalStorage } from "../../api/storage";
@@ -14,6 +14,7 @@ import { isAnonymous } from "@/constants/constants";
 import { HabitGoal, HabitJSON } from "../../api/habit";
 import OptionalGoal from "@/components/OptionalGoal";
 import Habit from "../../api/habit";
+import { timeFrame } from "@/api/types_and_utils";
 const addHabit = () => {
   const [habitName, setHabitName] = useState("");
   const [unit, setUnit] = useState("");
@@ -21,6 +22,23 @@ const addHabit = () => {
   const [goal, setGoal] = useState<HabitGoal | null>(
     new HabitGoal(1, unit, 1, "day")
   );
+
+
+  // This is here to address a specific bug, where if you leave it as "1 per day" and don't touch the goal checkbox, it skips the units
+  useEffect(() => {
+    const prevGoal = goal;
+    if (prevGoal) {
+      const goalJSON = prevGoal.JSON();
+      const unitUpdatedGoal = new HabitGoal(
+        goalJSON.goalNumber,
+        unit,
+        goalJSON.timeFrameCount,
+        goalJSON.timeFrameLabel as timeFrame
+      );
+
+      setGoal(unitUpdatedGoal);
+    }
+  }, [unit]);
 
   const handleSubmitHabit = async () => {
     const trimmedHabitName = habitName.trim();
@@ -59,8 +77,8 @@ const addHabit = () => {
             value={habitName}
             inputMode="text"
             onChangeText={(text) => {
-              // const filteredText = text.replace(/[^a-zA-Z0-9 ]/gi, "");
-              setHabitName(text);
+              const filteredText = text.replace(/[^a-zA-Z0-9 ]/gi, "");
+              setHabitName(filteredText);
             }}
             style={styles.textInput}
             autoCapitalize="characters"
@@ -70,8 +88,8 @@ const addHabit = () => {
             inputMode="text"
             value={unit}
             onChangeText={(text) => {
-              // const filteredText = text.replace(/[^a-zA-Z0-9 ]/gi, "");
-              setUnit(text);
+              const filteredText = text.replace(/[^a-zA-Z0-9 ]/gi, "");
+              setUnit(filteredText);
             }}
             style={styles.textInput}
           />

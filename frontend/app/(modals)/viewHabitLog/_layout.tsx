@@ -12,14 +12,14 @@ import {
   Button,
 } from "react-native-paper";
 import { useFocusEffect } from "expo-router";
-import Habit from "@/api/habit";
+import Habit, { HabitGoal } from "@/api/habit";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { getHabit, updateHabit } from "@/api/storage";
 import { HabitProvider } from "@/contexts/habitContext";
 import Select from "@/components/Select";
-import { sharedUser } from "@/api/types_and_utils";
+import { sharedUser, timeFrame } from "@/api/types_and_utils";
 import { selectItem } from "@/components/Select";
 import { email } from "@/api/types_and_utils";
 import OptionalGoal from "@/components/OptionalGoal";
@@ -50,6 +50,16 @@ const ViewHabitLogLayout = () => {
     setSharedUsers(getEmails(habit.getSharedUsers()));
     setGoal(habit.getGoal());
   }, [habit]);
+
+  // This is here to eliminate the glitch where I make updates to the unit, but they don't show up in the goal
+  useEffect(() => {
+    if (goal != null) {
+      const oldGoal = goal;
+      const newGoal = HabitGoal.parseJSON(oldGoal.JSON());
+      newGoal.setUnit(habitUnitTxt);
+      setGoal(newGoal);
+    }
+  }, [habitUnitTxt]);
 
   useFocusEffect(
     useCallback(() => {
@@ -140,15 +150,11 @@ const ViewHabitLogLayout = () => {
     }
   };
 
-  const handleCancelEdits = () => {
-    setEditModalOpen(false);
-  };
-
   const handleCloseEditsModal = async (save: boolean) => {
     if (save) {
       // Get the field data
       const newName = habitNameTxt;
-      const newUnit = habitUnitTxt;
+      const newUnit = habitUnitTxt.length > 0 ? habitUnitTxt : "Count";
       const newGoal = goal;
 
       habit.setUnit(newUnit);
