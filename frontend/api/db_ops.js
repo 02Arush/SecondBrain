@@ -1072,6 +1072,8 @@ export const getInvitesForUser = async (email) => {
  * @param {email} modifiedUser
  * @param {string} newRole
  * @param {Habit} habit
+ * 
+ * TODO: change HABIT to HABIT || TASK
  */
 export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, habit) => {
     const signedInUserRole = habit.getRoleOfUser(signedInUser).data;

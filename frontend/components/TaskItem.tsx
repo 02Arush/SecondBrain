@@ -44,9 +44,18 @@ const TaskItem = ({
     }
   };
 
+  // const handleShowTaskDetails = async () => {
+  //   router.push({
+  //     pathname: "/(modals)/createTask",
+  //     params: {
+  //       taskID: taskID,
+  //     },
+  //   });
+  // };
+
   const handleShowTaskDetails = async () => {
     router.push({
-      pathname: "/(modals)/createTask",
+      pathname: "/(modals)/viewTask/sharedUsers",
       params: {
         taskID: taskID,
       },
