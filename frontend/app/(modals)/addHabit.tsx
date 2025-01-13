@@ -23,7 +23,7 @@ const addHabit = () => {
   );
 
   const handleSubmitHabit = async () => {
-    const trimmedHabitName = habitName.toUpperCase().trim();
+    const trimmedHabitName = habitName.trim();
     const trimmedUnit = unit.trim();
 
     if (trimmedHabitName === "" || trimmedUnit === "") {
@@ -57,19 +57,21 @@ const addHabit = () => {
           <TextInput
             label="Habit Name"
             value={habitName}
+            inputMode="text"
             onChangeText={(text) => {
-              const filteredText = text.replace(/[^a-zA-Z0-9 ]/gi, "");
-              setHabitName(filteredText);
+              // const filteredText = text.replace(/[^a-zA-Z0-9 ]/gi, "");
+              setHabitName(text);
             }}
             style={styles.textInput}
             autoCapitalize="characters"
           />
           <TextInput
             label="Unit of Measurement"
+            inputMode="text"
             value={unit}
             onChangeText={(text) => {
-              const filteredText = text.replace(/[^a-zA-Z0-9 ]/gi, "");
-              setUnit(filteredText);
+              // const filteredText = text.replace(/[^a-zA-Z0-9 ]/gi, "");
+              setUnit(text);
             }}
             style={styles.textInput}
           />
