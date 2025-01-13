@@ -256,6 +256,16 @@ export default class Task {
     }
 
 
+    // TODO: IMPLEMENT THIS
+    getRoleOfUser() {
+        return {
+            ok: false,
+            message: "NOT IMPLEMENTED",
+            data: constants.ROLE.OWNER,
+        }
+    }
+
+
 
 }
 

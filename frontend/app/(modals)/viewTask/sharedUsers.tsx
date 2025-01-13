@@ -2,11 +2,12 @@ import { StyleSheet, View } from "react-native";
 import React, { useState, useContext, useEffect } from "react";
 import { TaskContext } from "@/contexts/taskContext";
 import { Text } from "react-native-paper";
+import RolesTable from "@/components/RolesTable";
 import Task from "@/api/task";
 const viewSharedUsers = () => {
   const task: any = useContext(TaskContext);
 
-  const sharedUsers = task instanceof Task ? task.getSharedUsers() : [];
+  
 
   // useEffect(() => {
   //   if (task instanceof Task) {
@@ -20,7 +21,7 @@ const viewSharedUsers = () => {
 
   return (
     <View>
-      <Text>{JSON.stringify(sharedUsers)}</Text>
+      <RolesTable />
     </View>
   );
 };

@@ -792,6 +792,51 @@ const getUserTasksCollection = (email) => {
     return collection(collections.users, email, "tasks");
 }
 
+
+
+/**
+ * @param {Task | Habit} item
+ */
+export const getSharedUsersForItem = async (item) => {
+
+    const itemType = item instanceof Habit ? "habit" : "task";
+    const ID = item instanceof Habit ? item.getID() : item.getTaskID();
+
+    const collectionToQuery = itemType == "habit" ? collections.habits : collections.tasks;
+    const itemDocRef = doc(collectionToQuery, ID);
+
+    const docSnap = await getDoc(itemDocRef);
+
+    if (!docSnap.exists()) {
+        return { ok: false, message: `Error Getting Shared Users. Doc with ${itemType} ID: ${ID} does not exist.` }
+    }
+
+    const itemData = docSnap.data();
+    const sharedUsers = itemData["sharedUsers"];
+
+    if (Array.isArray(sharedUsers)) {
+        const sharedMap = {};
+        sharedUsers.forEach((sharedUser) => {
+            const { email } = sharedUser;
+            sharedMap[email] = sharedUser;
+        })
+
+        await setDoc(itemDocRef, {
+            sharedUsers: sharedMap
+        }, { merge: true })
+
+        return getSharedUsersForItem(ID);
+
+    }
+
+    if (sharedUsers) {
+
+        return { ok: true, message: `Retrieved Shared Users for ${itemType}: ${ID}`, data: sharedUsers }
+    } else {
+        return { ok: false, message: `Shared Users does not exist for ${itemType}: ${ID}` }
+    }
+}
+
 /**
  * 
  * @param {string} habitID 
@@ -828,6 +873,21 @@ export const getSharedUsersForHabit = async (habitID) => {
     } else {
         return { ok: false, message: `Shared Users does not exist for habit: ${habitID}` }
     }
+}
+
+/**
+ * 
+ * @param {string} taskID 
+ */
+export const getSharedUsersForTask = async (taskID) => {
+    const taskDocRef = doc(collections.tasks, taskID);
+    const docSnap = await getDoc(taskDocRef);
+    if (!docSnap.exists()) {
+        return { ok: false, message: `Error Getting Shared Users. Doc with Task ID: ${taskID} does not exist.` }
+    }
+
+
+
 }
 
 /**
@@ -1068,16 +1128,17 @@ export const getInvitesForUser = async (email) => {
 }
 
 /**
- * @param {email} signedInUser
+ *  * @param {email} signedInUser
  * @param {email} modifiedUser
  * @param {string} newRole
- * @param {Habit} habit
- * 
- * TODO: change HABIT to HABIT || TASK
+ * @param {Habit | Task} item
  */
-export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, habit) => {
-    const signedInUserRole = habit.getRoleOfUser(signedInUser).data;
-    const modifiedUserRole = habit.getRoleOfUser(modifiedUser).data;
+
+export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, item) => {
+
+    // This is here to ensure that the user has proper permissions
+    const signedInUserRole = item.getRoleOfUser(signedInUser).data;
+    const modifiedUserRole = item.getRoleOfUser(modifiedUser).data;
 
     if (ROLE_POWERS[newRole] > ROLE_POWERS[signedInUserRole]) {
         return {
@@ -1096,6 +1157,30 @@ export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, habi
             Your role: ${signedInUserRole.toUpperCase()}, ${modifiedUser}'s role: ${modifiedUserRole.toUpperCase()}`
         }
     }
+
+    // At this point, we've established that the user is of high enough position to complete the operation
+    if (item instanceof Habit) {
+        const res = await changeUserHabitRole(signedInUser, modifiedUser, newRole, item);
+        return res;
+    } else {
+        return {
+            ok: false,
+            message: "Changing Task Roles Not Implemented"
+        }
+    }
+
+}
+
+/**
+ * @param {email} signedInUser
+ * @param {email} modifiedUser
+ * @param {string} newRole
+ * @param {Habit} habit
+ * 
+ * TODO: change HABIT to HABIT || TASK
+ */
+export const changeUserHabitRole = async (signedInUser, modifiedUser, newRole, habit) => {
+
 
     if (newRole == constants.ROLE.NONE) {
         const res = await deleteHabit(modifiedUser, habit)

@@ -22,6 +22,7 @@ import {
   changeRoleOfUser,
   createInvite,
   getSharedUsersForHabit,
+  getSharedUsersForItem,
 } from "@/api/db_ops";
 import {
   email,
@@ -32,6 +33,7 @@ import {
 } from "@/api/types_and_utils";
 import Select, { selectItem } from "@/components/Select";
 import { userSelectMap } from "@/api/types_and_utils";
+import RolesTable from "@/components/RolesTable";
 
 const sharedUsers = () => {
   const habit = useContext(HabitContext);
@@ -56,7 +58,7 @@ const sharedUsers = () => {
   );
 
   const fetchSharedUserData = async () => {
-    const res = await getSharedUsersForHabit(habitID);
+    const res = await getSharedUsersForItem(habit);
     if (res.ok) {
       const sharedUsersCloud = res.data || {};
       setSharedUsers(sharedUsersCloud);
@@ -158,12 +160,12 @@ const sharedUsers = () => {
 
   return (
     <View style={styles.componentContainer}>
+      {/* 
       <DataTable>
         <DataTable.Header>
           <DataTable.Cell style={styles.nickCell}>Nickname</DataTable.Cell>
           <DataTable.Cell style={styles.roleCell}>Role</DataTable.Cell>
           <DataTable.Cell style={styles.actionsCell}>Actions</DataTable.Cell>
-          {/* TODO: In Future, role should be dropdown that lets you change the user's role */}
         </DataTable.Header>
         {Object.values(sharedUsers).map((sharedUser) => {
           const email = sharedUser.email;
@@ -184,6 +186,15 @@ const sharedUsers = () => {
           return TableRow(sharedUser, visible, setVisible, handleSelectRole);
         })}
       </DataTable>
+ */}
+      <RolesTable
+        item={habit}
+        // handleChangeRoleOfUser={handleChangeRoleOfUser}
+        sharedUsers={sharedUsers}
+        setSharedUsers={setSharedUsers}
+        selectVisibilities={selectVisibilities}
+        setSelectVisibilities={setSelectVisibilities}
+      />
       <Button onPress={handleOpenInviteEmail}>Invite New User</Button>
       {/* This is here to add a text input where you can invite a user */}
       <View

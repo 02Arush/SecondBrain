@@ -8,23 +8,69 @@ import { selectItem } from "./Select";
 import constants from "@/constants/constants";
 import { ensureJSDate, userSelectMap } from "@/api/types_and_utils";
 import { AuthContext } from "@/contexts/authContext";
-
+import { HabitContext } from "@/contexts/habitContext";
+import { email } from "@/api/types_and_utils";
+import { changeRoleOfUser } from "@/api/db_ops";
+import Habit from "@/api/habit";
+import Task from "@/api/task";
+import { getSharedUsersForItem } from "@/api/db_ops";
 type propTypes = {
-  sharedUsers: sharedUser[];
-  selectVisibilities: userSelectMap;
+  item: Habit | Task;
+  sharedUsers: {
+    [key: string]: sharedUser;
+  };
+  setSharedUsers: React.Dispatch<
+    React.SetStateAction<{
+      [key: string]: sharedUser;
+    }>
+  >;
+  selectVisibilities: userSelectMap | undefined;
   setSelectVisibilities: any;
-  handleChangeRoleOfUser: (
-    modifiedUser: string,
-    newRole: string
-  ) => Promise<void>;
+  //   handleChangeRoleOfUser: (
+  //     modifiedUser: string,
+  //     newRole: string
+  //   ) => Promise<void>;
 };
 const RolesTable = ({
+  item,
   sharedUsers,
+  setSharedUsers,
   selectVisibilities,
   setSelectVisibilities,
-  handleChangeRoleOfUser,
 }: propTypes) => {
   const { email } = useContext(AuthContext);
+
+  const fetchSharedUserData = async () => {
+    const res = await getSharedUsersForItem(item);
+    if (res.ok) {
+      const sharedUsersCloud = res.data || {};
+      setSharedUsers(sharedUsersCloud);
+      const keys = Object.keys(sharedUsersCloud);
+      const values = Array(keys.length).fill(false);
+      const newVisibilities = new Map(
+        keys.map((key, index) => [key, values[index]])
+      );
+      setSelectVisibilities(newVisibilities);
+    } else {
+      alert("Error Retrieving Shared Users:\n" + res.message);
+    }
+  };
+
+  const handleChangeRoleOfUser = async (
+    modifiedUser: email,
+    newRole: string
+  ) => {
+    const signedInUser = email;
+    const res = await changeRoleOfUser(
+      signedInUser,
+      modifiedUser,
+      newRole,
+      item
+    );
+
+    alert(res.message);
+    fetchSharedUserData();
+  };
 
   const TableRow = (
     sharedUser: sharedUser,
