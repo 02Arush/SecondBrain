@@ -123,7 +123,11 @@ const createTask = () => {
     );
 
     if (typeof email === "string") {
-      newTask.addSharedUser({ email: email, permission: constants.ROLE.ADMIN });
+      newTask.addSharedUser({
+        email: email,
+        role: constants.ROLE.OWNER,
+        joinDate: new Date(),
+      });
     } else {
       alert("Error: email is not a string");
     }

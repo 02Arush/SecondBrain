@@ -22,7 +22,6 @@ export const updateTask = async (email: string, task: Task, isNewTask: boolean =
         const message = ok ? "Task Update Successfully In Cloud" : `${task.getTaskID} ERROR: ${res.error}, MSG: ${res.message}`
         return { ok, message }
 
-
     }
 }
 
@@ -85,9 +84,12 @@ export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, me
 
 
 export const retrieveTasks = async (email: string, completed: boolean = false, filterOption = filterOptions.DATE_EARLIEST) => {
+
+    let final_ret;
+
     if (isAnonymous(email)) {
         const res = await retrieveLocalStorageTasks(completed, filterOption)
-        return res;
+        final_ret = res;
 
     } else {
         const res = await getTasksForUser(email, completed, filterOption);
@@ -97,15 +99,47 @@ export const retrieveTasks = async (email: string, completed: boolean = false, f
             error: ${res.error}
         `
         const data = res.taskList || []
+        final_ret = {
+            ok,
+            message,
+            data
+        }
+        // return {
+        //     ok: ok,
+        //     message: message,
+        //     data: data,
+        // };
+    }
+
+    const lst = final_ret.data;
+    const expiredTasks: Task[] = lst.filter((task: Task) => task.isExpired())
+    const unexpiredTasks: Task[] = lst.filter((task) => !task.isExpired());
+
+    const deleteExpiredRes = await Promise.all(expiredTasks.map(async (task) => {
+        return await deleteTask(email, task.getTaskID())
+    }))
+
+    const msg = deleteExpiredRes.reduce((acc, res) => {
+        const msg = res.ok ? "" : res.message + "\n"
+        return acc + msg;
+    }, "")
+
+    if (msg.length > 0) {
         return {
-            ok: ok,
-            message: message,
-            data: data,
-        };
+            ok: false,
+            message: msg,
+            data: lst
+        }
+    } else {
+        return {
+            ok: true,
+            message: "Retrieved Tasks Successfully",
+            data: unexpiredTasks
+        }
     }
 }
 
-export const retrieveLocalStorageTasks = async (completed: boolean | undefined = undefined, filterOption: string = filterOptions.DATE_EARLIEST): Promise<{ ok: boolean, data: any, message: string }> => {
+export const retrieveLocalStorageTasks = async (completed: boolean | undefined = undefined, filterOption: string = filterOptions.DATE_EARLIEST): Promise<{ ok: boolean, data: Array<Task>, message: string }> => {
     const taskJSONS = await retrieveData(constants.TASK_LIST);
 
     if (typeof taskJSONS === "string") {
@@ -143,6 +177,7 @@ export const retrieveLocalStorageTasks = async (completed: boolean | undefined =
 
 
 export const getTask = async (email: string, taskID: string): Promise<{ ok: boolean, data: any, message: string }> => {
+
 
     if (isAnonymous(email)) {
         const res = await getTaskFromLocalStorage(taskID)
@@ -305,7 +340,7 @@ export const uploadLocalTasks = async (email: string) => {
 
         task.clearSharedUsers();
         task.addSharedUser(
-            { email: email, permission: constants.ROLE.OWNER }
+            { email: email, role: constants.ROLE.OWNER, joinDate: new Date() }
         )
         const res = await updateTask(email, task, true)
         return res;

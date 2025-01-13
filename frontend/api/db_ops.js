@@ -19,6 +19,7 @@ import { ROLE_POWERS, isAnonymous } from "@/constants/constants";
 import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail } from "./types_and_utils";
 import { sharedItemType } from "./types_and_utils";
 import constants from "@/constants/constants";
+import { email } from "./types_and_utils";
 import { sharedUser } from "./types_and_utils";
 
 
@@ -413,6 +414,9 @@ export const getTasksForUser = async (email, completed, sort) => {
          * @param {Array} taskIDs -
          * @returns {Promise<Array<Task>>} - Array of tasks
          */
+
+
+
         const getTaskList = async () => {
             let taskList = await Promise.all(taskIDs.map(async (id) => {
 
@@ -493,7 +497,8 @@ export const setCompleted = async (email, taskID, completedStatus = True) => {
     try {
         const taskDocRef = doc(db, "tasks", taskID);
         await setDoc(taskDocRef, {
-            completed: completedStatus
+            completed: completedStatus,
+            lastCompletionDate: completedStatus == true ? new Date() : null,
         }, { merge: true })
 
         return { ok: true }
@@ -548,6 +553,31 @@ const createHabitInUserCollection = async (email, habit) => {
 
     } catch (err) {
         const message = "Error Creating Habit In User Collection\n" + err.message
+        return { ok: false, message }
+    }
+}
+
+/**
+ * 
+ * @param {email} email 
+ * @param {Task} task 
+ */
+const createTaskInUserCollection = async (email, task) => {
+    try {
+        const taskID = task.getTaskID();
+        const userTasks = getUserTasksCollection(email);
+        const docRef = doc(userTasks, taskID);
+        const dataForUser = {
+            userPriority: task.getPriority(),
+        }
+        await setDoc(docRef, dataForUser, { merge: true })
+        return {
+            ok: true, message: "Added task to user's collection."
+        }
+
+
+    } catch (err) {
+        const message = "Error Creating Task In User Collection\n" + err.message
         return { ok: false, message }
     }
 }
@@ -758,6 +788,10 @@ const getUserHabitsCollection = (email) => {
     return collection(collections.users, email, 'habits')
 }
 
+const getUserTasksCollection = (email) => {
+    return collection(collections.users, email, "tasks");
+}
+
 /**
  * 
  * @param {string} habitID 
@@ -867,7 +901,7 @@ export const createInvite = async (sender, recipient, sharedItem, role = constan
 }
 
 /**
- * @param {string} recipient
+ * @param {email} recipient
  * @param {string} inviteID
  * @param {"accept" | "reject"} actionType
  */
@@ -925,11 +959,35 @@ export const invitationAction = async (recipient, inviteID, actionType) => {
 
         } else if (itemType == "task") {
             const taskID = itemID;
-            return {
-                ok: false,
-                message: "Task Invitatinos not yet implemented"
+            const taskRes = await getTaskItem(recipient, taskID);
+
+            if (!taskRes instanceof Task) {
+                return {
+                    ok: false,
+                    error: "Error Accepting Invite\n" + taskRes.error
+                }
             }
-            // ADD USER TO TASK- TO IMPLEMENT SOON
+            const task = taskRes;
+            task.addSharedUser({
+                email: recipient,
+                role: constants.ROLE.MEMBER,
+                joinDate: new Date(),
+            })
+
+            let message = "Error Accepting Invite For Habit\n";
+            const taskUpdateRes = await updateTask(recipient, task, task.getID());
+            message += taskUpdateRes.message + "\n";
+
+            // Add the Task to the recipient's task collection
+            const taskCollectionRes = await createTaskInUserCollection(recipient, task);
+            message += taskCollectionRes.message + "\n";
+
+            if (!taskCollectionRes.ok || !taskCollectionRes.ok) {
+                return {
+                    ok: false, message: message
+                }
+            }
+
 
         } else {
             return {
