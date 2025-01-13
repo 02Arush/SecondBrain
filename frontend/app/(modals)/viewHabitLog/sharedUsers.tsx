@@ -31,6 +31,7 @@ import {
   sharedUser,
 } from "@/api/types_and_utils";
 import Select, { selectItem } from "@/components/Select";
+import { userSelectMap } from "@/api/types_and_utils";
 
 const sharedUsers = () => {
   const habit = useContext(HabitContext);
@@ -42,7 +43,6 @@ const sharedUsers = () => {
   const habitID = habit.getID();
   const [showingAddEmail, setShowingAddEmail] = useState(false);
   const [emailRecipient, setEmailRecipient] = useState<string>("");
-  type userSelectMap = Map<email, boolean>;
   const [selectVisibilities, setSelectVisibilities] = useState<userSelectMap>();
 
   useFocusEffect(
@@ -87,7 +87,6 @@ const sharedUsers = () => {
 
     setShowingAddEmail(false);
   };
-
 
   // TODO: NOTIFY USER IF THEY TRY TO DEMOTE THEMSELVES AS OWNER BUT CAN'T
   const handleChangeRoleOfUser = async (

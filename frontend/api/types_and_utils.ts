@@ -235,4 +235,6 @@ export type sharedUser = {
     joinDate: Date,
 }
 
-export type email = string; 
+export type email = string;
+
+export type userSelectMap = Map<email, boolean>;

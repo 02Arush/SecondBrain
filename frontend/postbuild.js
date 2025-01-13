@@ -22,16 +22,7 @@ const manifestContent = {
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
-    {
-      "src": "./assets/images/icon.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "./assets/images/icon.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    },
+
     {
       "src": "./assets/images/icon.png",
       "type": "image/png",
