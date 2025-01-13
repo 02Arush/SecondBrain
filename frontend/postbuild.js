@@ -31,6 +31,11 @@ const manifestContent = {
       "src": "./assets/images/icon.png",
       "type": "image/png",
       "sizes": "512x512"
+    },
+    {
+      "src": "./assets/images/icon.png",
+      "type": "image/png",
+      "sizes": "1024x1024"
     }
   ],
   "start_url": ".",
