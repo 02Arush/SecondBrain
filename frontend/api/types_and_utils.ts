@@ -1,6 +1,10 @@
 import { getColor } from "@/constants/Colors";
 import { constants } from "@/constants/constants"
 import { Timestamp } from "firebase/firestore";
+import { router } from "expo-router";
+import { useRouteInfo } from "expo-router/build/hooks";
+import { UrlObject } from "expo-router/build/LocationProvider";
+
 
 /**
  * STRINGS
@@ -238,3 +242,10 @@ export type sharedUser = {
 export type email = string;
 
 export type userSelectMap = Map<email, boolean>;
+
+
+
+// TODO LATER
+const isPath = (path: string, route: UrlObject) => {
+    return route.pathname.localeCompare(`/viewHabitLog/${path}`) === 0;
+};

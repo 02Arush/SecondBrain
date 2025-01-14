@@ -1,34 +1,32 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 import { getSignedInUser } from '@/api/db_ops';
 import { AuthContext } from './authContext';
-import Task from "@/api/task"
+import Task from "@/api/task";
 import { getTask } from '@/api/taskStorage';
-
 
 const TaskContext = createContext(null);
 
 const TaskProvider = ({ taskID, children }) => {
-  const { email } = useContext(AuthContext)
-  const [task, setTask] = useState();
+  const { email } = useContext(AuthContext);
+  const [task, setTask] = useState(null);
 
   useEffect(() => {
-
-    (
-      async () => {
+    const fetchTask = async () => {
+      try {
         const res = await getTask(email, taskID);
-        const data = res.data;
-        if (res.data instanceof Task) {
-          setTask(res.data);
+        const potentialTask = res?.data;
+        if (potentialTask instanceof Task) {
+          setTask(potentialTask);
+        } else {
+          console.error("Data is not an instance of Task");
         }
+      } catch (error) {
+        console.error("Failed to fetch task:", error);
       }
+    };
 
-    )();
-
-  }, [email, taskID])
-
-
-
-
+    fetchTask();
+  }, [email, taskID]);
 
   return (
     <TaskContext.Provider value={task}>

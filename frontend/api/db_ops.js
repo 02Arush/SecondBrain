@@ -798,6 +798,13 @@ const getUserTasksCollection = (email) => {
  * @param {Task | Habit} item
  */
 export const getSharedUsersForItem = async (item) => {
+    if (!item) {
+        return {
+            ok: false,
+            message: "Item is undefiend",
+            data: {}
+        }
+    }
 
     const itemType = item instanceof Habit ? "habit" : "task";
     const ID = item instanceof Habit ? item.getID() : item.getTaskID();
@@ -1163,10 +1170,8 @@ export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, item
         const res = await changeUserHabitRole(signedInUser, modifiedUser, newRole, item);
         return res;
     } else {
-        return {
-            ok: false,
-            message: "Changing Task Roles Not Implemented"
-        }
+        const res = await changeUserTaskRole(signedInUser, modifiedUser, newRole, item);
+        return res;
     }
 
 }
@@ -1192,13 +1197,17 @@ export const changeUserHabitRole = async (signedInUser, modifiedUser, newRole, h
         }
     }
 
-    habit.changeRoleOfUser(modifiedUser, newRole)
+    const roleChanged = habit.changeRoleOfUser(modifiedUser, newRole)
     const newRoleOfUserRes = habit.getRoleOfUser(modifiedUser);
     const newRoleOfUser = newRoleOfUserRes.data;
-    const roleStayedSame = newRoleOfUser.localeCompare(modifiedUserRole) == 0
 
-    if (roleStayedSame) {
-        return { ok: true, message: "Could not update role of user. Habit needs at least one OWNER." }
+
+    if (!roleChanged) {
+        if (newRoleOfUser.localeCompare(constants.ROLE.OWNER) == 0) {
+            return { ok: true, message: "Could not update role of user. Habit needs at least one OWNER." }
+        } else {
+            return { ok: true, message: "User role stayed the same." }
+        }
     }
 
     const res = await updateHabit(signedInUser, habit, "modify");
@@ -1217,3 +1226,50 @@ export const changeUserHabitRole = async (signedInUser, modifiedUser, newRole, h
 
 }
 
+/**
+ * @param {email} signedInUser
+ * @param {email} modifiedUser
+ * @param {string} newRole
+ * @param {Task} task
+ */
+export const changeUserTaskRole = async (signedInUser, modifiedUser, newRole, task) => {
+
+    if (newRole == constants.ROLE.NONE) {
+        const res = await deleteTask(modifiedUser, task.getTaskID())
+        if (!res.ok) {
+            return { ok: false, message: "Unable to remove from habit:\n" + res.message }
+        } else {
+
+            return { ok: true, message: "Successfully removed user from habit" }
+        }
+    }
+
+
+    const roleChanged = task.changeRoleOfUser(modifiedUser, newRole)
+    const newRoleOfUserRes = task.getRoleOfUser(modifiedUser);
+    const newRoleOfUser = newRoleOfUserRes.data;
+
+
+    if (!roleChanged) {
+        if (newRoleOfUser.localeCompare(constants.ROLE.OWNER) == 0) {
+            return { ok: true, message: "Could not update role of user. Habit needs at least one OWNER." }
+        } else {
+            return { ok: true, message: "User role stayed the same." }
+        }
+    }
+
+    const res = await updateTask(modifiedUser, task, task.getTaskID());
+    if (res.ok) {
+        return {
+            ok: true,
+            message: `Successfully Changed ${modifiedUser}'s role to ${newRole}`
+        }
+
+    } else {
+        return {
+            ok: false,
+            message: "Failed to modify user role.\n" + res.message
+        }
+    }
+
+}

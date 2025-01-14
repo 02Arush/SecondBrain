@@ -1,27 +1,28 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { TaskContext } from "@/contexts/taskContext";
 import { Text } from "react-native-paper";
 import RolesTable from "@/components/RolesTable";
+import { router } from "expo-router";
 import Task from "@/api/task";
-const viewSharedUsers = () => {
-  const task: any = useContext(TaskContext);
 
-  
+const viewSharedUsers = () => {
+  const task: Task | null = useContext(TaskContext);
 
   // useEffect(() => {
-  //   if (task instanceof Task) {
-  //     console.log("YES");
-  //     console.log(task.getJSON());
-  //   } else {
-  //     console.log("NO");
-  //     console.log(task);
+  //   if (!task || task == null || task == undefined) {
   //   }
-  // });
+  // }, [task]);
+
+  if (!task) {
+    
+    // Render nothing while navigating to avoid the "setState during render" warning
+    return null;
+  }
 
   return (
     <View>
-      <RolesTable />
+      <RolesTable item={task} />
     </View>
   );
 };

@@ -6,6 +6,8 @@ import {
     ensureJSDate,
     timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays, sharedItemType
 } from "./types_and_utils";
+import { SharableItem } from "./SharableItem";
+
 
 import { sharedUser, email } from "./types_and_utils";
 // TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
@@ -20,7 +22,7 @@ export interface HabitJSON {
     "habitID": string
 }
 
-export default class Habit {
+export default class Habit implements SharableItem {
 
     private habitName: string;
     private habitID: string;
@@ -532,12 +534,16 @@ export default class Habit {
     }
 
     changeRoleOfUser(email: email, newRole: string) {
+
+        const initialRole = this.sharedUsers[email].role;
+
         if (email in this.sharedUsers) {
             this.sharedUsers[email].role = newRole
         }
         this.ensureOwnerExists();
 
-
+        const roleChanged = initialRole.localeCompare(this.sharedUsers[email].role) != 0
+        return roleChanged
     }
 
 

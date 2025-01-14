@@ -52,7 +52,7 @@ const tasks = () => {
   };
 
   const handleCreateTask = () => {
-    router.navigate("/(modals)/createTask");
+    router.navigate("/(modals)/viewTask/createTask");
   };
 
   const handleCompleteTask = async (taskID: string, completedStatus = true) => {

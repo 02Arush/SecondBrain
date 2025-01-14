@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { DataTable, IconButton } from "react-native-paper";
 import { sharedUser } from "@/api/types_and_utils";
 import Select from "./Select";
@@ -16,28 +16,12 @@ import Task from "@/api/task";
 import { getSharedUsersForItem } from "@/api/db_ops";
 type propTypes = {
   item: Habit | Task;
-  sharedUsers: {
-    [key: string]: sharedUser;
-  };
-  setSharedUsers: React.Dispatch<
-    React.SetStateAction<{
-      [key: string]: sharedUser;
-    }>
-  >;
-  selectVisibilities: userSelectMap | undefined;
-  setSelectVisibilities: any;
-  //   handleChangeRoleOfUser: (
-  //     modifiedUser: string,
-  //     newRole: string
-  //   ) => Promise<void>;
 };
-const RolesTable = ({
-  item,
-  sharedUsers,
-  setSharedUsers,
-  selectVisibilities,
-  setSelectVisibilities,
-}: propTypes) => {
+const RolesTable = ({ item }: propTypes) => {
+  const [sharedUsers, setSharedUsers] = useState<{
+    [key: string]: sharedUser;
+  }>(item.getSharedUsers());
+  const [selectVisibilities, setSelectVisibilities] = useState(new Map());
   const { email } = useContext(AuthContext);
 
   const fetchSharedUserData = async () => {
@@ -131,24 +115,25 @@ const RolesTable = ({
         <DataTable.Cell style={styles.actionsCell}>Actions</DataTable.Cell>
         {/* TODO: In Future, role should be dropdown that lets you change the user's role */}
       </DataTable.Header>
-      {Object.values(sharedUsers).map((sharedUser) => {
-        const email = sharedUser.email;
-        const visible = selectVisibilities?.get(email) || false;
-        const setVisible = (visible: boolean) => {
-          setSelectVisibilities((prev: userSelectMap | undefined) => {
-            const newMap = new Map(prev || new Map());
-            newMap.set(email, visible);
-            return newMap;
-          });
-        };
+      {sharedUsers &&
+        Object.values(sharedUsers).map((sharedUser: sharedUser) => {
+          const email = sharedUser.email;
+          const visible = selectVisibilities?.get(email) || false;
+          const setVisible = (visible: boolean) => {
+            setSelectVisibilities((prev: userSelectMap | undefined) => {
+              const newMap = new Map(prev || new Map());
+              newMap.set(email, visible);
+              return newMap;
+            });
+          };
 
-        const handleSelectRole = async (role: string) => {
-          const res = await handleChangeRoleOfUser(email, role);
-          return res;
-        };
+          const handleSelectRole = async (role: string) => {
+            const res = await handleChangeRoleOfUser(email, role);
+            return res;
+          };
 
-        return TableRow(sharedUser, visible, setVisible, handleSelectRole);
-      })}
+          return TableRow(sharedUser, visible, setVisible, handleSelectRole);
+        })}
     </DataTable>
   );
 };

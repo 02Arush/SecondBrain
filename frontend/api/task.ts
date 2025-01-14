@@ -1,20 +1,19 @@
 import constants from "@/constants/constants"
 import { filterOptions, getElapsedDays, sharedUser } from "./types_and_utils"
-type TaskUser = {
-    email: string,
-    permission: string,
-}
+import { ROLE_POWERS } from "@/constants/constants"
+import { email } from "./types_and_utils"
 import { ensureJSDate } from "./types_and_utils"
+import { SharableItem } from "./SharableItem"
 type taskProperty = "Name" | "Description" | "Importance" | "Deadline"
 
 
-export default class Task {
+export default class Task implements SharableItem {
     private taskID: string
     private name: string
     private description: string
     private deadline: Date | null
     private importance: number | null
-    private sharedUsers: sharedUser[] = []
+    private sharedUsers: { [key: email]: sharedUser };
     private completed: boolean = false;
     private lastCompletionDate: Date | null;
 
@@ -32,7 +31,7 @@ export default class Task {
             const taskDeadline = hasDeadline ? ensureJSDate(taskObjDeadline) : null;
             const lastCompletionDate = taskObject.lastCompletionDate ? ensureJSDate(taskObject.lastCompletionDate) : undefined
 
-            const sharedUsers: sharedUser[] = taskObject.sharedUsers;
+            const sharedUsers = taskObject.sharedUsers;
             const task = new Task(id, taskObject.taskName, taskObject.description, taskDeadline, taskObject.importance, taskObject.completed, lastCompletionDate, sharedUsers);
 
             return task;
@@ -77,7 +76,7 @@ export default class Task {
 
     // The reason why taskID is not an optional parameter yet, is because it was made "optional" later on in the procss, but would mess up the orderings of the rest of the 
     // parameters if I now made it optional wherever its used- ideally, it would be an optional parameter
-    constructor(taskID: string = "-1", name: string, description: string = "", deadline: Date | null = null, importance: number | null = null, completed: boolean = false, lastCompletionDate?: Date, sharedUsers?: sharedUser[],) {
+    constructor(taskID: string = "-1", name: string, description: string = "", deadline: Date | null = null, importance: number | null = null, completed: boolean = false, lastCompletionDate?: Date, sharedUsers?: { [key: email]: sharedUser }) {
 
         // IF A TASK ID IS NOT GIVEN, ASSIGN IT A TASK ID USING NAME AND LINUX EPOCH TIME
         this.taskID = taskID === "-1" ? `${name}${new Date().getTime()}` : taskID
@@ -87,8 +86,7 @@ export default class Task {
         this.importance = importance;
         this.completed = completed;
         this.lastCompletionDate = lastCompletionDate || null;
-        if (sharedUsers)
-            this.sharedUsers = sharedUsers;
+        this.sharedUsers = sharedUsers || {};
     }
 
     setName(name: string) {
@@ -145,16 +143,44 @@ export default class Task {
     }
 
     addSharedUser(user: sharedUser) {
-        this.sharedUsers.push(user);
+
+        const email = user.email;
+        this.sharedUsers[email] = user;
     }
 
-    removeSharedUser(userToRm: TaskUser) {
-        const newSharedUsers = this.sharedUsers.filter(user => user.email.localeCompare(userToRm.email) != 0)
-        this.sharedUsers = newSharedUsers;
+    removeSharedUser(email: email) {
+        delete this.sharedUsers[email]
+
+        if (Object.keys(this.sharedUsers).length > 0)
+            this.ensureOwnerExists();
     }
+
+    ensureOwnerExists(): void {
+        const compareSharedUsers = (a: sharedUser, b: sharedUser) => {
+            // If A's Power is higher than B, it should come earlier in the list
+            const roleDiff = ROLE_POWERS[b.role] - ROLE_POWERS[a.role];
+
+            // joinDate is either a date or a timestamp: force it to be a date object
+
+            if (roleDiff == 0) {
+                const aJoinDate = ensureJSDate(a.joinDate).getTime();
+                const bJoinDate = ensureJSDate(b.joinDate).getTime();
+                // If A's Join Date < B's Join Date, it should come earleir in the list
+                return aJoinDate - bJoinDate;
+            } else {
+                return roleDiff
+            }
+        }
+
+        const values = Object.values(this.getSharedUsers()).sort(compareSharedUsers);
+        const highestPriorityUser = values[0].email;
+        this.sharedUsers[highestPriorityUser].role = constants.ROLE.OWNER
+
+    }
+
 
     clearSharedUsers() {
-        this.sharedUsers = [];
+        this.sharedUsers = {}
     }
 
     getTaskID(): string {
@@ -257,12 +283,32 @@ export default class Task {
 
 
     // TODO: IMPLEMENT THIS
-    getRoleOfUser() {
-        return {
-            ok: false,
-            message: "NOT IMPLEMENTED",
-            data: constants.ROLE.OWNER,
+    getRoleOfUser(email: email): { ok: boolean, data: string, message: string } {
+
+        try {
+            const sharedUser = this.sharedUsers[email];
+            const role = sharedUser.role;
+            return { ok: true, data: role, message: "Role found successfully" }
+        } catch (e) {
+            return {
+                ok: false,
+                data: constants.ROLE.MEMBER,
+                message: `Role not found for user: ${email}, task: ${this.getName()}`
+            }
         }
+    }
+
+    changeRoleOfUser(email: email, newRole: string) {
+
+        const initialRole = this.sharedUsers[email].role;
+
+        if (email in this.sharedUsers) {
+            this.sharedUsers[email].role = newRole
+        }
+        this.ensureOwnerExists();
+
+        const roleChanged = initialRole.localeCompare(this.sharedUsers[email].role) != 0
+        return roleChanged
     }
 
 

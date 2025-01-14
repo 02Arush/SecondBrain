@@ -190,10 +190,10 @@ const sharedUsers = () => {
       <RolesTable
         item={habit}
         // handleChangeRoleOfUser={handleChangeRoleOfUser}
-        sharedUsers={sharedUsers}
-        setSharedUsers={setSharedUsers}
-        selectVisibilities={selectVisibilities}
-        setSelectVisibilities={setSelectVisibilities}
+        // sharedUsers={sharedUsers}
+        // setSharedUsers={setSharedUsers}
+        // selectVisibilities={selectVisibilities}
+        // setSelectVisibilities={setSelectVisibilities}
       />
       <Button onPress={handleOpenInviteEmail}>Invite New User</Button>
       {/* This is here to add a text input where you can invite a user */}

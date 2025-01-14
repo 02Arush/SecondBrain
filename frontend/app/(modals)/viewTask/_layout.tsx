@@ -9,47 +9,66 @@ import Task from "@/api/task";
 import { getTask } from "@/api/taskStorage";
 import { updateTask, deleteTask } from "@/api/taskStorage";
 import constants from "@/constants/constants";
-import {
-  getSimpleDateFromDate,
-  SimpleDate,
-  getDateFromSimpleDate,
-} from "@/api/types_and_utils";
+import { useRouteInfo } from "expo-router/build/hooks";
+
 import { TaskContext, TaskProvider } from "@/contexts/taskContext";
 
 const _layout = () => {
   const theme = useTheme();
   const { email } = useContext(AuthContext);
   const { taskID } = useLocalSearchParams<{ taskID: string }>();
-  //   const [task, setTask] = useState<Task>();
+  const [task, setTask] = useState<Task>();
+  const route = useRouteInfo();
+  const isPath = (path: string) => {
+    return route.pathname.localeCompare(`/viewTask/${path}`) === 0;
+  };
 
-  //   useFocusEffect(
-  //     useCallback(() => {
-  //       // get the task details
-  //       (async () => {
-  //         // alert(taskID);
+  useFocusEffect(
+    useCallback(() => {
+      // get the task details
+      (async () => {
+        // alert(taskID);
 
-  //         if (taskID && typeof taskID === "string") {
-  //           const res = await getTask(email, taskID);
+        if (taskID && typeof taskID === "string") {
+          const res = await getTask(email, taskID);
 
-  //           const currTask = res.data;
-  //           // populate the fields with intiial values
-  //           if (currTask instanceof Task) {
-  //             setTask(currTask);
-  //           } else {
-  //             alert(res.message);
-  //           }
-  //         }
-  //       })();
-  //     }, [taskID, email])
-  //   );
+          const currTask = res.data;
+          // populate the fields with intiial values
+          if (currTask instanceof Task) {
+            setTask(currTask);
+          } else {
+            alert(res.message);
+          }
+        }
+      })();
+    }, [taskID, email])
+  );
+
+  const handleNavigateSharedUsers = () => {
+    router.replace("/(modals)/viewTask/sharedUsers");
+  };
+
+  const handleNavigateEditTask = () => {
+    router.replace("/(modals)/viewTask/createTask");
+  };
 
   return (
     <TaskProvider taskID={taskID}>
       <View style={styles.pageContainer}>
         <View style={styles.contentContainer}>
+          <Text variant="bodyLarge">{task && task.getName()}</Text>
           <View style={styles.headerTabs}>
-            <IconButton icon="pencil" />
-            <IconButton icon="account-group-outline" />
+            <IconButton
+              icon="pencil"
+              onPress={handleNavigateEditTask}
+              iconColor={isPath("createTask") ? theme.colors.tertiary : "grey"}
+            />
+            <IconButton
+              disabled={!task}
+              icon="account-group-outline"
+              iconColor={isPath("sharedUsers") ? theme.colors.tertiary : "grey"}
+              onPress={handleNavigateSharedUsers}
+            />
           </View>
           <Slot />
         </View>
@@ -73,6 +92,8 @@ const styles = StyleSheet.create({
   },
 
   headerTabs: {
+    borderTopWidth: 1,
+    borderTopColor: "grey",
     flexDirection: "row",
     justifyContent: "space-evenly",
   },
