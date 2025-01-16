@@ -80,9 +80,6 @@ const RolesTable = ({ item }: propTypes) => {
       <DataTable.Row key={userEmail}>
         <DataTable.Cell style={styles.nickCell}>{nickname}</DataTable.Cell>
         <DataTable.Cell style={styles.roleCell}>
-          {/* <Button onPress={() => handleChangeRoleOfUser(email)}>
-                {role.toUpperCase()}
-              </Button> */}
           <Select
             visible={visible}
             items={roles}

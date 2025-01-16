@@ -4,7 +4,7 @@ import { Timestamp } from "firebase/firestore";
 import { router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { UrlObject } from "expo-router/build/LocationProvider";
-
+import Task from "./task";
 
 /**
  * STRINGS
@@ -224,6 +224,47 @@ export interface DataPoint {
     y: number;
     data?: Record<string, any>;
 }
+
+
+export const getEarliestAndLatestDeadline = (tasks: Task[]): { earliest: Date | null, latest: Date | null } => {
+    let ret;
+
+    // This is here to intialize the deadlines
+    if (tasks.length >= 1) {
+        ret = {
+            earliest: tasks[0].getDeadline(),
+            latest: tasks[0].getDeadline(),
+        }
+
+    } else {
+        return { earliest: null, latest: null }
+    }
+
+    const dateReduction = (accumulator: { earliest: Date | null, latest: Date | null }, task: Task) => {
+        const currDeadline = task.getDeadline()
+        const { earliest, latest } = accumulator;
+
+        if (currDeadline instanceof Date) {
+            if (!earliest) { accumulator["earliest"] = currDeadline } else {
+                accumulator["earliest"] = earliest < currDeadline ? earliest : currDeadline
+            };
+            if (!latest) { accumulator["latest"] = currDeadline } else {
+                accumulator["latest"] = latest > currDeadline ? latest : currDeadline
+            };
+
+            return accumulator;
+
+        } else {
+            return accumulator;
+        }
+
+    }
+
+    ret = tasks.reduce(dateReduction, ret);
+    return ret
+
+}
+
 
 export const roundToTwoDecimals = (num: number): number => {
     return Math.round(num * 100) / 100;
