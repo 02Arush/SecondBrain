@@ -35,10 +35,14 @@ const createTask = () => {
   const task: Task | null = useContext(TaskContext) as Task | null;
   const theme = useTheme();
 
-  if (!task) {
-    // Render nothing while navigating to avoid the "setState during render" warning
-    // return router.navigate("/(tabs)/tasks");
-  }
+  useEffect(() => {
+    setTaskName(task?.getName() || "");
+    setTaskDescription(task?.getDescription() || "");
+    setDisplayedDeadline(
+      task?.getDeadline()?.toDateString() || constants.NO_TASK_DEADLINE
+    );
+    setImportance(task?.getImportance() || 5)
+  }, [task]);
 
   const taskID = (task as Task) instanceof Task ? task?.getTaskID() : undefined;
   const { email } = useContext(AuthContext);
@@ -71,7 +75,7 @@ const createTask = () => {
   const handleConfirmDeadline = () => {
     const deadlineDate = getDateFromSimpleDate(deadline);
     if (deadlineDate) {
-      const dateString = deadlineDate.toDateString()
+      const dateString = deadlineDate.toDateString();
       setDisplayedDeadline("Deadline: " + dateString);
       setShowingDeadlineModal(false);
     }
