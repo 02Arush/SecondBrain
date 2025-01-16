@@ -55,7 +55,7 @@ const TaskItem = ({
 
   const handleShowTaskDetails = async () => {
     router.push({
-      pathname: "/(modals)/viewTask/sharedUsers",
+      pathname: "/(modals)/viewTask/createTask",
       params: {
         taskID: taskID,
       },

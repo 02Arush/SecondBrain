@@ -21,6 +21,7 @@ import { sharedItemType } from "./types_and_utils";
 import constants from "@/constants/constants";
 import { email } from "./types_and_utils";
 import { sharedUser } from "./types_and_utils";
+import { SharableItem } from "./SharableItem";
 
 
 const firebaseConfig = {
@@ -510,18 +511,70 @@ export const setCompleted = async (email, taskID, completedStatus = True) => {
 
 // Currently: any user that a task is shared with can permanently delete a task
 // FUTURE IMPLEMENTATION: DELETE DOCUMENT FOR ALL SHARED USERS
+
+/**
+ * 
+ * @param {string} email 
+ * @param {taskID} string
+ * @returns 
+ */
 export const deleteTask = async (email, taskID) => {
+
     try {
         // delete task from user's task collection
         const userTaskCollection = collection(collections.users, email, "tasks");
-        const docInUserTasks = doc(userTaskCollection, taskID);
+        const docInUserTasksRef = doc(userTaskCollection, taskID);
+        const docInTasksRef = doc(collections.tasks, taskID);
+
 
         // also delete task from tasks collection
-        const taskCollection = collections.tasks
-        const docInTasks = doc(taskCollection, taskID);
 
-        const delFromUser = await deleteDoc(docInUserTasks);
-        const delFromTasks = await deleteDoc(docInTasks);
+        const taskDocSnap = await getDoc(docInTasksRef);
+        if (taskDocSnap.exists()) {
+            const task = Task.fromObject(taskDocSnap.data(), taskID);
+            const roleRes = task.getRoleOfUser(email);
+            if (!roleRes.ok) {
+                return {
+                    ok: false,
+                    message: "Email Not Found in Shared Users Task: " + email
+                }
+            }
+
+            const role = roleRes.data;
+
+            const isOwner = role.localeCompare(constants.ROLE.OWNER) == 0;
+            if (isOwner) {
+                const sharedUsers = task.getSharedUsers();
+                const emails = Object.keys(sharedUsers)
+                const deletionResponses = await Promise.all(emails.map(async (email) => {
+                    const deleteRes = await deleteTaskDocForIndividual(email, taskID);
+                    return deleteRes;
+                }))
+
+                const errMsg = deletionResponses.reduce((message, res) => {
+                    if (!res.ok) {
+                        return message + "\n" + res.message;
+                    } else {
+                        return message;
+                    }
+                }, "");
+
+                await deleteDoc(doc(collections.tasks, taskID));
+
+                const ok = errMsg.length === 0;
+                // TODO: TASK DELETION AS EMAIL NOT WORKING
+                const message = ok ? "Task Delete Success" : "Task Delete Error\n" + errMsg;
+                return { ok, message }
+
+
+            } else {
+
+                const res = await deleteTaskDocForIndividual(email, taskID);
+                const ok = res.ok;
+                const message = res.ok ? "Successfully Deleted Task" : "Error Deleting Task\n" + res.message;
+                return { ok, message }
+            }
+        }
 
         return { ok: true, message: "Successfully Deleted Task" }
 
@@ -529,6 +582,44 @@ export const deleteTask = async (email, taskID) => {
         return { ok: false, error: err.code, message: err.message }
     }
 }
+
+/**
+ * 
+ * @param {string} email 
+ * @param {string} taskID 
+ */
+const deleteTaskDocForIndividual = async (email, taskID) => {
+    try {
+
+        const docRef = doc(collections.users, email, "tasks", taskID);
+        await deleteDoc(docRef);
+        const taskDocRef = doc(collections.tasks, taskID);
+        const taskDocSnap = await getDoc(taskDocRef);
+        if (taskDocSnap.exists()) {
+            const sharedUsers = taskDocSnap.data()["sharedUsers"];
+            delete sharedUsers[email];
+            await updateDoc(taskDocRef, {
+                sharedUsers
+            }, { merge: false })
+
+        } else {
+            return { ok: false, message: "Task not found in tasks collection " + taskID };
+        }
+
+
+        return {
+            ok: true, message: "Task Deleted"
+        }
+
+        // Remove shared users from task in the cloud
+
+    } catch (err) {
+        return { ok: false, message: err.message }
+    }
+
+}
+
+
 
 /**
  * 
@@ -568,7 +659,7 @@ const createTaskInUserCollection = async (email, task) => {
         const userTasks = getUserTasksCollection(email);
         const docRef = doc(userTasks, taskID);
         const dataForUser = {
-            userPriority: task.getPriority(),
+            userPriority: task.getImportance(),
         }
         await setDoc(docRef, dataForUser, { merge: true })
         return {
@@ -629,13 +720,14 @@ export const createHabit = async (email, habit) => {
         await setDoc(docRefHabit, docDataHabit, { merge: true })
         return {
             ok: true,
-            message: `Habit ${habit.getName()} created with ID: ${habitID}`
+            message: `Habit ${habit.getName()
+                } created with ID: ${habitID} `
         }
 
     } catch (err) {
         return {
             ok: false,
-            message: `Create Habit: Code: ${err.code}, Message: ${err.message}`
+            message: `Create Habit: Code: ${err.code}, Message: ${err.message} `
         }
     }
 
@@ -673,7 +765,7 @@ export const retrieveHabitList = async (email) => {
 
         let msg = responses.reduce((acc, response) => {
             if (!response.ok) {
-                return acc + `${response.message}\n`;
+                return acc + `${response.message} \n`;
             } else {
                 return acc;
             }
@@ -687,7 +779,7 @@ export const retrieveHabitList = async (email) => {
 
 
     } catch (err) {
-        return { ok: false, message: `ERROR: ${err.message}`, data: null }
+        return { ok: false, message: `ERROR: ${err.message} `, data: null }
 
     }
 }
@@ -707,7 +799,7 @@ export const retrieveActivityLogForUser = async (email, habitID) => {
 
         return { ok: true, data: activityLog, message: "Successfully retrieved user activities" }
     } catch (err) {
-        return { ok: false, message: `ERROR Retrieving Activity Log: ${err.message}`, data: {} }
+        return { ok: false, message: `ERROR Retrieving Activity Log: ${err.message} `, data: {} }
     }
 }
 
@@ -737,7 +829,7 @@ export const getHabitFromID = async (email, id) => {
         return { ok: true, message: "Retrieved Successfully", data: habit }
 
     } catch (err) {
-        return { ok: false, message: `${err.message}` }
+        return { ok: false, message: `${err.message} ` }
 
     }
 }
@@ -774,12 +866,12 @@ export const deleteHabit = async (email, habit) => {
 
         }
 
-        return { ok: true, message: `Successfully Deleted Habit: ${habit.getName()}` }
+        return { ok: true, message: `Successfully Deleted Habit: ${habit.getName()} ` }
 
     } catch (err) {
         return {
             ok: false,
-            message: `Error Deleting Habit: ${habit} for Email: ${email}. ERROR MESSAGE: ${err.message}`
+            message: `Error Deleting Habit: ${habit} for Email: ${email}. ERROR MESSAGE: ${err.message} `
         }
     }
 }
@@ -815,7 +907,7 @@ export const getSharedUsersForItem = async (item) => {
     const docSnap = await getDoc(itemDocRef);
 
     if (!docSnap.exists()) {
-        return { ok: false, message: `Error Getting Shared Users. Doc with ${itemType} ID: ${ID} does not exist.` }
+        return { ok: false, message: `Error Getting Shared Users.Doc with ${itemType} ID: ${ID} does not exist.` }
     }
 
     const itemData = docSnap.data();
@@ -838,9 +930,9 @@ export const getSharedUsersForItem = async (item) => {
 
     if (sharedUsers) {
 
-        return { ok: true, message: `Retrieved Shared Users for ${itemType}: ${ID}`, data: sharedUsers }
+        return { ok: true, message: `Retrieved Shared Users for ${itemType}: ${ID} `, data: sharedUsers }
     } else {
-        return { ok: false, message: `Shared Users does not exist for ${itemType}: ${ID}` }
+        return { ok: false, message: `Shared Users does not exist for ${itemType}: ${ID} ` }
     }
 }
 
@@ -853,7 +945,7 @@ export const getSharedUsersForHabit = async (habitID) => {
     const docSnap = await getDoc(habitDocRef);
 
     if (!docSnap.exists()) {
-        return { ok: false, message: `Error Getting Shared Users. Doc with habit ID: ${habitID} does not exist.` }
+        return { ok: false, message: `Error Getting Shared Users.Doc with habit ID: ${habitID} does not exist.` }
     }
 
     const habitData = docSnap.data();
@@ -876,9 +968,9 @@ export const getSharedUsersForHabit = async (habitID) => {
 
     if (sharedUsers) {
 
-        return { ok: true, message: `Retrieved Shared Users for habit: ${habitID}`, data: sharedUsers }
+        return { ok: true, message: `Retrieved Shared Users for habit: ${habitID} `, data: sharedUsers }
     } else {
-        return { ok: false, message: `Shared Users does not exist for habit: ${habitID}` }
+        return { ok: false, message: `Shared Users does not exist for habit: ${habitID} ` }
     }
 }
 
@@ -890,7 +982,7 @@ export const getSharedUsersForTask = async (taskID) => {
     const taskDocRef = doc(collections.tasks, taskID);
     const docSnap = await getDoc(taskDocRef);
     if (!docSnap.exists()) {
-        return { ok: false, message: `Error Getting Shared Users. Doc with Task ID: ${taskID} does not exist.` }
+        return { ok: false, message: `Error Getting Shared Users.Doc with Task ID: ${taskID} does not exist.` }
     }
 
 
@@ -901,7 +993,7 @@ export const getSharedUsersForTask = async (taskID) => {
  * 
  * @param {string} sender
  * @param {string} recipient
- * @param {Habit | Task} sharedItem 
+ * @param {SharableItem} sharedItem 
  * @param {string?} role
  */
 
@@ -1042,7 +1134,7 @@ export const invitationAction = async (recipient, inviteID, actionType) => {
             })
 
             let message = "Error Accepting Invite For Habit\n";
-            const taskUpdateRes = await updateTask(recipient, task, task.getID());
+            const taskUpdateRes = await updateTask(recipient, task, task.getTaskID());
             message += taskUpdateRes.message + "\n";
 
             // Add the Task to the recipient's task collection
@@ -1161,7 +1253,7 @@ export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, item
         return {
             ok: false,
             message: `You do not have the power to complete this operation.\n
-            Your role: ${signedInUserRole.toUpperCase()}, ${modifiedUser}'s role: ${modifiedUserRole.toUpperCase()}`
+            Your role: ${signedInUserRole.toUpperCase()}, ${modifiedUser} 's role: ${modifiedUserRole.toUpperCase()}`
         }
     }
 
@@ -1235,12 +1327,12 @@ export const changeUserHabitRole = async (signedInUser, modifiedUser, newRole, h
 export const changeUserTaskRole = async (signedInUser, modifiedUser, newRole, task) => {
 
     if (newRole == constants.ROLE.NONE) {
-        const res = await deleteTask(modifiedUser, task.getTaskID())
+        const res = await deleteTaskDocForIndividual(modifiedUser, task.getTaskID())
         if (!res.ok) {
-            return { ok: false, message: "Unable to remove from habit:\n" + res.message }
+            return { ok: false, message: "Unable to remove from Task:\n" + res.message }
         } else {
 
-            return { ok: true, message: "Successfully removed user from habit" }
+            return { ok: true, message: `Successfully removed user: ${modifiedUser} from Task: ${task.getName()}` }
         }
     }
 
