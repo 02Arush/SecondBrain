@@ -12,14 +12,14 @@ export const updateTask = async (email: string, task: Task, isNewTask: boolean =
         return res;
     } else {
         // NOW: ALL TASKS HAVE AN ID, RIGHT? SO 
-        const taskID = task.getTaskID();
+        const taskID = task.getID();
         const res =
             isNewTask && typeof taskID === "string" ?
                 await createTaskCloud(email, task)
                 : await updateTaskCloud(email, task, taskID)
 
         const ok = !res.error
-        const message = ok ? "Task Update Successfully In Cloud" : `${task.getTaskID} ERROR: ${res.error}, MSG: ${res.message}`
+        const message = ok ? "Task Update Successfully In Cloud" : `${task.getID()} ERROR: ${res.error}, MSG: ${res.message}`
         return { ok, message }
 
     }
@@ -57,10 +57,10 @@ export const updateLocalTaskList = async (task: Task): Promise<{ ok: boolean, me
         return { ok: false, message: "Task Retrieval from local storage error. Tasks is Not an Array. Contact Support" }
     }
 
-    const taskToUpdateID = task.getTaskID()
+    const taskToUpdateID = task.getID()
     const taskToUpdateIDX = tasks.findIndex(task => {
         const parsedTask = Task.fromObject(task, task.taskID);
-        return parsedTask instanceof Task && parsedTask.getTaskID() === taskToUpdateID
+        return parsedTask instanceof Task && parsedTask.getID() === taskToUpdateID
     })
 
 
@@ -116,7 +116,7 @@ export const retrieveTasks = async (email: string, completed: boolean = false, f
     const unexpiredTasks: Task[] = lst.filter((task) => !task.isExpired());
 
     const deleteExpiredRes = await Promise.all(expiredTasks.map(async (task) => {
-        return await deleteTask(email, task.getTaskID())
+        return await deleteTask(email, task.getID())
     }))
 
     const msg = deleteExpiredRes.reduce((acc, res) => {
@@ -209,7 +209,7 @@ export const getTaskFromLocalStorage = async (taskID: string): Promise<{ ok: boo
     }
 
     const foundTask = taskList.find((task: Task) => {
-        return task.getTaskID() == taskID;
+        return task.getID() == taskID;
     })
 
 

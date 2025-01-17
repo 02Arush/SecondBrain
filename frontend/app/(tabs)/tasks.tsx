@@ -62,7 +62,7 @@ const tasks = () => {
     } else {
       // Remove task from current displayed list of tasks
       const newTaskList = taskList.filter((task: Task) => {
-        return task.getTaskID() !== taskID;
+        return task.getID() !== taskID;
       });
       setTaskList(newTaskList);
     }
@@ -137,13 +137,13 @@ const tasks = () => {
           {taskList.map((task: Task, index) => {
             return (
               <TaskItem
-                taskID={task.getTaskID()}
+                taskID={task.getID()}
                 key={index}
                 taskName={task.getName()}
                 userImportance={task.getImportance()}
                 deadline={task.getDeadline()}
                 onComplete={(completedStatus = true) => {
-                  handleCompleteTask(task.getTaskID(), completedStatus);
+                  handleCompleteTask(task.getID(), completedStatus);
                 }}
                 completed={task.getCompleted()}
               />

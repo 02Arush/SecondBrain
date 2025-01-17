@@ -183,7 +183,7 @@ export default class Task implements SharableItem {
         this.sharedUsers = {}
     }
 
-    getTaskID(): string {
+    getID(): string {
         return this.taskID;
     }
 
@@ -270,7 +270,7 @@ export default class Task implements SharableItem {
 
     getJSON() {
         return {
-            taskID: this.getTaskID(),
+            taskID: this.getID(),
             taskName: this.getName(),
             description: this.getDescription(),
             importance: this.getImportance(),

@@ -44,7 +44,7 @@ const createTask = () => {
     setImportance(task?.getImportance() || 5)
   }, [task]);
 
-  const taskID = (task as Task) instanceof Task ? task?.getTaskID() : undefined;
+  const taskID = (task as Task) instanceof Task ? task?.getID() : undefined;
   const { email } = useContext(AuthContext);
 
   const [taskName, setTaskName] = useState<string>(task?.getName() || "");

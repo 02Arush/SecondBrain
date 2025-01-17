@@ -53,9 +53,8 @@ const collections = {
     habits: collection(db, "habits"),
     tasks: collection(db, "tasks"),
     users: collection(db, "users"),
+    invites: collection(db, "invites"),
 }
-
-
 
 
 export const attemptLogin = async (email, password) => {
@@ -342,7 +341,7 @@ export const createTask = async (email, task) => {
     // First: Add the document to the tasks collection
     try {
 
-        const taskID = task.getTaskID()
+        const taskID = task.getID()
         const res = await updateTask(email, task, taskID)
 
         if (!res.ok) {
@@ -655,7 +654,7 @@ const createHabitInUserCollection = async (email, habit) => {
  */
 const createTaskInUserCollection = async (email, task) => {
     try {
-        const taskID = task.getTaskID();
+        const taskID = task.getID();
         const userTasks = getUserTasksCollection(email);
         const docRef = doc(userTasks, taskID);
         const dataForUser = {
@@ -899,7 +898,7 @@ export const getSharedUsersForItem = async (item) => {
     }
 
     const itemType = item instanceof Habit ? "habit" : "task";
-    const ID = item instanceof Habit ? item.getID() : item.getTaskID();
+    const ID = item instanceof Habit ? item.getID() : item.getID();
 
     const collectionToQuery = itemType == "habit" ? collections.habits : collections.tasks;
     const itemDocRef = doc(collectionToQuery, ID);
@@ -1025,7 +1024,7 @@ export const createInvite = async (sender, recipient, sharedItem, role = constan
 
         } else {
             const task = sharedItem;
-            ID = task.getTaskID();
+            ID = task.getID();
             name = task.getName();
         }
 
@@ -1134,7 +1133,7 @@ export const invitationAction = async (recipient, inviteID, actionType) => {
             })
 
             let message = "Error Accepting Invite For Habit\n";
-            const taskUpdateRes = await updateTask(recipient, task, task.getTaskID());
+            const taskUpdateRes = await updateTask(recipient, task, task.getID());
             message += taskUpdateRes.message + "\n";
 
             // Add the Task to the recipient's task collection
@@ -1327,7 +1326,7 @@ export const changeUserHabitRole = async (signedInUser, modifiedUser, newRole, h
 export const changeUserTaskRole = async (signedInUser, modifiedUser, newRole, task) => {
 
     if (newRole == constants.ROLE.NONE) {
-        const res = await deleteTaskDocForIndividual(modifiedUser, task.getTaskID())
+        const res = await deleteTaskDocForIndividual(modifiedUser, task.getID())
         if (!res.ok) {
             return { ok: false, message: "Unable to remove from Task:\n" + res.message }
         } else {
@@ -1350,7 +1349,7 @@ export const changeUserTaskRole = async (signedInUser, modifiedUser, newRole, ta
         }
     }
 
-    const res = await updateTask(modifiedUser, task, task.getTaskID());
+    const res = await updateTask(modifiedUser, task, task.getID());
     if (res.ok) {
         return {
             ok: true,
@@ -1363,5 +1362,16 @@ export const changeUserTaskRole = async (signedInUser, modifiedUser, newRole, ta
             message: "Failed to modify user role.\n" + res.message
         }
     }
+
+}
+
+
+/**
+ * 
+ * @param {SharableItem} item 
+ */
+export const getInvitesForItem = (item) => {
+
+
 
 }

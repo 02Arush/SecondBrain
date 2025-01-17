@@ -7,6 +7,7 @@ import { sharedUser } from "./types_and_utils"
 
 
 export interface SharableItem {
+    getID(): string
     getSharedUsers(): { [key: email]: sharedUser }
     addSharedUser(sharedHabitUser: sharedUser): void
     getRoleOfUser(email: email): { ok: boolean, data: string, message: string }
