@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Dimensions, Pressable } from "react-native";
+import { ensureJSDate } from "@/api/types_and_utils";
 
 import { useTheme, Text, Surface, Button } from "react-native-paper";
 import { DataPoint } from "@/api/types_and_utils";
 import OutlineModal from "./OutlineModal";
+import constants from "@/constants/constants";
 // Type definition for data points
 
 interface ScatterplotProps {
@@ -34,13 +36,11 @@ const Scatterplot: React.FC<ScatterplotProps> = ({
 
     points.forEach((point) => {
       const pointObj = JSON.parse(point);
-      const pointData = pointObj.data;
       const id = pointObj.id;
       const importance = pointObj.data.importance;
-      const deadline = new Date(pointObj.data.deadline).toLocaleDateString();
-      newModalText += `Name: ${id}\nImportance: ${importance}\nDeadline: ${deadline}\n---\n`;
-
-      // newModalText += `${}\n`;
+      const objDeadline = pointObj.data.deadline != null ? ensureJSDate(pointObj.data.deadline) : null;
+      const displayedDeadline = objDeadline ? objDeadline.toDateString() : constants.NO_TASK_DEADLINE
+      newModalText += `Name: ${id}\nImportance: ${importance}\nDeadline: ${displayedDeadline}\n---\n`;
     });
 
     setModalText(newModalText);

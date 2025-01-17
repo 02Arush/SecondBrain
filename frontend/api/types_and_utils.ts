@@ -266,6 +266,32 @@ export const getEarliestAndLatestDeadline = (tasks: Task[]): { earliest: Date | 
 }
 
 
+/**
+ * TODO:
+ * Handle Cases where:
+ * a) No earliest or latest date is given
+ * b) No Deadline
+ * 
+ * Improve it from what it currently is.
+ * Currently: If No deadline is given, and one task, relative urgency auto sets to low
+ * Do we want this?
+ */
+export const getRelativeUrgencyOfDate = (date: Date | null, earliestDate: Date | null, latestDate: Date | null) : number => {
+    // If date is null, automatically give it minimum urgency which is 9
+    if (!date) return 9;
+
+    if (!earliestDate || !latestDate) return 4;
+
+    const timeRange = latestDate.getTime() - earliestDate.getTime();
+    const distanceFromEarliest = date.getTime() - earliestDate.getTime();
+
+    const normalizedUrgency = distanceFromEarliest / timeRange;
+
+    return normalizedUrgency * 8
+
+}
+
+
 export const roundToTwoDecimals = (num: number): number => {
     return Math.round(num * 100) / 100;
 };

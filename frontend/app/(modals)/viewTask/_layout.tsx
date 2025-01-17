@@ -92,8 +92,9 @@ const styles = StyleSheet.create({
   },
 
   headerTabs: {
-    borderTopWidth: 1,
-    borderTopColor: "grey",
+    borderBottomWidth: 1,
+    borderBottomColor: "grey",
+    marginBottom: 4,
     flexDirection: "row",
     justifyContent: "space-evenly",
   },
