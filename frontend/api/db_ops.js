@@ -9,7 +9,7 @@ import {
     getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
     signInWithEmailAndPassword, signOut, setPersistence, getReactNativePersistence, initializeAuth, deleteUser
 } from 'firebase/auth';
-import { getDocs, getFirestore, query, updateDoc, where } from 'firebase/firestore'
+import { addDoc, getDocs, getFirestore, query, updateDoc, where, deleteDocs } from 'firebase/firestore'
 import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
 import Habit from "./habit";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
@@ -1043,8 +1043,12 @@ export const createInvite = async (sender, recipient, sharedItem, role = constan
             role: role,
         }
 
-        // If a user is updated multiple times, 
+
         await setDoc(docRef, inviteInfo);
+
+        // Add the invite to the OVERALL invites collection using the ID
+        addDoc(collections.invites, inviteInfo);
+
         return {
             ok: true,
             message: "Successfully Invited User"
@@ -1161,6 +1165,7 @@ export const invitationAction = async (recipient, inviteID, actionType) => {
     if (!delRes.ok) {
         return {
             ok: false,
+
             message: "Invite Action Error\n" + delRes.message
         }
     }
@@ -1185,17 +1190,35 @@ export const getUserInvitesCollection = (recipient) => {
  */
 export const deleteInvite = async (recipient, inviteID) => {
     try {
-        const invitesCollection = getUserInvitesCollection(recipient)
-        const docRef = doc(invitesCollection, inviteID)
+        if (!recipient || !inviteID) {
+            throw new Error("Invalid recipient or inviteID provided.");
+        }
+
+        // Get the specific invite document for the user and delete it
+        const invitesCollection = getUserInvitesCollection(recipient);
+        const docRef = doc(invitesCollection, inviteID);
         await deleteDoc(docRef);
-        return { ok: true, message: "Invite delete success" }
+
+        // Query and delete related invites from the global collection
+        const q = query(
+            collections.invites,
+            where("recipient", "==", recipient),
+            where("itemID", "==", inviteID)
+        );
+
+        // Fetch the matching documents and delete them
+        const querySnapshot = await getDocs(q);
+        const deletePromises = querySnapshot.docs.map(docSnapshot => deleteDoc(docSnapshot.ref));
+        await Promise.all(deletePromises);
+
+        return { ok: true, message: "Invite deleted successfully." };
     } catch (err) {
         return {
             ok: false,
-            message: "Error Deleting Invite\n" + err.message,
-        }
+            message: `Error deleting invite: ${err.message}`,
+        };
     }
-}
+};
 
 
 /**
@@ -1370,8 +1393,38 @@ export const changeUserTaskRole = async (signedInUser, modifiedUser, newRole, ta
  * 
  * @param {SharableItem} item 
  */
-export const getInvitesForItem = (item) => {
+export const getInvitesForItem = async (item) => {
+    try {
+        const ID = item.getID();
 
+        const q = query(
+            collections.invites,
+            where("itemID", "==", ID)
+        )
 
+        const res = await getDocs(q);
+        const docs = res.docs.map(doc => {
+            const inviteID = doc.id;
+            const inviteData = { ...doc.data() }
+            return {
+                inviteID,
+                ...inviteData
+            }
+
+        })
+
+        return {
+            ok: true,
+            message: "Successfully Retrieved Invites",
+            data: docs,
+        }
+
+    } catch (err) {
+        return {
+            ok: false,
+            message: `Error Getting Invites For Item with ID: ${item.getID()}]\n${err.message}`,
+            data: [],
+        }
+    }
 
 }

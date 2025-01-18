@@ -11,6 +11,7 @@ import constants, { isAnonymous } from "@/constants/constants";
 import { router, useRouter, useFocusEffect } from "expo-router";
 import RolesTable from "@/components/RolesTable";
 import InviteUserUI from "@/components/InviteUserUI";
+import { getInvitesForItem } from "@/api/db_ops";
 
 const sharedUsers = () => {
   const habit = useContext(HabitContext);
@@ -22,6 +23,8 @@ const sharedUsers = () => {
       if (isAnonymous(email)) {
         router.back();
       }
+
+      
     }, [])
   );
 
