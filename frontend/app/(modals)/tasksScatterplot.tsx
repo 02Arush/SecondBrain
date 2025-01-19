@@ -6,7 +6,7 @@ import {
   processColor,
 } from "react-native";
 import React, { useCallback, useContext, useState, useEffect } from "react";
-import { Text, useTheme } from "react-native-paper";
+import { Text, useTheme, DataTable } from "react-native-paper";
 import { useFocusEffect } from "expo-router";
 import {
   DataPoint,
@@ -91,16 +91,11 @@ const tasksScatterplot = () => {
             yAxisLabel="Importance"
           />
         </View>
-        <ScrollView style={styles.legendContainer}>
-          <Text>Legend</Text>
-          {taskList.map((task, idx) => {
-            return (
-              <View key={idx}>
-                <Text>{task.getName()}</Text>
-              </View>
-            );
-          })}
-        </ScrollView>
+        <View style={styles.hintContainer}>
+          <Text style={{textAlign: "center"}}>
+            Press a&nbsp;<Text style={{color: theme.colors.primary}}>point</Text>&nbsp;on the chart to view the tasks at that point.
+          </Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -132,10 +127,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  legendContainer: {
+  hintContainer: {
     borderWidth: 1,
     flex: 1,
     width: "100%",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
 
   chart: {
