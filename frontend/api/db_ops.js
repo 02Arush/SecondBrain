@@ -201,6 +201,29 @@ export const updateUserHabitCollection = (email, newHabit) => {
     const userHabitCollection = getUserHabitsCollection(email)
 }
 
+
+/**
+ * 
+ * @param {string} email 
+ * @param {string} habitID 
+ */
+export const getHabitForUser = async (email, habitID) => {
+    const docRef = doc(collections.users, "habits", habitID)
+    const userHabitDoc = await getDoc(docRef);
+
+    if (!userHabitDoc.exists()) {
+        return {
+            ok: false, message: `Habit with ID: ${habitID} Not Found For User ${email}`
+        }
+    }
+
+    const data = userHabitDoc.data();
+    const activityLog = data["activityLog"]
+
+    const habit = await getHabitFromID
+
+}
+
 /**
  * 
  * @param {string} email 
@@ -787,8 +810,19 @@ export const retrieveHabitList = async (email) => {
  * 
  * @param {string} email 
  * @param {string} habitID 
+ * 
  */
 export const retrieveActivityLogForUser = async (email, habitID) => {
+
+    if (isAnonymous(email)) {
+        return {
+            ok: false,
+            message: "Can not retrieve activity log for user, since user is either offline or not signed in.",
+            data: new Map(),
+        }
+    }
+
+
     try {
         const habitCollection = getUserHabitsCollection(email);
         const docRef = doc(habitCollection, habitID);
@@ -798,7 +832,7 @@ export const retrieveActivityLogForUser = async (email, habitID) => {
 
         return { ok: true, data: activityLog, message: "Successfully retrieved user activities" }
     } catch (err) {
-        return { ok: false, message: `ERROR Retrieving Activity Log: ${err.message} `, data: {} }
+        return { ok: false, message: `ERROR Retrieving Activity Log: ${err.message} `, data: new Map() }
     }
 }
 

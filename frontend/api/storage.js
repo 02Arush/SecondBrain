@@ -4,9 +4,10 @@ import { isAnonymous } from '@/constants/constants';
 import {
     getUserDataFromEmail, updateUserHabitList,
     createHabit as createHabitCloud, retrieveHabitListCloud, deleteHabit as deleteHabitCloud, getHabitFromID,
-    updateHabit as updateHabitCloud
+    updateHabit as updateHabitCloud,
+    retrieveActivityLogForUser
 } from './db_ops';
-
+import constants from '@/constants/constants';
 import { habitModificationType } from './types_and_utils';
 // Function to store data
 export const storeData = async (key, value) => {
@@ -121,15 +122,13 @@ const retrieveHabitFromLocalStorage = async (habitID) => {
     if (!habitID) {
         return {
             ok: false,
-            error: "Habit ID is undefined"
+            message: "Habit ID is undefined"
         }
     }
 
     const habitList = await retrieveLocalHabitList();
 
     const habitJSON = habitList.find(habit => {
-
-
         return habit.habitID && habit.habitID.localeCompare(habitID) == 0;
     })
 
@@ -279,6 +278,46 @@ export const uploadLocalStorageHabits = async (email) => {
         }, "")
     }
     return { ok, message }
+
+
+}
+
+/**
+ * 
+ * @param {string} email 
+ */
+export const getSyncedDailyCheckin = async (email) => {
+    // Get the daily checkin from local storage
+
+    const lclDailyCheckin = await retrieveHabitFromLocalStorage(constants.DAILY_CHECK_IN)
+    const dailyCheckinHabit = lclDailyCheckin.data || new Habit("Daily Check-In", "Times")
+    dailyCheckinHabit.setID(constants.DAILY_CHECK_IN)
+
+    let tempCloudHabit;
+
+    if (!isAnonymous(email)) {
+        const cloudActivityLogRes = await retrieveActivityLogForUser(email, constants.DAILY_CHECK_IN)
+        const cloudActivityLog = cloudActivityLogRes.data;
+        tempCloudHabit = new Habit("Daily Check-In", "Times");
+        console.log("ACTIVITY LOG TYPE " + typeof cloudActivityLog)
+
+        tempCloudHabit.setActivityLog(cloudActivityLog)
+
+
+    }
+
+    const mergedHabit = tempCloudHabit instanceof Habit ? Habit.mergeHabits("Daily Check-In", "Times", tempCloudHabit, dailyCheckinHabit, true) : dailyCheckinHabit
+    mergedHabit.setID(constants.DAILY_CHECK_IN);
+    mergedHabit.logItem(new Date(), 1, true);
+
+    const storeLocalRes = await storeData(constants.DAILY_CHECK_IN, mergedHabit.getJSONString())
+    const storeCloudRes = await updateHabitCloud(email, mergedHabit, "log")
+
+
+    return {
+        ok: storeLocalRes.ok && storeCloudRes.ok,
+        message: "Local: " + storeLocalRes.message + "\nCloud: " + storeCloudRes.message
+    }
 
 
 }

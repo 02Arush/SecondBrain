@@ -11,7 +11,7 @@ import {
 } from "react-native-paper";
 import { router, useFocusEffect } from "expo-router";
 import Habit from "@/api/habit";
-import { retrieveLocalHabitList } from "@/api/storage";
+import { getSyncedDailyCheckin, retrieveLocalHabitList } from "@/api/storage";
 import {
   getUserDataFromEmail,
   retrieveHabitList as retrieveHabitListCloud,
@@ -24,6 +24,9 @@ export default function TabOneScreen() {
   const [habits, setHabits] = useState<any[]>([]);
   const { email, setEmail } = useContext(AuthContext);
   const [cloudUserData, setCloudUserData] = useState<any>({});
+  const [dailyCheckinHabit, setDailyCheckinHabit] = useState<Habit>(
+    new Habit("Daily Check-In")
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -47,8 +50,13 @@ export default function TabOneScreen() {
             }
           }
         }
+
+        // Finally: Here, get the Daily-Checkin-Data
+        const ret = await getSyncedDailyCheckin(email);
+        alert(ret.message);
       };
       fetchData();
+     
     }, [email])
   );
 
@@ -77,9 +85,8 @@ export default function TabOneScreen() {
         >
           <Text>
             Signed in As:&nbsp;
-            {!isAnonymous(email) ? (cloudUserData?.nickname || email) : email}
+            {!isAnonymous(email) ? cloudUserData?.nickname || email : email}
           </Text>
-          
         </View>
         <ScrollView style={styles.itemListContainer}>
           {habits.length === 0 && (
@@ -87,9 +94,10 @@ export default function TabOneScreen() {
               No Habits Created
             </Text>
           )}
-          {habits.map((habit: string, index: number) => {
-            const habitObject = Habit.parseHabit(habit);
-            return <HabitItem key={index} habit={habitObject} />;
+          <HabitItem habit={dailyCheckinHabit} />
+          {habits.map((habitString: string, index: number) => {
+            const habit = Habit.parseHabit(habitString);
+            return <HabitItem key={index} habit={habit} />;
           })}
         </ScrollView>
         <View style={styles.addButton}>

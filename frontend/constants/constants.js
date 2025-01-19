@@ -11,6 +11,8 @@ export const constants = {
         INVITED: "invited",
         NONE: "none",
     },
+
+    DAILY_CHECK_IN: "dailyCheckIn"
 }
 
 export const ROLE_POWERS = {
@@ -20,8 +22,6 @@ export const ROLE_POWERS = {
     [constants.ROLE.NONE]: 0,
     [constants.ROLE.INVITED]: 0
 }
-
-
 
 
 

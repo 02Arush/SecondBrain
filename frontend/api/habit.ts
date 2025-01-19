@@ -53,6 +53,14 @@ export default class Habit implements SharableItem {
         this.habitName = name;
     }
 
+    setID(habitID: string) {
+        this.habitID = habitID;
+    }
+
+    setActivityLog(activityLog: Map<string, number>) {
+        this.activityLog = activityLog || {}
+    }
+
     getAge(): number {
         return this.age;
     }
@@ -163,14 +171,27 @@ export default class Habit implements SharableItem {
 
 
 
-    static mergeHabits(newHabitName: string, newHabitUnit: string, habit1: Habit, habit2: Habit): Habit {
+    static mergeHabits(newHabitName: string, newHabitUnit: string, habit1: Habit, habit2: Habit, overwrite = false): Habit {
 
         const creationDate = habit1.getCreationDate().getTime() < habit2.getCreationDate().getTime() ?
             habit1.getCreationDate() : habit2.getCreationDate()
 
         const mergedHabit = new Habit(newHabitName, newHabitUnit, undefined, undefined, creationDate);
+
+
+        if (overwrite) {
+            const h1Activities = (habit1.getActivityLog());
+            const h2Activities = (habit2.getActivityLog());
+
+            const mergedActivityLog = new Map(Object.entries({ ...h1Activities, ...h2Activities }));
+            mergedHabit.setActivityLog(mergedActivityLog);
+            return mergedHabit;
+
+        }
+
         const h1Activities = habit1.getSortedActivityLog();
         const h2Activities = habit2.getSortedActivityLog();
+
         h1Activities.forEach((activity) => {
             mergedHabit.logItem(new Date(activity.date), activity.count);
         })
@@ -389,7 +410,12 @@ export default class Habit implements SharableItem {
     }
 
     getActivityLog() {
-        return Object.fromEntries(this.activityLog)
+
+        if (this.activityLog instanceof Map) {
+            return Object.fromEntries(this.activityLog)
+        } else {
+            return this.activityLog;
+        }
     }
 
 
@@ -438,10 +464,15 @@ export default class Habit implements SharableItem {
         return sortedData;
     }
 
-    logItem(date: Date, quantity: number) {
+    logItem(date: Date, quantity: number, overwrite = false) {
         const dateKey = date.toDateString();
         const currCount: number = this.activityLog.get(dateKey) || 0;
-        this.activityLog.set(dateKey, currCount + quantity);
+
+        if (overwrite) {
+            this.activityLog.set(dateKey, quantity)
+        } else {
+            this.activityLog.set(dateKey, currCount + quantity);
+        }
     }
 
     /**
