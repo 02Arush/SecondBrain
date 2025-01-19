@@ -17,13 +17,11 @@ const viewSharedUsers = () => {
   //   }
   // }, [task]);
 
-  const [refreshing, setIsRefreshing] = useState(false);
-  const handleRefresh = useCallback(() => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 100);
-  }, []);
+  const [count, setCount] = useState(0);
+
+  const handleRefresh = () => {
+    setCount(count + 1);
+  };
 
   if (!task) {
     // Render nothing while navigating to avoid the "setState during render" warning
@@ -32,7 +30,7 @@ const viewSharedUsers = () => {
 
   return (
     <View>
-      <RolesTable item={task} />
+      <RolesTable key={count} item={task} />
       <View style={styles.inviteSection}>
         <View style={styles.inputSection}>
           <InviteUserUI item={task} handleRefresh={handleRefresh} />
