@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import Task from "@/api/task";
 import { Button } from "react-native-paper";
 import InviteUserUI from "@/components/InviteUserUI";
+import { useState, useCallback } from "react";
 
 const viewSharedUsers = () => {
   const task: Task | null = useContext(TaskContext);
@@ -15,6 +16,14 @@ const viewSharedUsers = () => {
   //   if (!task || task == null || task == undefined) {
   //   }
   // }, [task]);
+
+  const [refreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 100);
+  }, []);
 
   if (!task) {
     // Render nothing while navigating to avoid the "setState during render" warning
@@ -25,9 +34,8 @@ const viewSharedUsers = () => {
     <View>
       <RolesTable item={task} />
       <View style={styles.inviteSection}>
-        <Button>Invite Users</Button>
         <View style={styles.inputSection}>
-          <InviteUserUI item={task} />
+          <InviteUserUI item={task} handleRefresh={handleRefresh} />
         </View>
       </View>
     </View>

@@ -10,23 +10,15 @@ import { isAnonymous } from "@/constants/constants";
 
 type propTypes = {
   item: SharableItem;
+  handleRefresh: () => void;
 };
 
-const InviteUserUI = ({ item }: propTypes) => {
+const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
   const [showingAddEmail, setShowingAddEmail] = useState(false);
   const [emailRecipient, setEmailRecipient] = useState<string>("");
   const { email } = useContext(AuthContext);
   const [showingInvited, setShowingInvited] = useState(false);
-  const [invitedUsers, setInvitedUsers] = useState<Array<any>>([]);
-
-  useEffect(() => {
-    (async () => {
-      if (!isAnonymous(email)) {
-        const res = await getInvitesForItem(item);
-        setInvitedUsers(res.data);
-      }
-    })();
-  }, [item]);
+ 
 
   const handleOpenInviteEmail = () => {
     setShowingAddEmail(true);
@@ -43,6 +35,10 @@ const InviteUserUI = ({ item }: propTypes) => {
     alert(res.message);
 
     setShowingAddEmail(false);
+
+    handleRefresh();
+
+    // refreshPage();
   };
 
   const handleOpenShowingInvited = async () => {
@@ -71,25 +67,7 @@ const InviteUserUI = ({ item }: propTypes) => {
           <IconButton icon={"check"} onPress={handleSubmitInviteEmail} />
         </View>
       </View>
-      <Button onPress={handleOpenShowingInvited}>Pending Invites</Button>
-      <DataTable style={{ display: showingInvited ? "flex" : "none" }}>
-        <DataTable.Header>
-          <DataTable.Title>Sender</DataTable.Title>
-          <DataTable.Title>Recipient</DataTable.Title>
-          <DataTable.Title>Actions</DataTable.Title>
-        </DataTable.Header>
-        {invitedUsers.map((invite, idx) => {
-          return (
-            <DataTable.Row key={idx}>
-              <DataTable.Cell>{invite.sender}</DataTable.Cell>
-              <DataTable.Cell>{invite.recipient}</DataTable.Cell>
-              <DataTable.Cell>
-                <IconButton icon={"close"} />
-              </DataTable.Cell>
-            </DataTable.Row>
-          );
-        })}
-      </DataTable>
+      
     </>
   );
 };

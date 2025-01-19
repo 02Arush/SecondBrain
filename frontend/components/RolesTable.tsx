@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
-import React, { useContext, useState } from "react";
-import { DataTable, IconButton } from "react-native-paper";
+import React, { useContext, useState, useEffect } from "react";
+import { DataTable, IconButton, Text } from "react-native-paper";
 import { sharedUser } from "@/api/types_and_utils";
 import Select from "./Select";
 import { getNicknameFromEmail } from "@/api/types_and_utils";
@@ -10,10 +10,12 @@ import { ensureJSDate, userSelectMap } from "@/api/types_and_utils";
 import { AuthContext } from "@/contexts/authContext";
 import { HabitContext } from "@/contexts/habitContext";
 import { email } from "@/api/types_and_utils";
-import { changeRoleOfUser } from "@/api/db_ops";
+import { changeRoleOfUser, deleteInvite } from "@/api/db_ops";
 import Habit from "@/api/habit";
 import Task from "@/api/task";
 import { getSharedUsersForItem } from "@/api/db_ops";
+import { isAnonymous } from "@/constants/constants";
+import { getInvitesForItem } from "@/api/db_ops";
 type propTypes = {
   item: Habit | Task;
 };
@@ -54,6 +56,27 @@ const RolesTable = ({ item }: propTypes) => {
 
     alert(res.message);
     fetchSharedUserData();
+  };
+
+  const [invitedUsers, setInvitedUsers] = useState<Array<any>>([]);
+
+  const fetchInvitedUsers = async () => {
+    if (!isAnonymous(email)) {
+      const res = await getInvitesForItem(item);
+      setInvitedUsers(res.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchInvitedUsers();
+  }, [item]);
+
+  const handleDeleteInvite = async (invite: any) => {
+    const { recipient, itemID } = invite;
+
+    const res = await deleteInvite(recipient, itemID);
+    alert(res.message);
+    fetchInvitedUsers();
   };
 
   const TableRow = (
@@ -107,7 +130,7 @@ const RolesTable = ({ item }: propTypes) => {
   return (
     <DataTable>
       <DataTable.Header>
-        <DataTable.Cell style={styles.nickCell}>Nickname</DataTable.Cell>
+        <DataTable.Cell style={styles.nickCell}>User</DataTable.Cell>
         <DataTable.Cell style={styles.roleCell}>Role</DataTable.Cell>
         <DataTable.Cell style={styles.actionsCell}>Actions</DataTable.Cell>
         {/* TODO: In Future, role should be dropdown that lets you change the user's role */}
@@ -131,6 +154,33 @@ const RolesTable = ({ item }: propTypes) => {
 
           return TableRow(sharedUser, visible, setVisible, handleSelectRole);
         })}
+
+      {invitedUsers.map((invite, idx) => {
+        return (
+          <DataTable.Row key={idx}>
+            <DataTable.Cell style={styles.nickCell}>
+              {invite.recipient}
+            </DataTable.Cell>
+            <DataTable.Cell style={styles.roleCell}>
+              <Text
+                style={{ textAlign: "center", width: "100%", color: "grey" }}
+              >
+                Invited
+              </Text>
+            </DataTable.Cell>
+            <DataTable.Cell>
+              <View style={styles.actionsCell}>
+                <IconButton
+                  icon={"delete"}
+                  onPress={() => {
+                    handleDeleteInvite(invite);
+                  }}
+                />
+              </View>
+            </DataTable.Cell>
+          </DataTable.Row>
+        );
+      })}
     </DataTable>
   );
 };

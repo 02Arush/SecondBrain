@@ -8,6 +8,7 @@ export const constants = {
         OWNER: "owner",
         ADMIN: "admin",
         MEMBER: "member",
+        INVITED: "invited",
         NONE: "none",
     },
 }
@@ -16,7 +17,8 @@ export const ROLE_POWERS = {
     [constants.ROLE.OWNER]: 3,
     [constants.ROLE.ADMIN]: 2,
     [constants.ROLE.MEMBER]: 1,
-    [constants.ROLE.NONE]: 0
+    [constants.ROLE.NONE]: 0,
+    [constants.ROLE.INVITED]: 0
 }
 
 

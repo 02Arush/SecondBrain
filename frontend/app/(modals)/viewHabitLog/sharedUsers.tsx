@@ -23,15 +23,19 @@ const sharedUsers = () => {
       if (isAnonymous(email)) {
         router.back();
       }
-
-      
     }, [])
   );
 
+  const [count, setCount] = useState(0);
+
+  const handleRefresh = () => {
+    setCount(count+1)
+  }
+
   return (
     <View style={styles.componentContainer}>
-      <RolesTable item={habit} />
-      <InviteUserUI item={habit} />
+      <RolesTable key={count} item={habit} />
+      <InviteUserUI item={habit} handleRefresh={handleRefresh} />
     </View>
   );
 };
