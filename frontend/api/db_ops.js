@@ -1252,7 +1252,7 @@ export const getInvitesForUser = async (email) => {
  *  * @param {email} signedInUser
  * @param {email} modifiedUser
  * @param {string} newRole
- * @param {Habit | Task} item
+ * @param {SharableItem} item
  */
 
 export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, item) => {
