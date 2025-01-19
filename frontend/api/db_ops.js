@@ -751,7 +751,7 @@ export const retrieveHabitList = async (email) => {
             if (res.data) {
                 return { ok: true, data: res.data, message: "Success" };
             } else {
-                return { ok: false, data: null, message: res.message };
+                return { ok: false, data: null, message: "Error Retrieving Habit List In Cloud\n" + res.message };
             }
         })
 

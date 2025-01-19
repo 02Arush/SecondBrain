@@ -548,25 +548,31 @@ export default class Habit implements SharableItem {
 
 
     ensureOwnerExists(): void {
-        const compareSharedUsers = (a: sharedUser, b: sharedUser) => {
-            // If A's Power is higher than B, it should come earlier in the list
-            const roleDiff = ROLE_POWERS[b.role] - ROLE_POWERS[a.role];
 
-            // joinDate is either a date or a timestamp: force it to be a date object
+        try {
+            const compareSharedUsers = (a: sharedUser, b: sharedUser) => {
+                // If A's Power is higher than B, it should come earlier in the list
+                const roleDiff = ROLE_POWERS[b.role] - ROLE_POWERS[a.role];
 
-            if (roleDiff == 0) {
-                const aJoinDate = ensureJSDate(a.joinDate).getTime();
-                const bJoinDate = ensureJSDate(b.joinDate).getTime();
-                // If A's Join Date < B's Join Date, it should come earleir in the list
-                return aJoinDate - bJoinDate;
-            } else {
-                return roleDiff
+                // joinDate is either a date or a timestamp: force it to be a date object
+
+                if (roleDiff == 0) {
+                    const aJoinDate = ensureJSDate(a.joinDate).getTime();
+                    const bJoinDate = ensureJSDate(b.joinDate).getTime();
+                    // If A's Join Date < B's Join Date, it should come earleir in the list
+                    return aJoinDate - bJoinDate;
+                } else {
+                    return roleDiff
+                }
             }
-        }
 
-        const values = Object.values(this.getSharedUsers()).sort(compareSharedUsers);
-        const highestPriorityUser = values[0].email;
-        this.sharedUsers[highestPriorityUser].role = constants.ROLE.OWNER
+            // ERROR HERE RETRIEVING HIGHEST PRIORITY USER
+            const values = Object.values(this.getSharedUsers()).sort(compareSharedUsers);
+            const highestPriorityUser = values[0].email;
+            this.sharedUsers[highestPriorityUser].role = constants.ROLE.OWNER
+        } catch (err) {
+            // JUST TO KEEP ERROR HANDLING ROBUST
+        }
 
     }
 
