@@ -53,10 +53,10 @@ export default function TabOneScreen() {
 
         // Finally: Here, get the Daily-Checkin-Data
         const ret = await getSyncedDailyCheckin(email);
-        alert(ret.message);
+        const dailyCheckinHabit = ret.data;
+        setDailyCheckinHabit(dailyCheckinHabit);
       };
       fetchData();
-     
     }, [email])
   );
 

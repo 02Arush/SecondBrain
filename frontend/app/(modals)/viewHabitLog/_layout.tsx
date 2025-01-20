@@ -24,6 +24,7 @@ import { selectItem } from "@/components/Select";
 import { email } from "@/api/types_and_utils";
 import OptionalGoal from "@/components/OptionalGoal";
 import OutlineModal from "@/components/OutlineModal";
+import { isDailyCheckin } from "@/api/types_and_utils";
 const ViewHabitLogLayout = () => {
   const route = useRouteInfo();
   const { habitID } = useLocalSearchParams<{ habitID: string }>();
@@ -184,12 +185,14 @@ const ViewHabitLogLayout = () => {
                 </Text>
                 <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
               </View>
-              <View style={styles.habitInfoRight}>
-                <IconButton
-                  icon="pencil"
-                  onPress={() => setEditModalOpen(true)}
-                />
-              </View>
+              {!isDailyCheckin(habit) && (
+                <View style={styles.habitInfoRight}>
+                  <IconButton
+                    icon="pencil"
+                    onPress={() => setEditModalOpen(true)}
+                  />
+                </View>
+              )}
             </View>
             <View
               style={{
@@ -199,7 +202,7 @@ const ViewHabitLogLayout = () => {
               }}
             >
               {/* HERE: ENABLE USERS TO SELECT A USER TO VIEW */}
-              {!isAnonymous(email) && (
+              {!isAnonymous(email) && !isDailyCheckin(habit) && (
                 <Select
                   mode="button-box"
                   visible={sharedUserSelectOpen}
@@ -211,11 +214,15 @@ const ViewHabitLogLayout = () => {
               )}
             </View>
             <View style={styles.habitNavigation}>
-              <IconButton
-                iconColor={isPath("editHabit") ? theme.colors.tertiary : "grey"}
-                icon="clipboard-edit-outline"
-                onPress={handleNavigateToEditHabit}
-              />
+              {!isDailyCheckin(habit) && (
+                <IconButton
+                  iconColor={
+                    isPath("editHabit") ? theme.colors.tertiary : "grey"
+                  }
+                  icon="clipboard-edit-outline"
+                  onPress={handleNavigateToEditHabit}
+                />
+              )}
               <IconButton
                 icon="timetable"
                 onPress={handleNavigateToAverages}
@@ -226,18 +233,15 @@ const ViewHabitLogLayout = () => {
                 onPress={handleNavigateToChart}
                 iconColor={isPath("barCharts") ? theme.colors.tertiary : "grey"}
               />
-              <IconButton
-                icon="account-group-outline"
-                onPress={handleNavigateToSharedUsers}
-                iconColor={
-                  isPath("sharedUsers") ? theme.colors.tertiary : "grey"
-                }
-              />
-            </View>
-            <View style={styles.habitInfo}>
-              {/* Left, habit info */}
-              <View></View>
-              {/* Select, Habit Info */}
+              {!isDailyCheckin(habit) && (
+                <IconButton
+                  icon="account-group-outline"
+                  onPress={handleNavigateToSharedUsers}
+                  iconColor={
+                    isPath("sharedUsers") ? theme.colors.tertiary : "grey"
+                  }
+                />
+              )}
             </View>
           </View>
 

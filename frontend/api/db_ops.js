@@ -768,7 +768,7 @@ export const retrieveHabitList = async (email) => {
     try {
         const userHabitsCollection = getUserHabitsCollection(email);
         const querySnap = await getDocs(userHabitsCollection);
-        const ids = querySnap.docs.map(doc => doc.id);
+        const ids = querySnap.docs.map(doc => doc.id).filter(id => id != constants.DAILY_CHECK_IN);
         const getHabits = ids.map(async (id) => {
             const res = await getHabitFromID(email, id);
             if (res.data) {
@@ -843,6 +843,9 @@ export const retrieveActivityLogForUser = async (email, habitID) => {
  * @param {string} habitID
  */
 export const getHabitFromID = async (email, id) => {
+
+
+
     try {
 
         const habitCollection = collections.habits;

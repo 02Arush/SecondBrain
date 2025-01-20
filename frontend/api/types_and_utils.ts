@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { UrlObject } from "expo-router/build/LocationProvider";
 import Task from "./task";
+import Habit from "./habit";
 
 /**
  * STRINGS
@@ -316,3 +317,7 @@ export type userSelectMap = Map<email, boolean>;
 const isPath = (path: string, route: UrlObject) => {
     return route.pathname.localeCompare(`/viewHabitLog/${path}`) === 0;
 };
+
+export const isDailyCheckin = (habit: Habit) => {
+    return habit.getID() == constants.DAILY_CHECK_IN;
+  };

@@ -19,7 +19,7 @@ export const storeData = async (key, value) => {
     }
 }
 
-
+import { HabitGoal } from './habit';
 // Function to retrieve data
 export const retrieveData = async (key) => {
     try {
@@ -205,6 +205,13 @@ export const deleteHabit = async (email, habit) => {
  * @param {string} habitID 
  */
 export const getHabit = async (email, habitID) => {
+
+    if (habitID == constants.DAILY_CHECK_IN) {
+        const res = await getSyncedDailyCheckin();
+        return res;
+    }
+
+
     if (isAnonymous(email)) {
         const res = await retrieveHabitFromLocalStorage(habitID);
         return res;
@@ -299,7 +306,6 @@ export const getSyncedDailyCheckin = async (email) => {
         const cloudActivityLogRes = await retrieveActivityLogForUser(email, constants.DAILY_CHECK_IN)
         const cloudActivityLog = cloudActivityLogRes.data;
         tempCloudHabit = new Habit("Daily Check-In", "Times");
-        console.log("ACTIVITY LOG TYPE " + typeof cloudActivityLog)
 
         tempCloudHabit.setActivityLog(cloudActivityLog)
 
@@ -309,6 +315,8 @@ export const getSyncedDailyCheckin = async (email) => {
     const mergedHabit = tempCloudHabit instanceof Habit ? Habit.mergeHabits("Daily Check-In", "Times", tempCloudHabit, dailyCheckinHabit, true) : dailyCheckinHabit
     mergedHabit.setID(constants.DAILY_CHECK_IN);
     mergedHabit.logItem(new Date(), 1, true);
+    mergedHabit.setUnit("Times")
+    mergedHabit.setGoal(new HabitGoal(1, "Times", 1, "day"))
 
     const storeLocalRes = await storeData(constants.DAILY_CHECK_IN, mergedHabit.getJSONString())
     const storeCloudRes = await updateHabitCloud(email, mergedHabit, "log")
@@ -316,7 +324,8 @@ export const getSyncedDailyCheckin = async (email) => {
 
     return {
         ok: storeLocalRes.ok && storeCloudRes.ok,
-        message: "Local: " + storeLocalRes.message + "\nCloud: " + storeCloudRes.message
+        message: "Local: " + storeLocalRes.message + "\nCloud: " + storeCloudRes.message,
+        data: mergedHabit
     }
 
 

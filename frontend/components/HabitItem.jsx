@@ -3,13 +3,18 @@ import React from "react";
 import { Button, Icon, IconButton, Text } from "react-native-paper";
 import { router, useRouter } from "expo-router";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
-
+import constants from "@/constants/constants";
+import { isDailyCheckin } from "@/api/types_and_utils";
+import Habit from "@/api/habit";
 /**
  *
- * @param {Habit} habit
- * @returns
+ *
  */
 const HabitItem = ({ habit }) => {
+  if (!habit instanceof Habit) {
+    return <></>;
+  }
+
   const router = useRouter();
   const habitID = habit.getID();
   const sevenDaysAgo = new Date();
@@ -49,11 +54,13 @@ const HabitItem = ({ habit }) => {
       <View style={styles.actionSection}>
         <Text>Today: {todayCount} </Text>
         <Text>Week: {sevenDayCount}</Text>
-        <IconButton
-          icon="clipboard-edit-outline"
-          size={16}
-          onPress={handleEditHabit}
-        />
+        {!isDailyCheckin(habit) && (
+          <IconButton
+            icon="clipboard-edit-outline"
+            size={16}
+            onPress={handleEditHabit}
+          />
+        )}
         <IconButton icon="chart-box" size={16} onPress={handleViewGraph} />
       </View>
     </Surface>
