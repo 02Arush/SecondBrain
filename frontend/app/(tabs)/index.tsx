@@ -12,10 +12,8 @@ import {
 import { router, useFocusEffect } from "expo-router";
 import Habit from "@/api/habit";
 import { getSyncedDailyCheckin, retrieveLocalHabitList } from "@/api/storage";
-import {
-  getUserDataFromEmail,
-  retrieveHabitList as retrieveHabitListCloud,
-} from "@/api/db_ops";
+import { getUserDataFromEmail } from "@/api/db_ops";
+import { retrieveHabitList as retrieveHabitListCloud } from "@/api/cloud_ops/habits";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 

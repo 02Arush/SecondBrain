@@ -1,12 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Habit from './habit';
 import { isAnonymous } from '@/constants/constants';
+
 import {
-    getUserDataFromEmail, updateUserHabitList,
-    createHabit as createHabitCloud, retrieveHabitListCloud, deleteHabit as deleteHabitCloud, getHabitFromID,
-    updateHabit as updateHabitCloud,
-    retrieveActivityLogForUser
-} from './db_ops';
+    createHabit as createHabitCloud, updateHabit as updateHabitCloud,
+    deleteHabit as deleteHabitCloud, retrieveActivityLogForUser,
+    retrieveHabitList as retrieveHabitListCloud, getHabitFromID,
+
+} from './cloud_ops/habits';
+
 import constants from '@/constants/constants';
 import { habitModificationType } from './types_and_utils';
 // Function to store data
@@ -321,7 +323,7 @@ export const getSyncedDailyCheckin = async (email) => {
     const storeLocalRes = await storeData(constants.DAILY_CHECK_IN, mergedHabit.getJSONString())
 
 
-    const storeCloudRes = !isAnonymous(email) ? await updateHabitCloud(email, mergedHabit, "log") : { ok: true, message: "Anonymous- Update Not Sent"}
+    const storeCloudRes = !isAnonymous(email) ? await updateHabitCloud(email, mergedHabit, "log") : { ok: true, message: "Anonymous- Update Not Sent" }
 
     return {
         ok: storeLocalRes.ok && storeCloudRes.ok,
