@@ -2,13 +2,11 @@
 
 import { addDoc, getDocs, query, updateDoc, where, deleteDocs } from 'firebase/firestore'
 import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
-import Task from "./task";
+import Task from '@/api/task'
 import { ROLE_POWERS, isAnonymous } from "@/constants/constants";
-import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail } from "./types_and_utils";
-import { sharedItemType } from "./types_and_utils";
+import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail, email, sharedItemType } from "@/api/types_and_utils";
 import constants from "@/constants/constants";
-import { email } from "./types_and_utils";
-import { collections } from '../db_ops';
+import { collections } from '@/api/db_ops';
 
 
 /**
@@ -39,7 +37,7 @@ export const createTask = async (email, task) => {
         }
 
         // Add document to user-specific subcollection with the key = taskID
-        const docRef = doc(db, "users", email, "tasks", taskID);
+        const docRef = doc(collections.users, email, "tasks", taskID);
         await setDoc(docRef, {
             userPriority: task.getImportance(),
         });
@@ -58,7 +56,7 @@ export const createTask = async (email, task) => {
 
 // PROBLEM HERE: UPDATE TASK CALLED UPDATES IT IN THE TASKS COLLECTION BUT NOT IN USERS TASK ARRAY
 export const updateTask = async (email, task, taskID) => {
-    const docRef = doc(db, "tasks", taskID)
+    const docRef = doc(collections.tasks, taskID)
 
     try {
         const res = await setDoc(docRef, task.getJSON(), { merge: true })
@@ -182,7 +180,7 @@ export const setCompleted = async (email, taskID, completedStatus = True) => {
 
 
     try {
-        const taskDocRef = doc(db, "tasks", taskID);
+        const taskDocRef = doc(collections.tasks, taskID);
         await setDoc(taskDocRef, {
             completed: completedStatus,
             lastCompletionDate: completedStatus == true ? new Date() : null,
@@ -219,12 +217,15 @@ export const deleteTask = async (email, taskID) => {
         if (taskDocSnap.exists()) {
             const task = Task.fromObject(taskDocSnap.data(), taskID);
             const roleRes = task.getRoleOfUser(email);
+            const roleFound = roleRes.ok;
             if (!roleRes.ok) {
                 return {
                     ok: false,
                     message: "Email Not Found in Shared Users Task: " + email
                 }
             }
+
+
 
             const role = roleRes.data;
 
@@ -312,7 +313,7 @@ const deleteTaskDocForIndividual = async (email, taskID) => {
  * @param {email} email 
  * @param {Task} task 
  */
-const createTaskInUserCollection = async (email, task) => {
+export const createTaskInUserCollection = async (email, task) => {
     try {
         const taskID = task.getID();
         const userTasks = getUserTasksCollection(email);
@@ -381,4 +382,14 @@ export const changeUserTaskRole = async (signedInUser, modifiedUser, newRole, ta
         }
     }
 
+}
+
+
+/**
+ * 
+ * @param {email} email 
+ * @returns 
+ */
+const getUserTasksCollection = (email) => {
+    return collection(collections.users, email, "tasks")
 }

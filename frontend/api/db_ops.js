@@ -23,7 +23,7 @@ import { email } from "./types_and_utils";
 import { sharedUser } from "./types_and_utils";
 import { SharableItem } from "./SharableItem";
 import { getHabitFromID, updateHabit, changeUserHabitRole, createHabitInUserCollection } from "@/api/cloud_ops/habits"
-import { changeUserTaskRole, createTaskInUserCollection, createTaskInUserCollection, updateTask, getTaskItem } from "./cloud_ops/tasks";
+import { changeUserTaskRole, createTaskInUserCollection, updateTask, getTaskItem } from "./cloud_ops/tasks";
 
 
 const firebaseConfig = {

@@ -374,3 +374,35 @@ export const deleteHabit = async (email, habit) => {
         }
     }
 }
+
+/**
+ * 
+ * @param {email} email 
+ * @param {Habit} habit 
+ */
+export const createHabitInUserCollection = async (email, habit) => {
+    try {
+        const habitID = habit.getID();
+        const userHabitCollection = getUserHabitsCollection(email);
+        const docRef = doc(userHabitCollection, habitID);
+        const activityLog = habit.getActivityLog();
+
+        await setDoc(docRef, {
+            activityLog: activityLog
+        })
+
+        return {
+            ok: true,
+            message: `Successfully created habit ${habit.getName()} for user: ${email}`
+        }
+
+
+    } catch (err) {
+        return {
+            ok: false,
+            message: "Error Creating Habit In User Collection:\n" + err.message
+        }
+
+    }
+
+}
