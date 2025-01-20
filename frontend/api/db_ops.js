@@ -578,54 +578,6 @@ export const changeRoleOfUser = async (signedInUser, modifiedUser, newRole, item
 
 }
 
-// /**
-//  * @param {email} signedInUser
-//  * @param {email} modifiedUser
-//  * @param {string} newRole
-//  * @param {Task} task
-//  */
-// export const changeUserTaskRole = async (signedInUser, modifiedUser, newRole, task) => {
-
-//     if (newRole == constants.ROLE.NONE) {
-//         const res = await deleteTaskDocForIndividual(modifiedUser, task.getID())
-//         if (!res.ok) {
-//             return { ok: false, message: "Unable to remove from Task:\n" + res.message }
-//         } else {
-
-//             return { ok: true, message: `Successfully removed user: ${modifiedUser} from Task: ${task.getName()}` }
-//         }
-//     }
-
-
-//     const roleChanged = task.changeRoleOfUser(modifiedUser, newRole)
-//     const newRoleOfUserRes = task.getRoleOfUser(modifiedUser);
-//     const newRoleOfUser = newRoleOfUserRes.data;
-
-
-//     if (!roleChanged) {
-//         if (newRoleOfUser.localeCompare(constants.ROLE.OWNER) == 0) {
-//             return { ok: true, message: "Could not update role of user. Habit needs at least one OWNER." }
-//         } else {
-//             return { ok: true, message: "User role stayed the same." }
-//         }
-//     }
-
-//     const res = await updateTask(modifiedUser, task, task.getID());
-//     if (res.ok) {
-//         return {
-//             ok: true,
-//             message: `Successfully Changed ${modifiedUser}'s role to ${newRole}`
-//         }
-
-//     } else {
-//         return {
-//             ok: false,
-//             message: "Failed to modify user role.\n" + res.message
-//         }
-//     }
-
-// }
-
 /**
  * 
  * @param {SharableItem} item 

@@ -2,8 +2,6 @@ import {
   StyleSheet,
   View,
   SafeAreaView,
-  ScrollView,
-  processColor,
 } from "react-native";
 import React, { useCallback, useContext, useState, useEffect } from "react";
 import { Text, useTheme, DataTable } from "react-native-paper";
@@ -13,7 +11,6 @@ import {
   getEarliestAndLatestDeadline,
   getRelativeUrgencyOfDate,
 } from "@/api/types_and_utils";
-import { isAnonymous } from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { retrieveTasks } from "@/api/taskStorage";
 import Task from "@/api/task";
