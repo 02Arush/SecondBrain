@@ -235,6 +235,13 @@ export const getHabitForUser = async (email, habitID) => {
  * 2) MODIFY THE DOCUMENT OF A HABIT, IN ITS OWN COLLECTION
  */
 export const updateHabit = async (email, habit, type) => {
+    if (isAnonymous(email)) {
+        return {
+            ok: false,
+            message: "Error updating habit cloud: Can not update data of anonymous user."
+        }
+    }
+
     if (type == "log") {
         const res = await logHabitActivity(email, habit);
         return res;
