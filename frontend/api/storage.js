@@ -207,7 +207,7 @@ export const deleteHabit = async (email, habit) => {
 export const getHabit = async (email, habitID) => {
 
     if (habitID == constants.DAILY_CHECK_IN) {
-        const res = await getSyncedDailyCheckin();
+        const res = await getSyncedDailyCheckin(email);
         return res;
     }
 
@@ -296,9 +296,9 @@ export const uploadLocalStorageHabits = async (email) => {
 export const getSyncedDailyCheckin = async (email) => {
     // Get the daily checkin from local storage
 
-    const lclDailyCheckin = await retrieveHabitFromLocalStorage(constants.DAILY_CHECK_IN)
-    const dailyCheckinHabit = lclDailyCheckin.data || new Habit("Daily Check-In", "Times")
-    dailyCheckinHabit.setID(constants.DAILY_CHECK_IN)
+    const lclDailyCheckinRes = await retrieveHabitFromLocalStorage(constants.DAILY_CHECK_IN)
+    const lclDailyCheckin = lclDailyCheckinRes.data || new Habit("Daily Check-In", "Times")
+    lclDailyCheckin.setID(constants.DAILY_CHECK_IN)
 
     let tempCloudHabit;
 
@@ -312,21 +312,20 @@ export const getSyncedDailyCheckin = async (email) => {
 
     }
 
-    const mergedHabit = tempCloudHabit instanceof Habit ? Habit.mergeHabits("Daily Check-In", "Times", tempCloudHabit, dailyCheckinHabit, true) : dailyCheckinHabit
+    const mergedHabit = tempCloudHabit instanceof Habit ? Habit.mergeHabits("Daily Check-In", "Times", tempCloudHabit, lclDailyCheckin, true) : lclDailyCheckin
     mergedHabit.setID(constants.DAILY_CHECK_IN);
     mergedHabit.logItem(new Date(), 1, true);
     mergedHabit.setUnit("Times")
     mergedHabit.setGoal(new HabitGoal(1, "Times", 1, "day"))
 
     const storeLocalRes = await storeData(constants.DAILY_CHECK_IN, mergedHabit.getJSONString())
-    const storeCloudRes = await updateHabitCloud(email, mergedHabit, "log")
 
+
+    const storeCloudRes = !isAnonymous(email) ? await updateHabitCloud(email, mergedHabit, "log") : { ok: true, message: "Anonymous- Update Not Sent"}
 
     return {
         ok: storeLocalRes.ok && storeCloudRes.ok,
         message: "Local: " + storeLocalRes.message + "\nCloud: " + storeCloudRes.message,
         data: mergedHabit
     }
-
-
 }
