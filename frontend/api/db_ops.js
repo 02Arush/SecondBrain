@@ -144,6 +144,7 @@ export const logOut = async () => {
     }
 }
 
+// TODO: FIX THE RESPONSE FOR THIS
 export const getUserDataFromEmail = async (email) => {
     try {
         const docRef = doc(collections.users, email);
