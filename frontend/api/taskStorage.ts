@@ -1,7 +1,7 @@
 import Task from "./task";
 import { storeData, retrieveData } from "./storage";
 import { isAnonymous, constants } from "@/constants/constants";
-import { getTasksForUser, setCompleted, deleteTask as deleteTaskFromCloud, getTaskItem, updateTask as updateTaskCloud, createTask as createTaskCloud } from "./db_ops";
+import { getTasksForUser, setCompleted, deleteTask as deleteTaskFromCloud, getTaskItem, updateTask as updateTaskCloud, createTask as createTaskCloud } from "./cloud_ops/tasks";
 import { filterOptions } from "./types_and_utils";
 
 export const updateTask = async (email: string, task: Task, isNewTask: boolean = false): Promise<{ ok: boolean, message: string }> => {

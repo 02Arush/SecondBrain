@@ -15,7 +15,6 @@ import { useFocusEffect } from "expo-router";
 import Habit, { HabitGoal } from "@/api/habit";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
-import { getUserDataFromEmail } from "@/api/db_ops";
 import { getHabit, updateHabit } from "@/api/storage";
 import { HabitProvider } from "@/contexts/habitContext";
 import Select from "@/components/Select";

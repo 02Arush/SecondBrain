@@ -5,8 +5,6 @@ import { createInvite } from "@/api/db_ops";
 import { Button, TextInput, IconButton, DataTable } from "react-native-paper";
 import { SharableItem } from "@/api/SharableItem";
 import { AuthContext } from "@/contexts/authContext";
-import { getInvitesForItem } from "@/api/db_ops";
-import { isAnonymous } from "@/constants/constants";
 
 type propTypes = {
   item: SharableItem;
