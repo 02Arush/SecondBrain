@@ -49,7 +49,7 @@ if (Platform.OS !== 'web') {
 
 
 const db = getFirestore(app);
-const collections = {
+export const collections = {
     habits: collection(db, "habits"),
     tasks: collection(db, "tasks"),
     users: collection(db, "users"),
@@ -193,34 +193,6 @@ export const updateUserDoc = async (email, updates) => {
             message: `Error updating user doc for email: ${email}\nMessage: ${err.message}`
         }
     }
-
-}
-
-
-export const updateUserHabitCollection = (email, newHabit) => {
-    const userHabitCollection = getUserHabitsCollection(email)
-}
-
-
-/**
- * 
- * @param {string} email 
- * @param {string} habitID 
- */
-export const getHabitForUser = async (email, habitID) => {
-    const docRef = doc(collections.users, "habits", habitID)
-    const userHabitDoc = await getDoc(docRef);
-
-    if (!userHabitDoc.exists()) {
-        return {
-            ok: false, message: `Habit with ID: ${habitID} Not Found For User ${email}`
-        }
-    }
-
-    const data = userHabitDoc.data();
-    const activityLog = data["activityLog"]
-
-    const habit = await getHabitFromID
 
 }
 
