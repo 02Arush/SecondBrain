@@ -6,6 +6,7 @@ import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmai
 import { collections } from "./../db_ops"
 import { ROLE_POWERS, isAnonymous } from "@/constants/constants";
 import constants from "@/constants/constants";
+import { getUserDataFromEmail } from "./../db_ops";
 
 /**
  * 
