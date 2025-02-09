@@ -319,10 +319,10 @@ export const getSyncedDailyCheckin = async (email) => {
     mergedHabit.logItem(new Date(), 1, true);
     mergedHabit.setUnit("Times")
     mergedHabit.setGoal(new HabitGoal(1, "Times", 1, "day"))
+    mergedHabit.ensureProperCreationDate()
+    
 
     const storeLocalRes = await storeData(constants.DAILY_CHECK_IN, mergedHabit.getJSONString())
-
-
     const storeCloudRes = !isAnonymous(email) ? await updateHabitCloud(email, mergedHabit, "log") : { ok: true, message: "Anonymous- Update Not Sent" }
 
     return {

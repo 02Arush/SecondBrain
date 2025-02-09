@@ -104,7 +104,13 @@ export const getDateFromSimpleDate = (simpleDate: { year: number, month: number,
 }
 
 export const getElapsedDays = (startDate: Date, endDate: Date): number => {
-    const elapsedMS = endDate.getTime() - startDate.getTime();
+
+    // convert them to simple dates and back because we want to only count days, not acknowledge hours or minutes (cleaner)
+    const formattedStartDate:Date = getDateFromSimpleDate(getSimpleDateFromDate(startDate)) || startDate;
+    const formattedEndDate:Date = getDateFromSimpleDate(getSimpleDateFromDate(endDate)) || endDate;
+
+
+    const elapsedMS = formattedEndDate.getTime() - formattedStartDate.getTime();
     const elapsedConverted = elapsedMS / (1000 * 60 * 60 * 24);
     const rounded = Math.round(elapsedConverted);
     return rounded;
