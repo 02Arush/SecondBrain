@@ -24,7 +24,7 @@ const manifestContent = {
     },
 
     {
-      "src": "./assets/images/icon.png",
+      "src": "./assets/images/logo_1024.png",
       "type": "image/png",
       "sizes": "1024x1024"
     }
