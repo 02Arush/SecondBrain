@@ -1,10 +1,16 @@
 import { StyleSheet, SafeAreaView, View, ScrollView } from "react-native";
 import React, { useState, useCallback, useContext } from "react";
-import { useTheme, Text, Button, IconButton, Icon } from "react-native-paper";
+import {
+  useTheme,
+  Text,
+  Button,
+  IconButton,
+  Icon,
+  ActivityIndicator,
+} from "react-native-paper";
 import TaskItem from "@/components/TaskItem";
 import { router, useFocusEffect } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
-import { getTasksForUser, setCompleted } from "@/api/db_ops";
 import { filterOptions as filters } from "@/api/types_and_utils";
 import Task from "@/api/task";
 import Select from "@/components/Select";
@@ -23,6 +29,7 @@ const tasks = () => {
     filters.DATE_EARLIEST
   );
   const filterOptions = Object.values(filters);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -39,6 +46,7 @@ const tasks = () => {
 
     // const res = await getTasksForUser(email, completed, filterOption);
 
+    setLoading(true);
     const res = await retrieveTasks(email, completed, filterOption);
 
     if (res.data) {
@@ -49,6 +57,8 @@ const tasks = () => {
     } else {
       alert("TASKS: RESPONSE ERROR");
     }
+
+    setLoading(false);
   };
 
   const handleCreateTask = () => {
@@ -134,21 +144,25 @@ const tasks = () => {
           </View>
         </View>
         <ScrollView style={styles.taskList}>
-          {taskList.map((task: Task, index) => {
-            return (
-              <TaskItem
-                taskID={task.getID()}
-                key={index}
-                taskName={task.getName()}
-                userImportance={task.getImportance()}
-                deadline={task.getDeadline()}
-                onComplete={(completedStatus = true) => {
-                  handleCompleteTask(task.getID(), completedStatus);
-                }}
-                completed={task.getCompleted()}
-              />
-            );
-          })}
+          {loading ? (
+            <ActivityIndicator size="large" />
+          ) : (
+            taskList.map((task: Task, index) => {
+              return (
+                <TaskItem
+                  taskID={task.getID()}
+                  key={index}
+                  taskName={task.getName()}
+                  userImportance={task.getImportance()}
+                  deadline={task.getDeadline()}
+                  onComplete={(completedStatus = true) => {
+                    handleCompleteTask(task.getID(), completedStatus);
+                  }}
+                  completed={task.getCompleted()}
+                />
+              );
+            })
+          )}
         </ScrollView>
         <View style={styles.createTaskButton}>
           <Button

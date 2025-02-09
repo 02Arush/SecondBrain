@@ -2,13 +2,7 @@ import { useCallback } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import HabitItem from "@/components/HabitItem";
 import { useState, useEffect, useContext } from "react";
-import {
-  Button,
-  Text,
-  useTheme,
-  TextInput,
-  IconButton,
-} from "react-native-paper";
+import { Button, Text, useTheme, ActivityIndicator } from "react-native-paper";
 import { router, useFocusEffect } from "expo-router";
 import Habit from "@/api/habit";
 import { getSyncedDailyCheckin, retrieveLocalHabitList } from "@/api/storage";
@@ -20,16 +14,22 @@ import { isAnonymous } from "@/constants/constants";
 export default function TabOneScreen() {
   const theme = useTheme();
   const [habits, setHabits] = useState<any[]>([]);
-  const { email, setEmail } = useContext(AuthContext);
+  const { email } = useContext(AuthContext);
   const [cloudUserData, setCloudUserData] = useState<any>({});
   const [dailyCheckinHabit, setDailyCheckinHabit] = useState<Habit>(
     new Habit("Daily Check-In")
   );
+  const [loading, setLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
+
+        setLoading(true);
+
         if (!isAnonymous(email)) {
+
+
           const userData = await getUserDataFromEmail(email);
           // const habitList = Array.isArray(userData["habitList"])
           //   ? userData["habitList"]
@@ -53,6 +53,8 @@ export default function TabOneScreen() {
         const ret = await getSyncedDailyCheckin(email);
         const dailyCheckinHabit = ret.data;
         setDailyCheckinHabit(dailyCheckinHabit);
+
+        setLoading(false);
       };
       fetchData();
     }, [email])
@@ -62,9 +64,6 @@ export default function TabOneScreen() {
     router.push("/(modals)/addHabit");
   }
 
-  const handleNavigateViewInvites = () => {
-    router.push("/(modals)/viewInvites");
-  };
 
   return (
     <View
@@ -81,22 +80,34 @@ export default function TabOneScreen() {
             alignItems: "center",
           }}
         >
-          <Text>
-            Signed in As:&nbsp;
-            {!isAnonymous(email) ? cloudUserData?.nickname || email : email}
-          </Text>
-        </View>
-        <ScrollView style={styles.itemListContainer}>
-          {habits.length === 0 && (
-            <Text style={{ textAlign: "center", marginTop: 10, color: "grey" }}>
-              No Habits Created
+          {loading ? (
+            <Text>Loading User Data...</Text>
+          ) : (
+            <Text>
+              Signed in As:&nbsp;
+              {!isAnonymous(email) ? cloudUserData?.nickname || email : email}
             </Text>
           )}
-          <HabitItem habit={dailyCheckinHabit} />
-          {habits.map((habitString: string, index: number) => {
-            const habit = Habit.parseHabit(habitString);
-            return <HabitItem key={index} habit={habit} />;
-          })}
+        </View>
+        <ScrollView style={styles.itemListContainer}>
+          {loading ? (
+            <ActivityIndicator size="large" />
+          ) : (
+            <>
+              {habits.length === 0 && (
+                <Text
+                  style={{ textAlign: "center", marginTop: 10, color: "grey" }}
+                >
+                  No Habits Created
+                </Text>
+              )}
+              <HabitItem habit={dailyCheckinHabit} />
+              {habits.map((habitString: string, index: number) => {
+                const habit = Habit.parseHabit(habitString);
+                return <HabitItem key={index} habit={habit} />;
+              })}
+            </>
+          )}
         </ScrollView>
         <View style={styles.addButton}>
           <Button

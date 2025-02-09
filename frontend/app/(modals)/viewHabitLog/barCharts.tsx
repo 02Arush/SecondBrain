@@ -14,7 +14,6 @@ import SegmentedButtons from "@/components/SegmentedButtons";
 const barCharts = () => {
   const scheme = useColorScheme();
   const theme = useTheme();
-  const route = useRouteInfo();
 
   const today = new Date();
   const startDate = new Date(today); // Create a copy of today's date
@@ -24,14 +23,8 @@ const barCharts = () => {
     startDate: startDate,
     endDate: today,
   });
-  const { email } = useContext(AuthContext);
 
-  // const habit = useContext(HabitContext);
-  // const [habit, setHabit] = useState<Habit>();
-
-  // const { habit } = useContext(HabitContext);
   const habit = useContext(HabitContext);
-  const habitName = habit.getName();
 
   const handleSelectTimeRangeButton = (value: string) => {
     const elapsedDays = Number(value);
@@ -45,15 +38,6 @@ const barCharts = () => {
     setDateRange(newDateRange);
   };
 
-  // useFocusEffect(
-  //   useCallback(() => {
-
-  //   }, [email])
-  // );
-
-  // the following function is used for getting habit data from start and end date to format for graphs
-
-  // const activities = habit?.getActivityOfDateRange(startDate, today) || [];
 
   const activities =
     habit?.getLogForBarcharts(dateRange.startDate, dateRange.endDate) || [];

@@ -10,6 +10,7 @@ import {
   useTheme,
   TextInput,
   Button,
+  ActivityIndicator,
 } from "react-native-paper";
 import { useFocusEffect } from "expo-router";
 import Habit, { HabitGoal } from "@/api/habit";
@@ -39,6 +40,7 @@ const ViewHabitLogLayout = () => {
   const [habitNameTxt, setHabitNameTxt] = useState(habit.getName());
   const [habitUnitTxt, setHabitUnitTxt] = useState(habit.getUnit());
   const [goal, setGoal] = useState(habit.getGoal());
+  const [loading, setLoading] = useState(false);
 
   const getEmails = (users: { [key: string]: sharedUser }) => {
     return Object.keys(users);
@@ -64,6 +66,8 @@ const ViewHabitLogLayout = () => {
   useFocusEffect(
     useCallback(() => {
       async function getHabitData() {
+        setLoading(true);
+
         const res = await getHabit(email, habitID);
         const currHabit = res.data;
         setSelectedUser(email);
@@ -72,6 +76,8 @@ const ViewHabitLogLayout = () => {
         } else {
           router.navigate("/");
         }
+
+        setLoading(false);
       }
       getHabitData();
     }, [email])
@@ -169,6 +175,16 @@ const ViewHabitLogLayout = () => {
   };
 
   const theme = useTheme();
+
+  if (loading) {
+    return (
+      <View style={styles.pageContainer}>
+        <View style={styles.contentContainer}>
+          <ActivityIndicator size={"large"} />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <HabitProvider initialHabit={habit}>
