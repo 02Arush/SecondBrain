@@ -178,6 +178,8 @@ const averages = () => {
         }
       }
 
+      average = average !== "N/A" ? roundToTwoDecimals(average) : "N/A"
+
       const ret = {
         total,
         average,
