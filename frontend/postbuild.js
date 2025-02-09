@@ -17,16 +17,18 @@ const manifestContent = {
   "short_name": "SecondBrain",
   "name": "SecondBrain",
   "icons": [
+
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "assets/images/logo_1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
     },
 
     {
-      "src": "./assets/images/logo_1024.png",
+      "src": "assets/images/logo_1024.png",
+      "sizes": "1024x1024",
       "type": "image/png",
-      "sizes": "1024x1024"
+      "purpose": "maskable"
     }
   ],
   "start_url": ".",
