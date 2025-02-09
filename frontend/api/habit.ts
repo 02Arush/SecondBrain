@@ -8,7 +8,6 @@ import {
 } from "./types_and_utils";
 import { SharableItem } from "./SharableItem";
 
-
 import { sharedUser, email } from "./types_and_utils";
 // TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
 
@@ -38,14 +37,12 @@ export default class Habit implements SharableItem {
         this.unit = unit;
         this.activityLog = activityLog;
         if (goal) this.goal = goal
-        if (!creationDate || !(creationDate instanceof Date)) {
-            this.creationDate = this.getFirstActivityDate();
-        } else {
-            this.creationDate = creationDate;
-        }
+        this.creationDate = creationDate || new Date();
+        this.creationDate = ensureJSDate(this.creationDate);
+        this.ensureProperCreationDate()
 
         this.habitID = habitID || this.habitName + Math.floor((new Date().getTime() / 1000));
-        this.age = Math.floor((new Date().getTime() - this.creationDate.getTime()) / (1000 * 60 * 60 * 24));
+        this.age = getElapsedDays(this.creationDate, new Date())
         this.sharedUsers = sharedUsers || {};
     }
 
@@ -66,12 +63,24 @@ export default class Habit implements SharableItem {
     }
 
     getFirstActivityDate(): Date {
-        const activities = this.getSortedActivityLog("ascending")
-        if (activities.length > 0) {
-            const firstDate = new Date(activities[0].date)
-            return firstDate;
+
+        const dates = this.getDates()
+        if (dates.length > 0) {
+            return new Date(dates[0])
         }
         return new Date();
+    }
+
+    ensureProperCreationDate(): void {
+        const currCreationDate: Date = this.getCreationDate()
+        if (!(currCreationDate instanceof Date)) {
+            console.log("INVALID CURR CREATION DATE " + this.getName())
+            console.log(currCreationDate)
+        }
+        const firstActDate = this.getFirstActivityDate()
+
+        this.creationDate = currCreationDate.getTime() < firstActDate.getTime() ? currCreationDate : firstActDate
+        this.age = getElapsedDays(this.creationDate, new Date());
     }
 
     getSharedUsers(): { [key: email]: sharedUser } {
@@ -79,7 +88,7 @@ export default class Habit implements SharableItem {
     }
 
     getCreationDate(): Date {
-        return this.creationDate
+        return this.creationDate || new Date()
     }
 
     addSharedUser(sharedHabitUser: sharedUser) {
@@ -332,11 +341,9 @@ export default class Habit implements SharableItem {
     }
 
     getTotalCount(mode: "total" | "average" = "total") {
-        const vals = Array.from(this.activityLog.values());
-        let sum = 0;
-        vals.forEach(element => {
-            sum += element;
-        });
+        const vals: number[] = Array.from(this.activityLog.values());
+
+        const sum = vals.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
         if (mode === "total") {
             return sum;
@@ -351,11 +358,7 @@ export default class Habit implements SharableItem {
         const firstDate = new Date(dates[0]);
         const currDate = new Date();
 
-        let elapsedDays = (currDate.getTime() - firstDate.getTime()) / (1000 * 3600 * 24);
-
-        if (elapsedDays < 1) {
-            elapsedDays = 1;
-        }
+        const elapsedDays = getElapsedDays(firstDate, currDate) + 1
 
         return mode == "average" ? this.calculateAverage(sum, elapsedDays) : sum;
     }
@@ -531,7 +534,7 @@ export default class Habit implements SharableItem {
         return windowSizeInDays * averagePerDay;
     }
 
-    getAveragePerTimeFrameAllTime(windowTimeFrameCount: number, windowTimeFrameLabel: timeFrame): number | null {
+    getAveragePerTimeFrameAllTime(windowTimeFrameCount: number, windowTimeFrameLabel: timeFrame): number {
         const windowSizeInDays = windowTimeFrameCount * timeFrameConverter[windowTimeFrameLabel];
         const averagePerDayAllTime = this.getTotalCount("average");
         return windowSizeInDays * averagePerDayAllTime;

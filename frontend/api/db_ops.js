@@ -144,6 +144,7 @@ export const logOut = async () => {
     }
 }
 
+// TODO: FIX THE RESPONSE FOR THIS
 export const getUserDataFromEmail = async (email) => {
     try {
         const docRef = doc(collections.users, email);
@@ -162,11 +163,49 @@ export const getUserDataFromEmail = async (email) => {
 
             return { ...userData, nickname: nickname };
         } else {
-            return { error: "Error: Habit Data not found for " + email }
+            return { ok: false, error: "Error: Habit Data not found for " + email }
         }
     } catch (err) {
-        return { error: err.message }
+        return { ok: false, error: err.message }
     }
+}
+
+/**
+ * 
+ * @param {email} email 
+ */
+export const getUserData = async (email) => {
+    if (isAnonymous(email)) {
+        return {
+            ok: false,
+            message: "Can not retrieve cloud data for anonymous email. Email: " + email,
+            data: null,
+        }
+    }
+
+    try {
+        const docRef = doc(collections.users, email);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) {
+            return { ok: false, message: `Document not found for user: ${email}`, data: null }
+        }
+
+        return {
+            ok: true,
+            data: docSnap.data(),
+            message: `Successfully Retrieved User Data for user: ${email}`
+        }
+
+
+    } catch (err) {
+        return {
+            ok: false,
+            message: "Error Retrieving User Data for " + email + "\n" + err.message,
+            data: null,
+        }
+
+    }
+
 }
 
 

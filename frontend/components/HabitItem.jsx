@@ -15,16 +15,17 @@ const HabitItem = ({ habit }) => {
     return <></>;
   }
 
-  const router = useRouter();
   const habitID = habit.getID();
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 
-  const sevenDayCount = habit.getCountFromDateRange(
-    new Date().setDate(new Date().getDate() - 6),
-    new Date(),
-    true
-  );
+  // const sevenDayCount = habit.getCountFromDateRange(
+  //   new Date().setDate(new Date().getDate() - 6),
+  //   new Date(),
+  //   true
+  // );
+
+  const sevenDayCount = habit.getCountPastXDays(7)
 
   const todayCount = habit.getTodayCount();
 

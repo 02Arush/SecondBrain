@@ -6,8 +6,8 @@ import {
   Platform,
 } from "react-native";
 import { Text, TextInput, useTheme, Surface, Button } from "react-native-paper";
-import { useContext, useEffect, useState } from "react";
-import { router } from "expo-router";
+import { useContext, useEffect, useState, useCallback } from "react";
+import { router, useFocusEffect } from "expo-router";
 import {
   attemptLogin,
   deleteAccount,
@@ -17,6 +17,7 @@ import {
 import { AuthContext } from "@/contexts/authContext";
 import constants, { isAnonymous } from "@/constants/constants";
 import OutlineModal from "@/components/OutlineModal";
+import { getFriendsOfUser } from "@/api/cloud_ops/friends";
 
 export default function auth() {
   const [loginEmail, setLoginEmail] = useState("");
@@ -24,6 +25,14 @@ export default function auth() {
   const { email, setEmail } = useContext(AuthContext);
   const [showingConfirmPasswordModal, setShowingConfirmPassModal] =
     useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const res = await getFriendsOfUser(email);
+      })();
+    }, [email])
+  );
 
   const handleLogin = async () => {
     // check if email or password are not null

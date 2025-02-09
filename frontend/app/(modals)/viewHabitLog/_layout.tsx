@@ -183,6 +183,7 @@ const ViewHabitLogLayout = () => {
                   <Text style={{ color: "grey" }}> ({habit.getUnit()})</Text>
                 </Text>
                 <Text>Goal: {habit.getGoal()?.toString() || "Not set"}</Text>
+                <Text>Age: {habit.getAge()} days</Text>
               </View>
               {!isDailyCheckin(habit) && (
                 <View style={styles.habitInfoRight}>

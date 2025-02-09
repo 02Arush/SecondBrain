@@ -105,13 +105,12 @@ const averages = () => {
 
         case "7 Days":
           total = roundToTwoDecimals(habit.getCountPastXDays(7, "total"));
-          average =
-            habit.getAveragePerTimeFrameOverTimeFrame(
-              1,
-              timeFrame,
-              1,
-              "week"
-            ) || "N/A";
+          average = habit.getAveragePerTimeFrameOverTimeFrame(
+            1,
+            timeFrame,
+            1,
+            "week"
+          ) || "N/A";
           col = getColor(total, 7);
           break;
 
@@ -129,7 +128,7 @@ const averages = () => {
 
         case "90 Days":
           total = roundToTwoDecimals(
-            habit.getCountOverTimeFrame(90, "day", "total")
+            habit.getCountPastXDays(90)
           );
           average =
             habit.getAveragePerTimeFrameOverTimeFrame(
@@ -179,11 +178,13 @@ const averages = () => {
         }
       }
 
-      return {
-        total: total,
-        average: average,
+      const ret = {
+        total,
+        average,
         color: col,
-      };
+      }
+
+      return ret;
     };
 
     const mapping: Record<string, { total: any; average: any; color: string }> =
@@ -207,7 +208,7 @@ const averages = () => {
     const col: string = mapping[key]["color"];
 
     if (typeof value === "number") {
-      return { value: roundToTwoDecimals(value), color: col };
+      return { value: (value), color: col };
     } else {
       return { value: "N/A", color: theme.colors.onBackground };
     }
