@@ -5,6 +5,7 @@ import { BarChart } from "react-native-chart-kit";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { AuthContext } from "@/contexts/authContext";
 import Habit from "@/api/habit";
+import { getFlooredDate } from "@/api/types_and_utils";
 
 import { HabitContext } from "@/contexts/habitContext";
 import DateRangePicker from "@/components/DateRangePicker";
@@ -16,7 +17,7 @@ const barCharts = () => {
   const theme = useTheme();
 
   const today = new Date();
-  const startDate = new Date(today); // Create a copy of today's date
+  const startDate = getFlooredDate(new Date(today)); // Create a copy of today's date
   startDate.setDate(today.getDate() - 7); // Past 7 wdays including day
 
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -32,12 +33,11 @@ const barCharts = () => {
     startDate.setDate(today.getDate() - elapsedDays);
     const newDateRange: DateRange = {
       startDate: startDate,
-      endDate: today,
+      endDate: new Date(today),
     };
 
     setDateRange(newDateRange);
   };
-
 
   const activities =
     habit?.getLogForBarcharts(dateRange.startDate, dateRange.endDate) || [];

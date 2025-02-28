@@ -9,6 +9,7 @@ import {
 import { SharableItem } from "./SharableItem";
 
 import { sharedUser, email } from "./types_and_utils";
+import { getFlooredDate } from "./types_and_utils";
 // TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
 
 export interface HabitJSON {
@@ -21,6 +22,11 @@ export interface HabitJSON {
     "habitID": string
 }
 
+interface habitActivity  {
+    date: string,
+    count: number
+}
+
 export default class Habit implements SharableItem {
 
     private habitName: string;
@@ -31,6 +37,9 @@ export default class Habit implements SharableItem {
     private creationDate: Date;
     private age: number; // Age in days
     private sharedUsers: { [key: email]: sharedUser };
+    private sortedActivityLog: Array<habitActivity>
+
+    
 
     constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date, habitID?: string, sharedUsers?: { [key: email]: sharedUser }) {
         this.habitName = name;
@@ -44,6 +53,8 @@ export default class Habit implements SharableItem {
         this.habitID = habitID || this.habitName + Math.floor((new Date().getTime() / 1000));
         this.age = getElapsedDays(this.creationDate, new Date())
         this.sharedUsers = sharedUsers || {};
+        this.sortedActivityLog = this.genSortedActivityLog()
+
     }
 
     setName(name: string) {
@@ -308,8 +319,10 @@ export default class Habit implements SharableItem {
 
     getLogForBarcharts(startDate: Date, endDate: Date, maxNumberOfBars: number = 8): { date: string, count: number }[] {
 
-        const elapsedDays = getElapsedDays(startDate, endDate)
 
+        const flooredStartDate = getFlooredDate(startDate);
+
+        const elapsedDays = getElapsedDays(startDate, endDate)
         const numBars = Math.min(maxNumberOfBars, elapsedDays)
 
         // Use ceil so that you don't exceed the max number of bars
@@ -322,7 +335,7 @@ export default class Habit implements SharableItem {
 
         // Print the dates evenly distributed across the startDate and endDate
         // console.log("DAYS PER STEP" + daysPerStep.toString())
-        let i = startDate.getTime() // MS
+        let i = flooredStartDate.getTime() // MS
         while (i <= endDate.getTime()) {
             const iAsDate = new Date(i)
             const nextDateMS = i + daysPerStep * (1000 * 60 * 60 * 24)
@@ -450,7 +463,7 @@ export default class Habit implements SharableItem {
         return JSON.stringify(this.getJSON());
     }
 
-    getSortedActivityLog(direction: "ascending" | "descending" = "ascending"): { date: string; count: number }[] {
+    private genSortedActivityLog(direction: "ascending" | "descending" = "ascending"): habitActivity[] {
         const dates = Array.from(this.activityLog.keys()).sort((date1, date2) => {
             return new Date(date1).getTime() - new Date(date2).getTime();
         });
@@ -466,6 +479,11 @@ export default class Habit implements SharableItem {
 
         return sortedData;
     }
+
+    getSortedActivityLog() {
+        return this.sortedActivityLog
+    }
+
 
     logItem(date: Date, quantity: number, overwrite = false) {
         const dateKey = date.toDateString();

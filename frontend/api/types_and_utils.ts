@@ -81,7 +81,7 @@ export type SimpleDate = {
     year: number;
 };
 
-export type DateRange = {
+export interface DateRange {
     startDate: Date,
     endDate: Date,
 }
@@ -103,11 +103,23 @@ export const getDateFromSimpleDate = (simpleDate: { year: number, month: number,
     }
 }
 
+export const getFlooredDate = (date: Date) : Date => {
+    const simpleDate = getSimpleDateFromDate(date);
+    const flooredDate = getDateFromSimpleDate(simpleDate);
+    if (flooredDate === null) {
+        throw new Error("Get Floored Date: Unable to Parse Date")
+        
+    }
+
+    return flooredDate;
+
+}
+
 export const getElapsedDays = (startDate: Date, endDate: Date): number => {
 
     // convert them to simple dates and back because we want to only count days, not acknowledge hours or minutes (cleaner)
-    const formattedStartDate:Date = getDateFromSimpleDate(getSimpleDateFromDate(startDate)) || startDate;
-    const formattedEndDate:Date = getDateFromSimpleDate(getSimpleDateFromDate(endDate)) || endDate;
+    const formattedStartDate: Date = getDateFromSimpleDate(getSimpleDateFromDate(startDate)) || startDate;
+    const formattedEndDate: Date = getDateFromSimpleDate(getSimpleDateFromDate(endDate)) || endDate;
 
 
     const elapsedMS = formattedEndDate.getTime() - formattedStartDate.getTime();
@@ -283,7 +295,7 @@ export const getEarliestAndLatestDeadline = (tasks: Task[]): { earliest: Date | 
  * Currently: If No deadline is given, and one task, relative urgency auto sets to low
  * Do we want this?
  */
-export const getRelativeUrgencyOfDate = (date: Date | null, earliestDate: Date | null, latestDate: Date | null) : number => {
+export const getRelativeUrgencyOfDate = (date: Date | null, earliestDate: Date | null, latestDate: Date | null): number => {
     // If date is null, automatically give it minimum urgency which is 9
     if (!date) return 9;
 
@@ -326,4 +338,4 @@ const isPath = (path: string, route: UrlObject) => {
 
 export const isDailyCheckin = (habit: Habit) => {
     return habit.getID() == constants.DAILY_CHECK_IN;
-  };
+};
