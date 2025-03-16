@@ -26,7 +26,7 @@ const SegmentedButtons = ({
         const isSelected = segment.value === selectedSegment;
 
         const segmentColors = {
-          backgroundColor: isSelected ? theme.colors.secondary : "transparent",
+          backgroundColor: isSelected ? theme.colors.primary : "transparent",
           borderColor: theme.colors.primary,
         };
 

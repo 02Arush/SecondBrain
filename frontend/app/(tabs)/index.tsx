@@ -31,9 +31,6 @@ export default function TabOneScreen() {
 
 
           const userData = await getUserDataFromEmail(email);
-          // const habitList = Array.isArray(userData["habitList"])
-          //   ? userData["habitList"]
-          //   : JSON.parse(userData["habitList"]);
           const cloudHabitData = await retrieveHabitListCloud(email);
           const data = cloudHabitData.data || [];
           setCloudUserData(userData);

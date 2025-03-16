@@ -61,12 +61,12 @@ const _layout = () => {
             <IconButton
               icon="pencil"
               onPress={handleNavigateEditTask}
-              iconColor={isPath("createTask") ? theme.colors.tertiary : "grey"}
+              iconColor={isPath("createTask") ? theme.colors.primary : "grey"}
             />
             <IconButton
               disabled={!task}
               icon="account-group-outline"
-              iconColor={isPath("sharedUsers") ? theme.colors.tertiary : "grey"}
+              iconColor={isPath("sharedUsers") ? theme.colors.primary : "grey"}
               onPress={handleNavigateSharedUsers}
             />
           </View>

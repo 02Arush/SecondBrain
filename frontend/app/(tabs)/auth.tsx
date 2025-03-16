@@ -143,7 +143,9 @@ export default function auth() {
                     justifyContent: "flex-end",
                   }}
                 >
-                  <Button compact mode="text" onPress={handleForgotPassword}>
+                  <Button 
+                  buttonColor={theme.colors.primary}
+                  compact mode="text" onPress={handleForgotPassword}>
                     Forgot Password
                   </Button>
                 </View>

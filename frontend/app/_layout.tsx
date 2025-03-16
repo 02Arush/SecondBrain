@@ -7,6 +7,7 @@ import { useColorScheme, StyleSheet } from "react-native";
 import { PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 import { createNavStyle } from "@/components/createNavigationStyle";
 import { AuthProvider } from "@/contexts/authContext";
+import colorScheme, { getColor } from "@/constants/Colors";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -52,8 +53,11 @@ const customLightTheme = {
 
     ...MD3LightTheme.colors,
     tertiary: "#2b8a3e",
-    background: "#ebebf0",
-    surface: "#d8d8dc"
+    background: "#fefefe",
+    surface: "#d8d8dc",
+    primary: getColor("light", "purple") || "purple",
+    onPrimary: "#fefefe",
+
   },
 };
 
@@ -65,6 +69,9 @@ const customDarkTheme = {
     background: "#000000",
     surface: "rgb(28, 28, 30)",
     tertiary: "#2f9e44",
+    primary: getColor("dark", "purple") || "purple",
+    onPrimary: "#fefefe",
+
   },
 };
 

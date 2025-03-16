@@ -233,7 +233,7 @@ const ViewHabitLogLayout = () => {
               {!isDailyCheckin(habit) && (
                 <IconButton
                   iconColor={
-                    isPath("editHabit") ? theme.colors.tertiary : "grey"
+                    isPath("editHabit") ? theme.colors.primary : "grey"
                   }
                   icon="clipboard-edit-outline"
                   onPress={handleNavigateToEditHabit}
@@ -242,12 +242,12 @@ const ViewHabitLogLayout = () => {
               <IconButton
                 icon="timetable"
                 onPress={handleNavigateToAverages}
-                iconColor={isPath("averages") ? theme.colors.tertiary : "grey"}
+                iconColor={isPath("averages") ? theme.colors.primary : "grey"}
               ></IconButton>
               <IconButton
                 icon="chart-bar"
                 onPress={handleNavigateToChart}
-                iconColor={isPath("barCharts") ? theme.colors.tertiary : "grey"}
+                iconColor={isPath("barCharts") ? theme.colors.primary : "grey"}
               />
               {!isDailyCheckin(habit) && (
                 <IconButton
