@@ -60,7 +60,7 @@ const barCharts = () => {
     ],
   };
 
-  const barColor: string = scheme == "dark" ? theme.colors.primary : "black";
+  const barColor: string = theme.colors.primary;
   const chartConfig = {
     backgroundGradientFrom: "#FFF",
     backgroundGradientFromOpacity: 0.0,
@@ -84,10 +84,8 @@ const barCharts = () => {
     <View>
       <View style={styles.row}>
         <View style={{ flex: 1 }}>
-          <Text>Past:</Text>
-        </View>
-        <View style={{ flex: 6 }}>
           <SegmentedButtons
+          width={100}
             segments={[
               { value: "7", label: "1 Week" },
               { value: "14", label: "2 Weeks" },

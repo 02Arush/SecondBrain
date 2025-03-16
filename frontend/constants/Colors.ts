@@ -2,22 +2,28 @@ const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
 
 
+const globals = {
+  purple: "#8455F3",
+  green: "#24845c",
+  lime: "#528823"
+}
+
 const colorScheme: any = {
   light: {
     text: '#000',
-    background: '#fff',
+    background: '#fefefe',
     tint: tintColorLight,
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
 
 
-    green: "#2f9e44",
-    lime: "#94d82d",
+    green: globals.green,
+    lime: globals.lime,
     yellow: "#fab005",
     orange: "#f76707",
-    red: "#e03131",
+    red: "#ce4257",
     blue: "#1c7ed6",
-    purple: "#8455F3",
+    purple: globals.purple,
 
 
   },
@@ -28,13 +34,13 @@ const colorScheme: any = {
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
 
-    green: "#2f9e44",
-    lime: "#94d82d",
+    green: globals.green,
+    lime: globals.lime,
     yellow: "#fab005",
     orange: "#f76707",
-    red: "#e03131",
+    red: "#ce4257",
     blue: "#1c7ed6",
-    purple: "#8455F3"
+    purple: globals.purple,
   },
 };
 

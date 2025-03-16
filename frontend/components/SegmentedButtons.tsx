@@ -12,12 +12,14 @@ type propTypes = {
   segments: SegmentButton[];
   selectedSegment: string;
   setSelectedSegment: (item: string) => void;
+  width?: number
 };
 
 const SegmentedButtons = ({
   segments,
   selectedSegment,
   setSelectedSegment,
+  width
 }: propTypes) => {
   const theme = useTheme();
   return (
@@ -33,7 +35,7 @@ const SegmentedButtons = ({
         return (
           <Pressable
             key={segment.value}
-            style={{ ...styles.segmentButton, ...segmentColors }}
+            style={{ ...styles.segmentButton, ...segmentColors, width }}
             onPress={() => setSelectedSegment(segment.value)}
           >
             <Text
@@ -67,5 +69,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  
   },
 });

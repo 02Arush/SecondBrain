@@ -54,7 +54,6 @@ const customLightTheme = {
     ...MD3LightTheme.colors,
     tertiary: "#2b8a3e",
     background: "#fefefe",
-    surface: "#d8d8dc",
     primary: getColor("light", "purple") || "purple",
     onPrimary: "#fefefe",
 

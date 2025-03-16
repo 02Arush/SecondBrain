@@ -190,8 +190,6 @@ const styles = StyleSheet.create({
 
   xAxisLabelContainer: {
     position: "absolute",
-    borderWidth: 1,
-    // borderColor: "red",
     bottom: 10,
     width: "100%",
     flexDirection: "row",
@@ -202,8 +200,6 @@ const styles = StyleSheet.create({
   yAxisLabelContainer: {
     position: "absolute",
     left: -130,
-    borderWidth: 1,
-    // borderColor: "orange",
     transform: [{ rotate: "-90deg" }],
     width: "100%",
     flexDirection: "row",
