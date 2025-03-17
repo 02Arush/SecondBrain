@@ -13,7 +13,7 @@ import {
 } from "@/api/types_and_utils";
 import { AuthContext } from "@/contexts/authContext";
 import { retrieveTasks } from "@/api/taskStorage";
-import Task from "@/api/task";
+import Task from "@/api/models/task";
 import ScatterPlot from "@/components/Scatterplot";
 const tasksScatterplot = () => {
   const { email, setEmail } = useContext(AuthContext);

@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 import { getSignedInUser } from '@/api/db_ops';
 import { AuthContext } from './authContext';
-import Task from "@/api/task";
+import Task from "@/api/models/task";
 import { getTask } from '@/api/taskStorage';
 
 const TaskContext = createContext(null);

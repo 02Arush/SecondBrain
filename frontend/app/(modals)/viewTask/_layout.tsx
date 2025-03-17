@@ -5,7 +5,7 @@ import { Text, IconButton } from "react-native-paper";
 import { useFocusEffect } from "expo-router";
 import { useTheme } from "react-native-paper";
 import { AuthContext } from "@/contexts/authContext";
-import Task from "@/api/task";
+import Task from "@/api/models/task";
 import { getTask } from "@/api/taskStorage";
 import { updateTask, deleteTask } from "@/api/taskStorage";
 import constants from "@/constants/constants";

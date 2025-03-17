@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
 } from "react-native-paper";
 import { useFocusEffect } from "expo-router";
-import Habit, { HabitGoal } from "@/api/habit";
+import Habit, { HabitGoal } from "@/api/models/habit";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { getHabit, updateHabit } from "@/api/storage";

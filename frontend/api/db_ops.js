@@ -11,17 +11,17 @@ import {
 } from 'firebase/auth';
 import { addDoc, getDocs, getFirestore, query, updateDoc, where, deleteDocs } from 'firebase/firestore'
 import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
-import Habit from "./habit";
+import Habit from "./models/habit";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from "react-native";
-import Task from "./task";
+import Task from "./models/task";
 import { ROLE_POWERS, isAnonymous } from "@/constants/constants";
 import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail } from "./types_and_utils";
 import { sharedItemType } from "./types_and_utils";
 import constants from "@/constants/constants";
 import { email } from "./types_and_utils";
 import { sharedUser } from "./types_and_utils";
-import { SharableItem } from "./SharableItem";
+import { SharableItem } from "./models/SharableItem";
 import { getHabitFromID, updateHabit, changeUserHabitRole, createHabitInUserCollection } from "@/api/cloud_ops/habits"
 import { changeUserTaskRole, createTaskInUserCollection, updateTask, getTaskItem } from "./cloud_ops/tasks";
 

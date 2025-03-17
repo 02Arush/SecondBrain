@@ -12,7 +12,7 @@ import TaskItem from "@/components/TaskItem";
 import { router, useFocusEffect } from "expo-router";
 import { AuthContext } from "@/contexts/authContext";
 import { filterOptions as filters } from "@/api/types_and_utils";
-import Task from "@/api/task";
+import Task from "@/api/models/task";
 import Select from "@/components/Select";
 import { retrieveTasks } from "@/api/taskStorage";
 import { removeData } from "@/api/storage";

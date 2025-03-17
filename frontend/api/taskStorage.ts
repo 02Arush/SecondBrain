@@ -1,4 +1,4 @@
-import Task from "./task";
+import Task from "./models/task";
 import { storeData, retrieveData } from "./storage";
 import { isAnonymous, constants } from "@/constants/constants";
 import { getTasksForUser, setCompleted, deleteTask as deleteTaskFromCloud, getTaskItem, updateTask as updateTaskCloud, createTask as createTaskCloud } from "./cloud_ops/tasks";

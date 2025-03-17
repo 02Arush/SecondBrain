@@ -1,7 +1,7 @@
 import { StyleSheet, View, TouchableOpacity } from "react-native";
 import React, { useState, useContext, useCallback, useEffect } from "react";
 import { useRouteInfo, useRouter } from "expo-router/build/hooks";
-import Habit, { HabitJSON } from "@/api/habit";
+import Habit, { HabitJSON } from "@/api/models/habit";
 import {
   Text,
   IconButton,

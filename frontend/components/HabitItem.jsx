@@ -5,7 +5,7 @@ import { router, useRouter } from "expo-router";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
 import constants from "@/constants/constants";
 import { isDailyCheckin } from "@/api/types_and_utils";
-import Habit from "@/api/habit";
+import Habit from "@/api/models/habit";
 /**
  *
  *

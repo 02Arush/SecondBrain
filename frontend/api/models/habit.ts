@@ -5,11 +5,11 @@ import {
     stringToTimeFrame,
     ensureJSDate,
     timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays, sharedItemType
-} from "./types_and_utils";
+} from "../types_and_utils";
 import { SharableItem } from "./SharableItem";
 
-import { sharedUser, email } from "./types_and_utils";
-import { getFlooredDate } from "./types_and_utils";
+import { sharedUser, email } from "../types_and_utils";
+import { getFlooredDate } from "../types_and_utils";
 // TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
 
 export interface HabitJSON {

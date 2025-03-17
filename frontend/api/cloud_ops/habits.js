@@ -1,6 +1,6 @@
 
 
-import Habit from "./../habit"
+import Habit from "../models/habit"
 import { collection, setDoc, doc, getDoc, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
 import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail } from "./../types_and_utils"
 import { collections } from "./../db_ops"

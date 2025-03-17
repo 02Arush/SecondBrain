@@ -3,7 +3,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { createInvite } from "@/api/db_ops";
 
 import { Button, TextInput, IconButton, DataTable } from "react-native-paper";
-import { SharableItem } from "@/api/SharableItem";
+import { SharableItem } from "@/api/models/SharableItem";
 import { AuthContext } from "@/contexts/authContext";
 
 type propTypes = {

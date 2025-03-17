@@ -4,7 +4,7 @@ import HabitItem from "@/components/HabitItem";
 import { useState, useEffect, useContext } from "react";
 import { Button, Text, useTheme, ActivityIndicator } from "react-native-paper";
 import { router, useFocusEffect } from "expo-router";
-import Habit from "@/api/habit";
+import Habit from "@/api/models/habit";
 import { getSyncedDailyCheckin, retrieveLocalHabitList } from "@/api/storage";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { retrieveHabitList as retrieveHabitListCloud } from "@/api/cloud_ops/habits";
@@ -24,12 +24,8 @@ export default function TabOneScreen() {
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-
         setLoading(true);
-
         if (!isAnonymous(email)) {
-
-
           const userData = await getUserDataFromEmail(email);
           const cloudHabitData = await retrieveHabitListCloud(email);
           const data = cloudHabitData.data || [];
@@ -50,7 +46,6 @@ export default function TabOneScreen() {
         const ret = await getSyncedDailyCheckin(email);
         const dailyCheckinHabit = ret.data;
         setDailyCheckinHabit(dailyCheckinHabit);
-
         setLoading(false);
       };
       fetchData();

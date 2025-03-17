@@ -9,7 +9,7 @@ import {
   IconButton,
 } from "react-native-paper";
 import Select from "./Select";
-import { HabitGoal } from "@/api/habit";
+import { HabitGoal } from "@/api/models/habit";
 
 type props = {
   goal: HabitGoal | null;

@@ -4,7 +4,7 @@ import { TaskContext } from "@/contexts/taskContext";
 import { Text } from "react-native-paper";
 import RolesTable from "@/components/RolesTable";
 import { router } from "expo-router";
-import Task from "@/api/task";
+import Task from "@/api/models/task";
 import { Button } from "react-native-paper";
 import InviteUserUI from "@/components/InviteUserUI";
 import { useState, useCallback } from "react";

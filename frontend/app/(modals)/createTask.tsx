@@ -18,7 +18,7 @@ import { getDateFromSimpleDate } from "@/api/types_and_utils";
 import { Slider } from "@react-native-assets/slider";
 
 import { CustomSurface as Surface } from "@/components/CustomSurface";
-import Task from "@/api/task";
+import Task from "@/api/models/task";
 import { createTask as createTaskDB } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";

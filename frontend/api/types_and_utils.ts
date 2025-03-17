@@ -4,8 +4,8 @@ import { Timestamp } from "firebase/firestore";
 import { router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { UrlObject } from "expo-router/build/LocationProvider";
-import Task from "./task";
-import Habit from "./habit";
+import Task from "./models/task";
+import Habit from "./models/habit";
 
 /**
  * STRINGS

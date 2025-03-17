@@ -11,9 +11,9 @@ import { router } from "expo-router";
 import { createHabit, insertHabitLocalStorage } from "../../api/storage";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
-import { HabitGoal, HabitJSON } from "../../api/habit";
+import { HabitGoal, HabitJSON } from "../../api/models/habit";
 import OptionalGoal from "@/components/OptionalGoal";
-import Habit from "../../api/habit";
+import Habit from "../../api/models/habit";
 import { timeFrame } from "@/api/types_and_utils";
 const addHabit = () => {
   const [habitName, setHabitName] = useState("");

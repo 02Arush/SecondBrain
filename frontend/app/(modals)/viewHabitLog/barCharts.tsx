@@ -4,7 +4,7 @@ import { Text, useTheme } from "react-native-paper";
 import { BarChart } from "react-native-chart-kit";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { AuthContext } from "@/contexts/authContext";
-import Habit from "@/api/habit";
+import Habit from "@/api/models/habit";
 import { getFlooredDate } from "@/api/types_and_utils";
 
 import { HabitContext } from "@/contexts/habitContext";

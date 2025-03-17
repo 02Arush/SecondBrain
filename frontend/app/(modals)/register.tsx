@@ -13,7 +13,7 @@ import { AuthContext } from "@/contexts/authContext";
 import OutlineModal from "@/components/OutlineModal";
 import { isAnonymous } from "@/constants/constants";
 import { retrieveLocalHabitList } from "@/api/storage";
-import Habit from "@/api/habit";
+import Habit from "@/api/models/habit";
 import { uploadLocalTasks } from "@/api/taskStorage";
 import { useEffect } from "react";
 import { uploadLocalStorageHabits } from "@/api/storage";

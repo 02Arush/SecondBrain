@@ -1,8 +1,8 @@
 import constants from "@/constants/constants"
-import { filterOptions, getElapsedDays, sharedUser } from "./types_and_utils"
+import { filterOptions, getElapsedDays, sharedUser } from "../types_and_utils"
 import { ROLE_POWERS } from "@/constants/constants"
-import { email } from "./types_and_utils"
-import { ensureJSDate } from "./types_and_utils"
+import { email } from "../types_and_utils"
+import { ensureJSDate } from "../types_and_utils"
 import { SharableItem } from "./SharableItem"
 type taskProperty = "Name" | "Description" | "Importance" | "Deadline"
 

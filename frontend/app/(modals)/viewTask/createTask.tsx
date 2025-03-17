@@ -14,7 +14,7 @@ import {
 import constants from "@/constants/constants";
 import { deleteTask, updateTask } from "@/api/taskStorage";
 import { router } from "expo-router";
-import Task from "@/api/task";
+import Task from "@/api/models/task";
 import { AuthContext } from "@/contexts/authContext";
 import { TaskContext } from "@/contexts/taskContext";
 import { Button } from "react-native-paper";

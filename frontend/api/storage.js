@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Habit from './habit';
+import Habit from './models/habit';
 import { isAnonymous } from '@/constants/constants';
 
 import {
@@ -21,7 +21,7 @@ export const storeData = async (key, value) => {
     }
 }
 
-import { HabitGoal } from './habit';
+import { HabitGoal } from './models/habit';
 // Function to retrieve data
 export const retrieveData = async (key) => {
     try {
