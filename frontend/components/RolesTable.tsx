@@ -1,21 +1,17 @@
-import { StyleSheet, View } from "react-native";
-import React, { useContext, useState, useEffect } from "react";
-import { DataTable, IconButton, Text } from "react-native-paper";
-import { sharedUser } from "@/api/types_and_utils";
-import Select from "./Select";
-import { getNicknameFromEmail } from "@/api/types_and_utils";
-import { selectItem } from "./Select";
-import constants from "@/constants/constants";
-import { ensureJSDate, userSelectMap } from "@/api/types_and_utils";
-import { AuthContext } from "@/contexts/authContext";
-import { HabitContext } from "@/contexts/habitContext";
-import { email } from "@/api/types_and_utils";
-import { changeRoleOfUser, deleteInvite } from "@/api/db_ops";
+import { changeRoleOfUser, deleteInvite, getInvitesForItem, getSharedUsersForItem } from "@/api/db_ops";
 import Habit from "@/api/models/habit";
 import Task from "@/api/models/task";
-import { getSharedUsersForItem } from "@/api/db_ops";
-import { isAnonymous } from "@/constants/constants";
-import { getInvitesForItem } from "@/api/db_ops";
+import { ensureJSDate, getNicknameFromEmail } from "@/api/types_and_utils";
+import constants, { isAnonymous } from "@/constants/constants";
+import { AuthContext } from "@/contexts/authContext";
+import React, { useContext, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { DataTable, IconButton, Text } from "react-native-paper";
+import Select, { selectItem } from "./Select";
+
+import { userSelectMap } from "@/api/models/miscTypes";
+import { email, sharedUser } from "@/api/models/userTypes";
+
 type propTypes = {
   item: Habit | Task;
 };

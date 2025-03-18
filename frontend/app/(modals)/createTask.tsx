@@ -1,34 +1,26 @@
-import { StyleSheet, View, SafeAreaView } from "react-native";
-import React, { useState, useContext, useCallback } from "react";
-import { KeyboardAvoidingView, Platform } from "react-native";
-import {
-  Checkbox,
-  HelperText,
-  Text,
-  TextInput,
-  Button,
-  IconButton,
-  useTheme,
-} from "react-native-paper";
-import { SimpleDate } from "@/api/types_and_utils";
+import { SimpleDate } from "@/api/models/dateTypes";
+import { getDateFromSimpleDate } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import OutlineModal from "@/components/OutlineModal";
 import constants from "@/constants/constants";
-import { getDateFromSimpleDate } from "@/api/types_and_utils";
 import { Slider } from "@react-native-assets/slider";
-
-import { CustomSurface as Surface } from "@/components/CustomSurface";
-import Task from "@/api/models/task";
-import { createTask as createTaskDB } from "@/api/db_ops";
-import { AuthContext } from "@/contexts/authContext";
-import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
-import { updateTask } from "@/api/taskStorage";
-import { deleteTask, getTask } from "@/api/taskStorage";
-import { getSimpleDateFromDate } from "@/api/types_and_utils";
+import React, { useCallback, useContext, useState } from "react";
+import { KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, View } from "react-native";
 import {
-  retrieveLocalStorageTasks,
-  updateLocalTaskList,
-} from "@/api/taskStorage";
+  Button,
+  HelperText,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme
+} from "react-native-paper";
+
+import Task from "@/api/models/task";
+import { deleteTask, getTask, updateTask } from "@/api/taskStorage";
+import { getSimpleDateFromDate } from "@/api/types_and_utils";
+import { CustomSurface as Surface } from "@/components/CustomSurface";
+import { AuthContext } from "@/contexts/authContext";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 
 const createTask = () => {
   const theme = useTheme();

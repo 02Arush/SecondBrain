@@ -10,7 +10,8 @@ import {
 } from './cloud_ops/habits';
 
 import constants from '@/constants/constants';
-import { habitModificationType } from './types_and_utils';
+import { habitModificationType } from './models/miscTypes';
+
 // Function to store data
 export const storeData = async (key, value) => {
     try {

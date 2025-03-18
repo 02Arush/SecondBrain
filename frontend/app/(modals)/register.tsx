@@ -1,23 +1,19 @@
+import { registerAccount } from "@/api/db_ops";
+import { uploadLocalStorageHabits } from "@/api/storage";
+import { uploadLocalTasks } from "@/api/taskStorage";
+import { isValidEmail } from "@/api/types_and_utils";
+import OutlineModal from "@/components/OutlineModal";
+import { AuthContext } from "@/contexts/authContext";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
-  StyleSheet,
-  View,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
+  StyleSheet,
+  View,
 } from "react-native";
-import React, { useCallback, useContext, useState } from "react";
-import { Text, useTheme, TextInput, Button } from "react-native-paper";
-import { registerAccount } from "@/api/db_ops";
-import { router, useFocusEffect } from "expo-router";
-import { AuthContext } from "@/contexts/authContext";
-import OutlineModal from "@/components/OutlineModal";
-import { isAnonymous } from "@/constants/constants";
-import { retrieveLocalHabitList } from "@/api/storage";
-import Habit from "@/api/models/habit";
-import { uploadLocalTasks } from "@/api/taskStorage";
-import { useEffect } from "react";
-import { uploadLocalStorageHabits } from "@/api/storage";
-import { isValidEmail } from "@/api/types_and_utils";
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 
 const register = () => {
   // This is here such that the "sync local storage to new account" modal never initially displays

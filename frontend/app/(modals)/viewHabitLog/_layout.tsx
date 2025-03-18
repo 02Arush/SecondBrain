@@ -1,30 +1,27 @@
-import { StyleSheet, View } from "react-native";
-import React, { useState, useCallback, useContext, useEffect } from "react";
-import { Slot, router } from "expo-router";
-import { useLocalSearchParams, useRouteInfo } from "expo-router/build/hooks";
-import { CustomSurface as Surface } from "@/components/CustomSurface";
-import {
-  Text,
-  IconButton,
-  Icon,
-  useTheme,
-  TextInput,
-  Button,
-  ActivityIndicator,
-} from "react-native-paper";
-import { useFocusEffect } from "expo-router";
 import Habit, { HabitGoal } from "@/api/models/habit";
-import { AuthContext } from "@/contexts/authContext";
-import { isAnonymous } from "@/constants/constants";
+import { sharedUser } from "@/api/models/userTypes";
 import { getHabit, updateHabit } from "@/api/storage";
-import { HabitProvider } from "@/contexts/habitContext";
-import Select from "@/components/Select";
-import { sharedUser, timeFrame } from "@/api/types_and_utils";
-import { selectItem } from "@/components/Select";
-import { email } from "@/api/types_and_utils";
+import { isDailyCheckin } from "@/api/types_and_utils";
+import { CustomSurface as Surface } from "@/components/CustomSurface";
 import OptionalGoal from "@/components/OptionalGoal";
 import OutlineModal from "@/components/OutlineModal";
-import { isDailyCheckin } from "@/api/types_and_utils";
+import Select from "@/components/Select";
+import { isAnonymous } from "@/constants/constants";
+import { AuthContext } from "@/contexts/authContext";
+import { HabitProvider } from "@/contexts/habitContext";
+import { Slot, router, useFocusEffect } from "expo-router";
+import { useLocalSearchParams, useRouteInfo } from "expo-router/build/hooks";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme
+} from "react-native-paper";
+
 const ViewHabitLogLayout = () => {
   const route = useRouteInfo();
   const { habitID } = useLocalSearchParams<{ habitID: string }>();

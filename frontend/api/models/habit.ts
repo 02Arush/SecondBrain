@@ -2,14 +2,17 @@
 
 import constants, { ROLE_POWERS } from "@/constants/constants";
 import {
-    stringToTimeFrame,
     ensureJSDate,
-    timeFrame, habitGoal, timeFrameConverter, SimpleDate, getDateFromSimpleDate, getElapsedDays, sharedItemType
+    getDateFromSimpleDate, getElapsedDays,
+    stringToTimeFrame,
+    timeFrameConverter
 } from "../types_and_utils";
 import { SharableItem } from "./SharableItem";
+import { SimpleDate, timeFrame } from "./dateTypes";
+import { habitGoal } from "./miscTypes";
 
-import { sharedUser, email } from "../types_and_utils";
 import { getFlooredDate } from "../types_and_utils";
+import { email, sharedUser } from "./userTypes";
 // TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
 
 export interface HabitJSON {
@@ -22,7 +25,7 @@ export interface HabitJSON {
     "habitID": string
 }
 
-interface habitActivity  {
+interface habitActivity {
     date: string,
     count: number
 }
@@ -39,7 +42,7 @@ export default class Habit implements SharableItem {
     private sharedUsers: { [key: email]: sharedUser };
     private sortedActivityLog: Array<habitActivity>
 
-    
+
 
     constructor(name: string, unit: string = "NULL_UNIT", activityLog: Map<string, number> = new Map<string, number>(), goal?: HabitGoal, creationDate?: Date, habitID?: string, sharedUsers?: { [key: email]: sharedUser }) {
         this.habitName = name;

@@ -1,20 +1,20 @@
+import { DataPoint } from "@/api/models/miscTypes";
+import Task from "@/api/models/task";
+import { retrieveTasks } from "@/api/taskStorage";
 import {
-  StyleSheet,
-  View,
-  SafeAreaView,
-} from "react-native";
-import React, { useCallback, useContext, useState, useEffect } from "react";
-import { Text, useTheme, DataTable } from "react-native-paper";
-import { useFocusEffect } from "expo-router";
-import {
-  DataPoint,
   getEarliestAndLatestDeadline,
   getRelativeUrgencyOfDate,
 } from "@/api/types_and_utils";
-import { AuthContext } from "@/contexts/authContext";
-import { retrieveTasks } from "@/api/taskStorage";
-import Task from "@/api/models/task";
 import ScatterPlot from "@/components/Scatterplot";
+import { AuthContext } from "@/contexts/authContext";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useContext, useState } from "react";
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from "react-native";
+import { Text, useTheme } from "react-native-paper";
 const tasksScatterplot = () => {
   const { email, setEmail } = useContext(AuthContext);
 

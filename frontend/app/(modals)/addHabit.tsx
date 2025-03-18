@@ -1,20 +1,18 @@
+import { timeFrame } from "@/api/models/dateTypes";
+import OptionalGoal from "@/components/OptionalGoal";
+import { AuthContext } from "@/contexts/authContext";
+import { router } from "expo-router";
+import React, { useContext, useEffect, useState } from "react";
 import {
-  StyleSheet,
-  View,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
-import React, { useState, useContext, useEffect } from "react";
-import { TextInput, Button } from "react-native-paper";
-import { router } from "expo-router";
-import { createHabit, insertHabitLocalStorage } from "../../api/storage";
-import { AuthContext } from "@/contexts/authContext";
-import { isAnonymous } from "@/constants/constants";
-import { HabitGoal, HabitJSON } from "../../api/models/habit";
-import OptionalGoal from "@/components/OptionalGoal";
-import Habit from "../../api/models/habit";
-import { timeFrame } from "@/api/types_and_utils";
+import { Button, TextInput } from "react-native-paper";
+import Habit, { HabitGoal } from "../../api/models/habit";
+import { createHabit } from "../../api/storage";
 const addHabit = () => {
   const [habitName, setHabitName] = useState("");
   const [unit, setUnit] = useState("");

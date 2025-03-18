@@ -1,18 +1,5 @@
-import { StyleSheet, View, TouchableOpacity } from "react-native";
-import React, { useState, useContext, useCallback, useEffect } from "react";
-import { useRouteInfo, useRouter } from "expo-router/build/hooks";
-import Habit, { HabitJSON } from "@/api/models/habit";
-import {
-  Text,
-  IconButton,
-  // TextInput,
-  Button,
-  useTheme,
-  Divider,
-  TextInput,
-} from "react-native-paper";
+import { SimpleDate } from "@/api/models/dateTypes";
 import { deleteHabit, updateHabit } from "@/api/storage";
-import { AuthContext } from "@/contexts/authContext";
 import {
   filterTextToInteger,
   getDateFromSimpleDate,
@@ -21,9 +8,20 @@ import {
   shiftSimpleDate,
 } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
-import { SimpleDate } from "@/api/types_and_utils";
+import { AuthContext } from "@/contexts/authContext";
+import { useRouteInfo, useRouter } from "expo-router/build/hooks";
+import React, { useContext, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import {
+  // TextInput,
+  Button,
+  Divider,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme,
+} from "react-native-paper";
 // import { SegmentedButtons } from "react-native-paper";
-import SegmentedButtons from "@/components/SegmentedButtons";
 import { HabitContext } from "@/contexts/habitContext";
 
 // Q:

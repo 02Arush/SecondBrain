@@ -1,13 +1,11 @@
-import { StyleSheet, View } from "react-native";
-import React, { useState, useCallback, useContext } from "react";
-import { Text, useTheme } from "react-native-paper";
-import { DataTable } from "react-native-paper";
-import { timeFrameConverter } from "@/api/types_and_utils";
 import {
-  winrateToColor,
   roundToTwoDecimals,
-  timeFrame,
+   timeFrameConverter, winrateToColor
 } from "@/api/types_and_utils";
+import React, { useContext, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { DataTable, Text, useTheme } from "react-native-paper";
+import { timeFrame } from "@/api/models/dateTypes";
 
 import Select from "@/components/Select";
 import { HabitContext } from "@/contexts/habitContext";

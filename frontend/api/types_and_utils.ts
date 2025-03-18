@@ -6,6 +6,7 @@ import { useRouteInfo } from "expo-router/build/hooks";
 import { UrlObject } from "expo-router/build/LocationProvider";
 import Task from "./models/task";
 import Habit from "./models/habit";
+import { SimpleDate, timeFrame } from "./models/dateTypes";
 
 /**
  * STRINGS
@@ -66,8 +67,6 @@ export const weekDays = [
 ]
 
 
-export type timeFrame = "day" | "week" | "month" | "year"
-
 export const timeFrameConverter: Record<string, number> = {
     "day": 1,
     "week": 7,
@@ -75,16 +74,6 @@ export const timeFrameConverter: Record<string, number> = {
     "year": 365,
 }
 
-export type SimpleDate = {
-    day: number;
-    month: number;
-    year: number;
-};
-
-export interface DateRange {
-    startDate: Date,
-    endDate: Date,
-}
 
 export const getDateFromSimpleDate = (simpleDate: { year: number, month: number, day: number }): Date | null => {
     const { year, month, day } = simpleDate;
@@ -209,13 +198,6 @@ export const winrateToColor = (winrate: number, theme: "light" | "dark"): string
  OBJECTS
 */
 
-export type habitGoal = {
-    "goalNumber": number,
-    "unit": string,
-    "timeFrameCount": number,
-    "timeFrameLabel": string
-
-}
 
 export const filterOptions = {
     DATE_EARLIEST: "Date (Earliest)",
@@ -235,13 +217,6 @@ export const range = (startInclusive: number = 0, endExclusive: number): number[
     })
 
     return arr;
-}
-
-export interface DataPoint {
-    id: string;
-    x: number;
-    y: number;
-    data?: Record<string, any>;
 }
 
 
@@ -315,21 +290,6 @@ export const roundToTwoDecimals = (num: number): number => {
     return Math.round(num * 100) / 100;
 };
 
-export type habitModificationType = "log" | "modify"
-
-export type sharedItemType = "habit" | "task"
-
-export type sharedUser = {
-    email: string,
-    role: string,
-    joinDate: Date,
-}
-
-export type email = string;
-
-export type userSelectMap = Map<email, boolean>;
-
-
 
 // TODO LATER
 const isPath = (path: string, route: UrlObject) => {
@@ -339,3 +299,5 @@ const isPath = (path: string, route: UrlObject) => {
 export const isDailyCheckin = (habit: Habit) => {
     return habit.getID() == constants.DAILY_CHECK_IN;
 };
+
+

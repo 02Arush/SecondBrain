@@ -4,26 +4,27 @@
 // an auth token, otherwise show no habits and than allow me to sign in again
 
 // Import the functions you need from the SDKs you need
+import constants, { ROLE_POWERS, isAnonymous } from "@/constants/constants";
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from "firebase/app";
 import {
-    getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
-    signInWithEmailAndPassword, signOut, setPersistence, getReactNativePersistence, initializeAuth, deleteUser
+    createUserWithEmailAndPassword,
+    deleteUser,
+    getAuth,
+    getReactNativePersistence, initializeAuth,
+    onAuthStateChanged,
+    signInWithEmailAndPassword, signOut
 } from 'firebase/auth';
-import { addDoc, getDocs, getFirestore, query, updateDoc, where, deleteDocs } from 'firebase/firestore'
-import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
-import Habit from "./models/habit";
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, setDoc, where } from 'firebase/firestore';
 import { Platform } from "react-native";
+import Habit from "./models/habit";
 import Task from "./models/task";
-import { ROLE_POWERS, isAnonymous } from "@/constants/constants";
-import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail } from "./types_and_utils";
-import { sharedItemType } from "./types_and_utils";
-import constants from "@/constants/constants";
-import { email } from "./types_and_utils";
-import { sharedUser } from "./types_and_utils";
+import { email } from "./models/userTypes";
+import { getNicknameFromEmail, isValidEmail } from "./types_and_utils";
+
+import { changeUserHabitRole, createHabitInUserCollection, getHabitFromID, updateHabit } from "@/api/cloud_ops/habits";
+import { changeUserTaskRole, createTaskInUserCollection, getTaskItem, updateTask } from "./cloud_ops/tasks";
 import { SharableItem } from "./models/SharableItem";
-import { getHabitFromID, updateHabit, changeUserHabitRole, createHabitInUserCollection } from "@/api/cloud_ops/habits"
-import { changeUserTaskRole, createTaskInUserCollection, updateTask, getTaskItem } from "./cloud_ops/tasks";
 
 
 const firebaseConfig = {

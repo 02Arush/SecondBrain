@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Dimensions, Pressable } from "react-native";
 import { ensureJSDate } from "@/api/types_and_utils";
+import React, { useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 
-import { useTheme, Text, Surface, Button } from "react-native-paper";
-import { DataPoint } from "@/api/types_and_utils";
-import OutlineModal from "./OutlineModal";
+import { DataPoint } from "@/api/models/miscTypes";
 import constants from "@/constants/constants";
+import { Button, Text, useTheme } from "react-native-paper";
+import OutlineModal from "./OutlineModal";
 // Type definition for data points
 
 interface ScatterplotProps {

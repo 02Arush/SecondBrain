@@ -1,33 +1,26 @@
-import {
-  StyleSheet,
-  View,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import React, { useState, useContext, useEffect } from "react";
-import {
-  getSimpleDateFromDate,
-  getDateFromSimpleDate,
-  SimpleDate,
-} from "@/api/types_and_utils";
-import constants from "@/constants/constants";
-import { deleteTask, updateTask } from "@/api/taskStorage";
-import { router } from "expo-router";
+import { SimpleDate } from "@/api/models/dateTypes";
 import Task from "@/api/models/task";
+import { deleteTask, updateTask } from "@/api/taskStorage";
+import {
+  getDateFromSimpleDate,
+  getSimpleDateFromDate,
+} from "@/api/types_and_utils";
+import DatePicker from "@/components/DatePicker";
+import OutlineModal from "@/components/OutlineModal";
+import constants from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { TaskContext } from "@/contexts/taskContext";
-import { Button } from "react-native-paper";
-import OutlineModal from "@/components/OutlineModal";
-import {
-  useTheme,
-  Text,
-  IconButton,
-  TextInput,
-  HelperText,
-} from "react-native-paper";
 import { Slider } from "@react-native-assets/slider";
-import DatePicker from "@/components/DatePicker";
+import { router } from "expo-router";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from "react-native";
+import { Button, HelperText, IconButton, Text, TextInput, useTheme } from "react-native-paper";
 
 import { CustomSurface as Surface } from "@/components/CustomSurface";
 

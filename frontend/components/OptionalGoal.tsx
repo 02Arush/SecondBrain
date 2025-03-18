@@ -1,15 +1,14 @@
-import { StyleSheet, View } from "react-native";
-import React, { useState, useEffect } from "react";
+import { HabitGoal } from "@/api/models/habit";
 import { filterTextToInteger, stringToTimeFrame } from "@/api/types_and_utils";
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
 import {
-  TextInput,
-  Text,
-  Checkbox,
-  useTheme,
   IconButton,
+  Text,
+  TextInput,
+  useTheme
 } from "react-native-paper";
 import Select from "./Select";
-import { HabitGoal } from "@/api/models/habit";
 
 type props = {
   goal: HabitGoal | null;

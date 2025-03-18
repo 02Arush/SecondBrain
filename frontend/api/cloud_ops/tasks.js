@@ -1,13 +1,11 @@
 
 
-import { addDoc, getDocs, query, updateDoc, where, deleteDocs } from 'firebase/firestore'
-import { collection, setDoc, doc, getDoc, deleteDoc } from "firebase/firestore";
-import Task from '@/api/models/task'
-import { ROLE_POWERS, isAnonymous } from "@/constants/constants";
-import { filterOptions, getNicknameFromEmail, habitModificationType, isValidEmail, email, sharedItemType } from "@/api/types_and_utils";
-import constants from "@/constants/constants";
 import { collections } from '@/api/db_ops';
-
+import Task from '@/api/models/task';
+import { filterOptions } from "@/api/types_and_utils";
+import constants, { isAnonymous } from "@/constants/constants";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc } from 'firebase/firestore';
+import { email } from '../models/userTypes';
 
 /**
  * 

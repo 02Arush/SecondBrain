@@ -5,7 +5,7 @@ import { useFocusEffect } from "expo-router";
 import { getInvitesForUser, invitationAction } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
-import { sharedItemType } from "@/api/types_and_utils";
+import { sharedItemType } from "@/api/models/miscTypes";
 
 const viewInvites = () => {
   const [invites, setInvites] = useState<Array<any>>([]);

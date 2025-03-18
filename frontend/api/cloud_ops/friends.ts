@@ -1,31 +1,15 @@
 
-import { email } from "../types_and_utils"
-import { collections, getUserData, getUserDataFromEmail, getUserInvitesCollection, updateUserDoc } from "../db_ops"
-import { addDoc, getDocs, getFirestore, query, updateDoc, where, deleteDoc, DocumentReference, DocumentData } from 'firebase/firestore'
-import { collection, setDoc, doc, getDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { collections, getUserData, getUserInvitesCollection, updateUserDoc } from "../db_ops";
+import { email, friendReference, friendsList } from "./../models/userTypes";
 
-import { createInvite } from "../db_ops";
-import { updateCurrentUser } from "firebase/auth";
-
-type friendRequest = {
-    
-    sender: email,
-    recipient: email,
-    date: Date,
-}
-
-type friendItem = {
-    email: email,
-    reference: DocumentReference,
-    date: Date,
-}
+import { friendRequest } from "@/api/models/userTypes";
 
 
-const genFriendItem = (email: email): friendItem => {
+const genFriendItem = (email: email): friendReference => {
     return {
         email,
         reference: doc(collections.users, email),
-        date: new Date(),
     }
 }
 
@@ -69,7 +53,7 @@ export const createFriendship = async (sender: email, recipient: email) => {
         }
     } else {
         const senderFriends = senderDataRes.data
-        const recipientFriends = senderDataRes.data
+        const recipientFriends = recipientDataRes.data
 
         const recipientFriendItem = genFriendItem(recipient);
         const senderFriendItem = genFriendItem(sender);
@@ -78,15 +62,20 @@ export const createFriendship = async (sender: email, recipient: email) => {
         recipientFriends[sender] = senderFriendItem
 
         await updateUserDoc(sender, {
-            "friends" : senderFriends
+            "friends": senderFriends
         })
 
         await updateUserDoc(recipient, {
-            "friends" : recipientFriends
+            "friends": recipientFriends
         })
+
+        return {
+            ok: true,
+            message: `Friendship created between ${sender} and ${recipient}`
+        }
     }
 
-   
+
 
 }
 
@@ -102,18 +91,18 @@ const removeFriendship = (emailA: email, emailB: email) => {
 export const getFriendsOfUser = async (email: email): Promise<{
     ok: boolean,
     message: string,
-    data: Record<string, friendItem> | null
+    data: friendsList | null
 }> => {
     try {
 
         const userData = await getUserData(email);
-        if (!userData.data) { 
-            return {ok: false, message: "User data not found", data: null}
+        if (!userData.data) {
+            return { ok: false, message: "User data not found", data: null }
         }
 
-        const data: Record<string, friendItem> = userData.data["friends"] || {}
+        const data: friendsList = userData.data["friends"] || {}
         return {
-            ok: true, 
+            ok: true,
             message: "Success",
             data,
         }

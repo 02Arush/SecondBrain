@@ -1,35 +1,29 @@
+import { SimpleDate } from "@/api/models/dateTypes";
 import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-  FlatList,
-  useColorScheme,
-} from "react-native";
-import React, { useState, useEffect } from "react";
-import {
-  TextInput,
-  Text,
-  IconButton,
-  useTheme,
-  Button,
-} from "react-native-paper";
-import {
-  isEqualSimpleDate,
-  filterTextToInteger,
+  getDateFromSimpleDate,
   getSimpleDateFromDate,
-} from "@/api/types_and_utils";
-import {
-  SimpleDate,
+  isEqualSimpleDate,
   months,
   monthsAndDays,
   range,
-  weekDays,
+  weekDays
 } from "@/api/types_and_utils";
-import Select from "./Select";
-import { getDateFromSimpleDate } from "@/api/types_and_utils";
+import { getColor } from "@/constants/Colors";
+import React, { useEffect, useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  View,
+  useColorScheme
+} from "react-native";
+import {
+  Button,
+  IconButton,
+  Text,
+  useTheme
+} from "react-native-paper";
 import OutlineModal from "./OutlineModal";
-import colorScheme, { getColor } from "@/constants/Colors";
 
 type propTypes = {
   date: SimpleDate;

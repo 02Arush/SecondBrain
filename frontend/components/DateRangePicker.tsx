@@ -1,14 +1,11 @@
-import { StyleSheet, View } from "react-native";
-import React from "react";
-import { Text } from "react-native-paper";
-import DatePicker from "./DatePicker";
+import { DateRange, SimpleDate } from "@/api/models/dateTypes";
 import {
-  getSimpleDateFromDate,
   getDateFromSimpleDate,
-  DateRange,
-  SimpleDate,
+  getSimpleDateFromDate,
 } from "@/api/types_and_utils";
-
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import DatePicker from "./DatePicker";
 type propTypes = {
   dateRange: DateRange;
   setDateRange: (dateRange: DateRange) => void;

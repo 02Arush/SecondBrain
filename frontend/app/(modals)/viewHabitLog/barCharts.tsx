@@ -1,16 +1,14 @@
-import { StyleSheet, View, useColorScheme } from "react-native";
-import React, { useState, useEffect, useCallback, useContext } from "react";
-import { Text, useTheme } from "react-native-paper";
-import { BarChart } from "react-native-chart-kit";
-import { useRouteInfo } from "expo-router/build/hooks";
-import { AuthContext } from "@/contexts/authContext";
-import Habit from "@/api/models/habit";
 import { getFlooredDate } from "@/api/types_and_utils";
+import React, { useContext, useState } from "react";
+import { StyleSheet, View, useColorScheme } from "react-native";
+import { BarChart } from "react-native-chart-kit";
+import { useTheme } from "react-native-paper";
 
-import { HabitContext } from "@/contexts/habitContext";
+import { DateRange } from "@/api/models/dateTypes";
+import { getElapsedDays } from "@/api/types_and_utils";
 import DateRangePicker from "@/components/DateRangePicker";
-import { DateRange, getElapsedDays } from "@/api/types_and_utils";
 import SegmentedButtons from "@/components/SegmentedButtons";
+import { HabitContext } from "@/contexts/habitContext";
 
 const barCharts = () => {
   const scheme = useColorScheme();

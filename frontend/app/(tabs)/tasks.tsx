@@ -1,23 +1,18 @@
-import { StyleSheet, SafeAreaView, View, ScrollView } from "react-native";
-import React, { useState, useCallback, useContext } from "react";
+import Task from "@/api/models/task";
+import { retrieveTasks, setCompletedStatus } from "@/api/taskStorage";
+import { filterOptions as filters } from "@/api/types_and_utils";
+import Select from "@/components/Select";
+import TaskItem from "@/components/TaskItem";
+import { AuthContext } from "@/contexts/authContext";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useContext, useState } from "react";
+import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
 import {
-  useTheme,
-  Text,
+  ActivityIndicator,
   Button,
   IconButton,
-  Icon,
-  ActivityIndicator,
+  useTheme
 } from "react-native-paper";
-import TaskItem from "@/components/TaskItem";
-import { router, useFocusEffect } from "expo-router";
-import { AuthContext } from "@/contexts/authContext";
-import { filterOptions as filters } from "@/api/types_and_utils";
-import Task from "@/api/models/task";
-import Select from "@/components/Select";
-import { retrieveTasks } from "@/api/taskStorage";
-import { removeData } from "@/api/storage";
-import constants from "@/constants/constants";
-import { setCompletedStatus } from "@/api/taskStorage";
 
 const tasks = () => {
   const theme = useTheme();

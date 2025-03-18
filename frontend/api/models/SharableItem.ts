@@ -1,6 +1,7 @@
 
-import { email } from "../types_and_utils"
-import { sharedUser } from "../types_and_utils"
+
+
+import {email, sharedUser} from "./userTypes"
 
 
 // FUTURE: TURN THIS INTO AN ABSTRACT CLASS

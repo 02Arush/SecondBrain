@@ -1,11 +1,10 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import React from "react";
-import { Button, Icon, IconButton, Text } from "react-native-paper";
-import { router, useRouter } from "expo-router";
-import { CustomSurface as Surface } from "@/components/CustomSurface";
-import constants from "@/constants/constants";
-import { isDailyCheckin } from "@/api/types_and_utils";
 import Habit from "@/api/models/habit";
+import { isDailyCheckin } from "@/api/types_and_utils";
+import { CustomSurface as Surface } from "@/components/CustomSurface";
+import { router } from "expo-router";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { IconButton, Text } from "react-native-paper";
 /**
  *
  *
