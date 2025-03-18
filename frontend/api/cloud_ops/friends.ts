@@ -8,6 +8,7 @@ import { createInvite } from "../db_ops";
 import { updateCurrentUser } from "firebase/auth";
 
 type friendRequest = {
+    
     sender: email,
     recipient: email,
     date: Date,
@@ -32,7 +33,7 @@ const genFriendReqId = (sender: email) => {
     return "fr#" + sender;
 }
 
-const sendFriendRequest = async (sender: email, recipient: email) => {
+export const sendFriendRequest = async (sender: email, recipient: email) => {
     const request: friendRequest = {
         sender,
         recipient,
@@ -81,7 +82,7 @@ export const createFriendship = async (sender: email, recipient: email) => {
         })
 
         await updateUserDoc(recipient, {
-            "friends" : recipient
+            "friends" : recipientFriends
         })
     }
 
@@ -98,7 +99,7 @@ const removeFriendship = (emailA: email, emailB: email) => {
 
 }
 
-const getFriendsOfUser = async (email: email): Promise<{
+export const getFriendsOfUser = async (email: email): Promise<{
     ok: boolean,
     message: string,
     data: Record<string, friendItem> | null
