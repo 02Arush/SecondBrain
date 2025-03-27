@@ -1,21 +1,21 @@
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useState, Suspense } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import { ActivityIndicator, Text } from "react-native-paper";
 
 import { createFriendship, getFriendsOfUser } from "@/api/cloud_ops/friends";
-import { getInvitesForUser } from "@/api/db_ops";
-import { friend, friendsList } from "@/api/models/userTypes";
+import { getInvitesForUser, getUserData, getUserDataFromEmail } from "@/api/db_ops";
+import { friend, friendReference, friendsList } from "@/api/models/userTypes";
 import { AuthContext } from "@/contexts/authContext";
 import { useFocusEffect } from "expo-router";
 import { DataTable, Button } from "react-native-paper";
-
+import FriendsTable from "@/components/profile/friendsTable";
 const friends = () => {
   const [friendsList, setFriendsList] = useState<friendsList>({});
   const { email } = useContext(AuthContext);
 
-  const friendsListArray = Object.entries(friendsList);
+  const friendsListArray = Object.keys(friendsList);
 
-  
+
 
   useFocusEffect(
     useCallback(() => {
@@ -34,26 +34,23 @@ const friends = () => {
 
   const handleAddFriend = async () => {
     // For testing purposes
-    const res = await createFriendship("test2@jp.com", "test1@jp.com")
+    const res = await createFriendship("test2@jp.com", "test1@jp.com");
   };
+
 
   return (
     <SafeAreaView style={styles.contentContainer}>
       <View style={styles.pageContainer}>
-        <Text>Friends List</Text>
-        <DataTable>
-          <DataTable.Header>
-            <DataTable.Cell>Email</DataTable.Cell>
-          </DataTable.Header>
-          
-        </DataTable>
-        <Text>Add Friend Button</Text>
+       
+        
+        <FriendsTable friendsList = {friendsList} />
         <Button onPress={handleAddFriend}>Add Friend</Button>
         <Text>
           Pending Friend Requests Button (should also show in invites)
         </Text>
       </View>
     </SafeAreaView>
+
   );
 };
 

@@ -116,3 +116,6 @@ export const getFriendsOfUser = async (email: email): Promise<{
 
     }
 }
+
+// Given: doc Ref
+// displayableFriendData

@@ -5,9 +5,9 @@ export type friend = {
     email: string
 }
 
+export type email = string;
 
-export type friendRequest = {
-    
+export type friendRequest = {   
     sender: email,
     recipient: email,
     date: Date,
@@ -18,13 +18,15 @@ export type friendReference = {
     reference: DocumentReference,
 }
 
-export type friendsList = Record<string, friendReference>
+export type displayedFriendItem = {
+    email: email,
+    nickname: string
+}
 
+export type friendsList = Record<string, friendReference>
 
 export type sharedUser = {
     email: string,
     role: string,
     joinDate: Date,
 }
-
-export type email = string;
