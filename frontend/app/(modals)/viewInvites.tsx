@@ -6,6 +6,8 @@ import { getInvitesForUser, invitationAction } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
 import { sharedItemType } from "@/api/models/miscTypes";
+import { inviteType } from "@/api/models/miscTypes";
+import { friendRequest, isFriendRequest } from "@/api/models/userTypes";
 
 const viewInvites = () => {
   const [invites, setInvites] = useState<Array<any>>([]);
@@ -32,8 +34,29 @@ const viewInvites = () => {
     alert(res.message);
   };
 
-  const makeRow = (invite: any) => {
-    const { sender, itemType, itemID, role, itemName } = invite;
+  const makeRow = (invite: inviteType | friendRequest, key: number) => {
+    const { sender } = invite;
+
+    if (isFriendRequest(invite)) {
+      return (
+        <DataTable.Row key={key}>
+          <DataTable.Cell style={styles.senderCell}>
+            {sender}
+          </DataTable.Cell>
+          <DataTable.Cell style={styles.categoryCell}>
+            <Text>Friend Request</Text>
+          </DataTable.Cell>
+          <DataTable.Cell style={styles.actionsCell}>
+            <View style={styles.actionsCell}>
+              <IconButton icon="check" size={16} style={styles.actionIconStyles} />
+              <IconButton icon="delete" size={16} style={styles.actionIconStyles} />
+            </View>
+          </DataTable.Cell>
+        </DataTable.Row>
+      );
+    }
+
+    const { itemType, itemID, role, itemName } = invite;
 
     return (
       <DataTable.Row key={itemID}>
@@ -118,7 +141,7 @@ const viewInvites = () => {
             </DataTable.Title>
           </DataTable.Header>
         </DataTable>
-        {invites.map((invite) => makeRow(invite))}
+        {invites.map((invite, idx) => makeRow(invite, idx))}
       </View>
     </View>
   );

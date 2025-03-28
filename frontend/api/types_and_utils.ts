@@ -36,7 +36,7 @@ export const getNicknameFromEmail = (email: string): string => {
 export const isValidEmail = (email?: string): boolean => {
     if (!email) return false;
 
-    return email.length > 0 && email.includes("@")
+    return email.length > 0 && email.includes("@") && email.includes(".")
 }
 
 /**

@@ -36,7 +36,6 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
 
     handleRefresh();
 
-    // refreshPage();
   };
 
   const handleOpenShowingInvited = async () => {

@@ -22,3 +22,6 @@ export interface DataPoint {
     data?: Record<string, any>;
 }
 
+export type inviteType = {
+    sender: string, itemType: string, itemID: string, role: string, itemName: string
+}

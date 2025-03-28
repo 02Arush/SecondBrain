@@ -1,8 +1,8 @@
 import { StyleSheet, View } from "react-native";
 import React, { useState, useEffect, Suspense } from "react";
-import { ActivityIndicator, DataTable, Icon } from "react-native-paper";
+import { ActivityIndicator, DataTable, Icon , Divider} from "react-native-paper";
 import { displayedFriendItem, friendsList } from "@/api/models/userTypes";
-import { getUserData, getUserDataFromEmail } from "@/api/db_ops";
+import { getUserData } from "@/api/db_ops";
 
 const FriendsTable = ({ friendsList }: { friendsList: friendsList }) => {
   const friendsListArray = Object.keys(friendsList);
@@ -41,19 +41,22 @@ const FriendsTable = ({ friendsList }: { friendsList: friendsList }) => {
     <DataTable>
       <DataTable.Header>
         <DataTable.Cell>Nickname</DataTable.Cell>
-        <DataTable.Cell>More Information</DataTable.Cell>
-        <DataTable.Cell>Actions</DataTable.Cell>
+        <DataTable.Cell>Email</DataTable.Cell>
+        <DataTable.Cell style={styles.endCell}>Actions</DataTable.Cell>
       </DataTable.Header>
       <Suspense fallback={<ActivityIndicator size={"small"} />}>
         {fullFriendsData.map((item) => {
           return (
-            <DataTable.Row>
-              <DataTable.Cell>{item.nickname}</DataTable.Cell>
-              <DataTable.Cell>{item.email}</DataTable.Cell>
-              <DataTable.Cell>
-                <Icon source="close" size={20} />
-              </DataTable.Cell>
-            </DataTable.Row>
+            <>
+              <DataTable.Row>
+                <DataTable.Cell>{item.nickname}</DataTable.Cell>
+                <DataTable.Cell>{item.email}</DataTable.Cell>
+                <DataTable.Cell style={styles.endCell}>
+                  <Icon source="close" size={20} />
+                </DataTable.Cell>
+              </DataTable.Row>
+              <Divider />
+            </>
           );
         })}
       </Suspense>
@@ -63,4 +66,6 @@ const FriendsTable = ({ friendsList }: { friendsList: friendsList }) => {
 
 export default FriendsTable;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  endCell: { flexDirection: "row", justifyContent: "flex-end" },
+});

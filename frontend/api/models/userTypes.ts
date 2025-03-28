@@ -1,4 +1,5 @@
 import { DocumentReference } from "firebase/firestore"
+import { inviteType } from "./miscTypes";
 
 export type friend = {
     nickname: string,
@@ -11,6 +12,10 @@ export type friendRequest = {
     sender: email,
     recipient: email,
     date: Date,
+}
+
+export const isFriendRequest = (object: inviteType | friendRequest): object is friendRequest  => {
+    return object.hasOwnProperty("sender") && object.hasOwnProperty("recipient") && object.hasOwnProperty("date");
 }
 
 export type friendReference = {
