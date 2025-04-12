@@ -1,13 +1,10 @@
 import { StyleSheet, View, TouchableOpacity } from "react-native";
 import React, { useState, useContext, useCallback, useEffect } from "react";
 import { useRouteInfo, useRouter } from "expo-router/build/hooks";
-import Habit, { HabitJSON } from "@/api/habit";
 import {
   Text,
   IconButton,
-  // TextInput,
   Button,
-  useTheme,
   Divider,
   TextInput,
 } from "react-native-paper";
@@ -22,8 +19,6 @@ import {
 } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import { SimpleDate } from "@/api/types_and_utils";
-// import { SegmentedButtons } from "react-native-paper";
-import SegmentedButtons from "@/components/SegmentedButtons";
 import { HabitContext } from "@/contexts/habitContext";
 
 // Q:
@@ -31,12 +26,7 @@ import { HabitContext } from "@/contexts/habitContext";
 // But when I navigate from the HabitItem, it is NOT set correctly?
 const editHabit = () => {
   const todayDate = new Date();
-  const route = useRouteInfo();
-  const theme = useTheme();
   const router = useRouter();
-
-  //   const habit = useContext(HabitContext);
-
   const habit = useContext(HabitContext);
 
   const { email } = useContext(AuthContext);

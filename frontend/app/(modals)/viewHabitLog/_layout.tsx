@@ -278,7 +278,11 @@ const ViewHabitLogLayout = () => {
             value={habitUnitTxt}
             onChangeText={setHabitUnitTxt}
           />
+          
+
           <OptionalGoal goal={goal} setGoal={setGoal} unit={habitUnitTxt} />
+          
+
           <View style={styles.editModalActions}>
             <Button onPress={() => handleCloseEditsModal(false)}>Cancel</Button>
             <Button

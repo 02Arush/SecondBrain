@@ -310,8 +310,6 @@ export const getSyncedDailyCheckin = async (email) => {
         tempCloudHabit = new Habit("Daily Check-In", "Times");
 
         tempCloudHabit.setActivityLog(cloudActivityLog)
-
-
     }
 
     const mergedHabit = tempCloudHabit instanceof Habit ? Habit.mergeHabits("Daily Check-In", "Times", tempCloudHabit, lclDailyCheckin, true) : lclDailyCheckin
