@@ -84,6 +84,7 @@ export const attemptLogin = async (email, password) => {
 export const registerAccount = async (email, password) => {
     try {
 
+        email = email.toLowerCase()
         // TODO: GET "NICKNAME" AS EMAIL FOLLOWED BY TIMEMILLIS
         const nickname = getNicknameFromEmail(email);
 
@@ -186,6 +187,8 @@ export const getUserData = async (email) => {
 
     try {
         const docRef = doc(collections.users, email);
+
+        
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) {
             return { ok: false, message: `Document not found for user: ${email}`, data: null }

@@ -88,8 +88,7 @@ export default class Habit implements SharableItem {
     ensureProperCreationDate(): void {
         const currCreationDate: Date = this.getCreationDate()
         if (!(currCreationDate instanceof Date)) {
-            console.log("INVALID CURR CREATION DATE " + this.getName())
-            console.log(currCreationDate)
+     
         }
         const firstActDate = this.getFirstActivityDate()
 
@@ -168,7 +167,6 @@ export default class Habit implements SharableItem {
             habitList[idx] = habitJSONObject;
             return habitList;
         } else {
-            console.log("ERROR in updateHabitInHabitList")
             return { error: "Habit not found in habitList" }
         }
 

@@ -154,6 +154,10 @@ const Settings = () => {
           label="Friends"
           IconButton={<IconButton icon="eye" onPress={handleViewFriendsList} />}
         />
+        <Row
+          label="Delete Account"
+          IconButton={<IconButton icon="delete" onPress={handleShowConfirmPasswordModal} />}
+        />
 
         {showingConfirmPasswordModal && (
           <>

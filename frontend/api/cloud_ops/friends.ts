@@ -1,6 +1,6 @@
 
-import { doc, setDoc } from "firebase/firestore";
-import { collections, getUserData, getUserInvitesCollection, updateUserDoc } from "../db_ops";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { collections, getUserData, getUserDataFromEmail, getUserInvitesCollection, updateUserDoc } from "../db_ops";
 import { email, friendReference, friendsList } from "./../models/userTypes";
 
 import { friendRequest } from "@/api/models/userTypes";
@@ -46,7 +46,12 @@ export const createFriendship = async (sender: email, recipient: email) => {
     const senderDataRes = await getFriendsOfUser(sender);
     const recipientDataRes = await getFriendsOfUser(recipient);
 
+
+
     if (!senderDataRes.data || !recipientDataRes.data) {
+
+
+
         return {
             ok: false,
             message: "Unable to retrieve document fields"
@@ -79,7 +84,25 @@ export const createFriendship = async (sender: email, recipient: email) => {
 
 }
 
-const deleteFriendRequest = () => {
+export const deleteFriendRequest = async (sender: string, recipient: string): Promise<{ ok: boolean, message: string }> => {
+
+    try {
+        const invitesCollection = getUserInvitesCollection(recipient);
+        const reqId = genFriendReqId(sender);
+
+        // delete doc with the above ID from the invitesCollection
+        const docRef = doc(invitesCollection, reqId);
+        await deleteDoc(docRef);
+        return {
+            ok: true,
+            message: "Sucessfully deleted friend request from " + sender
+        }
+
+    } catch (err) {
+        return { ok: false, message: "Error deleting friend request " + JSON.stringify(err) }
+
+    }
+
 
 
 }
@@ -96,11 +119,13 @@ export const getFriendsOfUser = async (email: email): Promise<{
     try {
 
         const userData = await getUserData(email);
+
         if (!userData.data) {
             return { ok: false, message: "User data not found", data: null }
         }
 
         const data: friendsList = userData.data["friends"] || {}
+
         return {
             ok: true,
             message: "Success",

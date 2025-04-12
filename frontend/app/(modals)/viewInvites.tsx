@@ -8,6 +8,7 @@ import { isAnonymous } from "@/constants/constants";
 import { sharedItemType } from "@/api/models/miscTypes";
 import { inviteType } from "@/api/models/miscTypes";
 import { friendRequest, isFriendRequest } from "@/api/models/userTypes";
+import { createFriendship, deleteFriendRequest } from "@/api/cloud_ops/friends";
 
 const viewInvites = () => {
   const [invites, setInvites] = useState<Array<any>>([]);
@@ -30,7 +31,22 @@ const viewInvites = () => {
     action: "accept" | "reject"
   ) => {
     const res = await invitationAction(email, itemID, action);
-    fetchInviteData();
+    await fetchInviteData();
+    alert(res.message);
+  };
+
+  const handleCreateFriendship = async (sender: string) => {
+    const recipient = email;
+    const res = await createFriendship(sender, recipient);
+    const message = res.message;
+    await fetchInviteData();
+    alert(message);
+  };
+
+  const handleRejectFriendRequest = async (sender: string) => {
+    const recipient = email;
+    const res = await deleteFriendRequest(sender, recipient);
+    await fetchInviteData();
     alert(res.message);
   };
 
@@ -40,16 +56,25 @@ const viewInvites = () => {
     if (isFriendRequest(invite)) {
       return (
         <DataTable.Row key={key}>
-          <DataTable.Cell style={styles.senderCell}>
-            {sender}
-          </DataTable.Cell>
-          <DataTable.Cell style={styles.categoryCell}>
+          <DataTable.Cell style={styles.senderCell}>{sender}</DataTable.Cell>
+          <DataTable.Cell style={styles.nameCell}>
             <Text>Friend Request</Text>
           </DataTable.Cell>
+          <DataTable.Cell style={styles.categoryCell}>-</DataTable.Cell>
           <DataTable.Cell style={styles.actionsCell}>
             <View style={styles.actionsCell}>
-              <IconButton icon="check" size={16} style={styles.actionIconStyles} />
-              <IconButton icon="delete" size={16} style={styles.actionIconStyles} />
+              <IconButton
+                icon="delete"
+                size={16}
+                style={styles.actionIconStyles}
+                onPress={() => handleRejectFriendRequest(sender)}
+              />
+              <IconButton
+                icon="check"
+                size={16}
+                style={styles.actionIconStyles}
+                onPress={() => handleCreateFriendship(sender)}
+              />
             </View>
           </DataTable.Cell>
         </DataTable.Row>

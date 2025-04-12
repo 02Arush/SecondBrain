@@ -1,18 +1,18 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState, useEffect, Suspense } from "react";
-import { ActivityIndicator, DataTable, Icon , Divider} from "react-native-paper";
+import React, { useState, useEffect } from "react";
+import { ActivityIndicator, DataTable, Icon, Divider } from "react-native-paper";
 import { displayedFriendItem, friendsList } from "@/api/models/userTypes";
 import { getUserData } from "@/api/db_ops";
 
 const FriendsTable = ({ friendsList }: { friendsList: friendsList }) => {
   const friendsListArray = Object.keys(friendsList);
 
-  const [fullFriendsData, setFullFriendsData] = useState<displayedFriendItem[]>(
-    []
-  );
+  const [fullFriendsData, setFullFriendsData] = useState<displayedFriendItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       const newFullFriendsData = await Promise.all(
         friendsListArray.map(async (email) => {
           const res = await getUserData(email);
@@ -34,6 +34,7 @@ const FriendsTable = ({ friendsList }: { friendsList: friendsList }) => {
       );
 
       setFullFriendsData(filtered);
+      setLoading(false);
     })();
   }, [friendsList]);
 
@@ -44,22 +45,22 @@ const FriendsTable = ({ friendsList }: { friendsList: friendsList }) => {
         <DataTable.Cell>Email</DataTable.Cell>
         <DataTable.Cell style={styles.endCell}>Actions</DataTable.Cell>
       </DataTable.Header>
-      <Suspense fallback={<ActivityIndicator size={"small"} />}>
-        {fullFriendsData.map((item) => {
-          return (
-            <>
-              <DataTable.Row>
-                <DataTable.Cell>{item.nickname}</DataTable.Cell>
-                <DataTable.Cell>{item.email}</DataTable.Cell>
-                <DataTable.Cell style={styles.endCell}>
-                  <Icon source="close" size={20} />
-                </DataTable.Cell>
-              </DataTable.Row>
-              <Divider />
-            </>
-          );
-        })}
-      </Suspense>
+
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" />
+        </View>
+      ) : (
+        fullFriendsData.map((item, idx) => (
+          <DataTable.Row key={idx}>
+            <DataTable.Cell>{item.nickname}</DataTable.Cell>
+            <DataTable.Cell>{item.email}</DataTable.Cell>
+            <DataTable.Cell style={styles.endCell}>
+              <Icon source="close" size={20} />
+            </DataTable.Cell>
+          </DataTable.Row>
+        ))
+      )}
     </DataTable>
   );
 };
@@ -68,4 +69,5 @@ export default FriendsTable;
 
 const styles = StyleSheet.create({
   endCell: { flexDirection: "row", justifyContent: "flex-end" },
+  loadingContainer: { paddingVertical: 20, alignItems: "center" },
 });
