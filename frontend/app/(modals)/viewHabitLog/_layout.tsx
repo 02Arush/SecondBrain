@@ -25,6 +25,14 @@ import { email } from "@/api/types_and_utils";
 import OptionalGoal from "@/components/OptionalGoal";
 import OutlineModal from "@/components/OutlineModal";
 import { isDailyCheckin } from "@/api/types_and_utils";
+import { deleteHabit } from "@/api/storage";
+import SegmentedButtons from "@/components/SegmentedButtons";
+
+enum settingsTab {
+  PROPERTIES = "Properties",
+  ADVANCED = "Advanced",
+}
+
 const ViewHabitLogLayout = () => {
   const route = useRouteInfo();
   const { habitID } = useLocalSearchParams<{ habitID: string }>();
@@ -41,6 +49,9 @@ const ViewHabitLogLayout = () => {
   const [habitUnitTxt, setHabitUnitTxt] = useState(habit.getUnit());
   const [goal, setGoal] = useState(habit.getGoal());
   const [loading, setLoading] = useState(false);
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<settingsTab>(
+    settingsTab.PROPERTIES
+  );
 
   const getEmails = (users: { [key: string]: sharedUser }) => {
     return Object.keys(users);
@@ -141,6 +152,31 @@ const ViewHabitLogLayout = () => {
     }
   };
 
+  const handleDeleteHabit = async () => {
+    const res = await deleteHabit(email, habit);
+    if (res.ok) {
+      router.navigate("/");
+    } else {
+      alert("Error Deleting Habit\n" + res.message);
+    }
+
+    setEditModalOpen(false);
+  };
+
+  const handleResetHabitProgress = async () => {
+    const emptyActivityLog = new Map<string, number>();
+    habit.setActivityLog(emptyActivityLog);
+    const res = await updateHabit(email, habit, "log");
+    if (res.ok) {
+      alert("Activity Log has been reset for " + habit.getName());
+    } else {
+      alert("Error updating habit activity log. Try again later.");
+    }
+
+    setEditModalOpen(false);
+    router.navigate("/");
+  };
+
   const isPath = (path: string) => {
     return route.pathname.localeCompare(`/viewHabitLog/${path}`) === 0;
   };
@@ -204,7 +240,7 @@ const ViewHabitLogLayout = () => {
               {!isDailyCheckin(habit) && (
                 <View style={styles.habitInfoRight}>
                   <IconButton
-                    icon="pencil"
+                    icon="cog"
                     onPress={() => setEditModalOpen(true)}
                   />
                 </View>
@@ -254,7 +290,7 @@ const ViewHabitLogLayout = () => {
                   icon="account-group-outline"
                   onPress={handleNavigateToSharedUsers}
                   iconColor={
-                    isPath("sharedUsers") ? theme.colors.tertiary : "grey"
+                    isPath("sharedUsers") ? theme.colors.primary : "grey"
                   }
                 />
               )}
@@ -267,31 +303,76 @@ const ViewHabitLogLayout = () => {
         </View>
       </View>
       <OutlineModal showing={editModalOpen}>
-        <Surface style={{ padding: 12 }}>
-          <TextInput
-            label={"Habit Name"}
-            value={habitNameTxt}
-            onChangeText={setHabitNameTxt}
+        <View style={{ marginTop: 8 }}>
+          <SegmentedButtons
+            segments={[
+              { value: settingsTab.PROPERTIES },
+              { value: settingsTab.ADVANCED },
+            ]}
+            selectedSegment={selectedSettingsTab}
+            setSelectedSegment={(value) => {
+              setSelectedSettingsTab(value as settingsTab);
+            }}
           />
-          <TextInput
-            label={"Unit"}
-            value={habitUnitTxt}
-            onChangeText={setHabitUnitTxt}
-          />
-          
+        </View>
 
-          <OptionalGoal goal={goal} setGoal={setGoal} unit={habitUnitTxt} />
-          
+        <Surface
+          style={{
+            paddingHorizontal: 12,
+            height: 300,
+            justifyContent: "center",
+          }}
+        >
+          {selectedSettingsTab === settingsTab.PROPERTIES ? (
+            <>
+              <TextInput
+                label={"Habit Name"}
+                value={habitNameTxt}
+                onChangeText={setHabitNameTxt}
+              />
+              <TextInput
+                label={"Unit"}
+                value={habitUnitTxt}
+                onChangeText={setHabitUnitTxt}
+              />
 
-          <View style={styles.editModalActions}>
-            <Button onPress={() => handleCloseEditsModal(false)}>Cancel</Button>
-            <Button
-              onPress={() => handleCloseEditsModal(true)}
-              mode="contained"
+              <OptionalGoal goal={goal} setGoal={setGoal} unit={habitUnitTxt} />
+
+              <View style={styles.editModalActions}>
+                <Button onPress={() => handleCloseEditsModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onPress={() => handleCloseEditsModal(true)}
+                  mode="contained"
+                >
+                  Save
+                </Button>
+              </View>
+            </>
+          ) : (
+            <View
+              style={{
+                width: "100%",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              Save
-            </Button>
-          </View>
+              <View style={{ width: "75%" }}>
+                <Button onPress={handleResetHabitProgress} mode="contained">
+                  Reset All Progress
+                </Button>
+                <Button
+                  mode="text"
+                  textColor={theme.colors.error}
+                  onPress={handleDeleteHabit}
+                >
+                  Delete Habit
+                </Button>
+              </View>
+            </View>
+          )}
         </Surface>
       </OutlineModal>
     </HabitProvider>
@@ -369,6 +450,7 @@ const styles = StyleSheet.create({
   },
 
   editModalActions: {
+    marginTop: 20,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",

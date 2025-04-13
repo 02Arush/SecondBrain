@@ -265,7 +265,6 @@ const editHabit = () => {
         >
           Reset
         </Button>
-        <Button onPress={handleDeleteHabit}>Delete Habit</Button>
       </View>
     </View>
   );
