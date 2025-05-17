@@ -1,39 +1,23 @@
 import React, { useCallback, useContext, useState, Suspense } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
-import { ActivityIndicator, Text } from "react-native-paper";
 
-import { createFriendship, getFriendsOfUser, sendFriendRequest } from "@/api/cloud_ops/friends";
 import {
-  getInvitesForUser,
-  getUserData,
-  getUserDataFromEmail,
-} from "@/api/db_ops";
-import { friend, friendReference, friendsList } from "@/api/models/userTypes";
+  createFriendship,
+  getFriendsOfUser,
+  sendFriendRequest,
+} from "@/api/cloud_ops/friends";
 import { AuthContext } from "@/contexts/authContext";
-import { useFocusEffect } from "expo-router";
-import { DataTable, IconButton, TextInput, Button } from "react-native-paper";
+import { IconButton, TextInput, Button } from "react-native-paper";
 import FriendsTable from "@/components/profile/friendsTable";
+import { useFriendsList } from "@/hooks/useFriendsList";
 import { isValidEmail } from "@/api/types_and_utils";
 
 const friends = () => {
-  const [friendsList, setFriendsList] = useState<friendsList>({});
-
   const [showingAddFriendUI, setShowingAddFriendUI] = useState(false);
   const [emailToInviteTxt, setEmailToInviteTxt] = useState("");
   const { email } = useContext(AuthContext);
 
-  const friendsListArray = Object.keys(friendsList);
-
-  useFocusEffect(
-    useCallback(() => {
-      (async () => {
-        const invitesRes = await getInvitesForUser(email);
-        const friendsRes = await getFriendsOfUser(email);
-        const friendsList = friendsRes.data;
-        if (friendsList) setFriendsList(friendsList);
-      })();
-    }, [email])
-  );
+  const { friendsList } = useFriendsList();
 
   const handleDeleteFriend = () => {
     alert("Not Implemented");
@@ -44,23 +28,19 @@ const friends = () => {
   };
 
   const handleSendFriendRequest = async () => {
-
     if (isValidEmail(emailToInviteTxt)) {
-      const res = await sendFriendRequest(email, emailToInviteTxt)
+      const res = await sendFriendRequest(email, emailToInviteTxt);
       if (res.ok) {
-        alert("Friend request sent to: " + emailToInviteTxt)
+        alert("Friend request sent to: " + emailToInviteTxt);
         handleCloseAddFriend();
-
-        
       } else {
-        alert("Error sending friend request")
+        alert("Error sending friend request");
       }
 
       setEmailToInviteTxt("");
     } else {
-      alert("Invalid Email Address: " + emailToInviteTxt)
+      alert("Invalid Email Address: " + emailToInviteTxt);
     }
-      
   };
 
   const handleCloseAddFriend = async () => {
@@ -81,7 +61,10 @@ const friends = () => {
             }}
           >
             <View style={{ flex: 3 }}>
-              <TextInput value={emailToInviteTxt} onChangeText={setEmailToInviteTxt}/>
+              <TextInput
+                value={emailToInviteTxt}
+                onChangeText={setEmailToInviteTxt}
+              />
             </View>
             <View style={{ flex: 1, flexDirection: "row" }}>
               <IconButton icon="close" onPress={handleCloseAddFriend} />

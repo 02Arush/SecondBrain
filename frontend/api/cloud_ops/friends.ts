@@ -2,7 +2,6 @@
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { collections, getUserData, getUserDataFromEmail, getUserInvitesCollection, updateUserDoc } from "../db_ops";
 import { email, friendReference, friendsList } from "./../models/userTypes";
-
 import { friendRequest } from "@/api/models/userTypes";
 
 
@@ -85,7 +84,6 @@ export const createFriendship = async (sender: email, recipient: email) => {
 }
 
 export const deleteFriendRequest = async (sender: string, recipient: string): Promise<{ ok: boolean, message: string }> => {
-
     try {
         const invitesCollection = getUserInvitesCollection(recipient);
         const reqId = genFriendReqId(sender);
@@ -102,9 +100,6 @@ export const deleteFriendRequest = async (sender: string, recipient: string): Pr
         return { ok: false, message: "Error deleting friend request " + JSON.stringify(err) }
 
     }
-
-
-
 }
 
 const removeFriendship = (emailA: email, emailB: email) => {
@@ -141,6 +136,13 @@ export const getFriendsOfUser = async (email: email): Promise<{
 
     }
 }
+
+// const getFriendsWithNicknames = (friendsList: friendsList): Record<email, string> => {
+
+//     const keys = Object.keys(friendsList)
+//     return
+   
+// }
 
 // Given: doc Ref
 // displayableFriendData

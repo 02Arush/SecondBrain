@@ -2,7 +2,7 @@ import { StyleSheet, View, Pressable } from "react-native";
 import React from "react";
 import { Button, IconButton, Text, useTheme } from "react-native-paper";
 
-type SegmentButton = {
+export type SegmentButton = {
   value: string;
   icon?: string;
   label?: string;
