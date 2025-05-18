@@ -15,8 +15,9 @@ import { useFetchInvitedUsers } from "@/hooks/useFetchInvitedUsers";
 
 type propTypes = {
   item: Habit | Task;
+  onRefresh?: () => void
 };
-const RolesTable = ({ item }: propTypes) => {
+const RolesTable = ({ item, onRefresh }: propTypes) => {
   const [sharedUsers, setSharedUsers] = useState<{
     [key: string]: sharedUser;
   }>(item.getSharedUsers());
@@ -62,6 +63,7 @@ const RolesTable = ({ item }: propTypes) => {
     const res = await deleteInvite(recipient, itemID);
     alert(res.message);
     handleRefreshInvitedUsers()
+    if (onRefresh) onRefresh();
   };
 
   const TableRow = (
