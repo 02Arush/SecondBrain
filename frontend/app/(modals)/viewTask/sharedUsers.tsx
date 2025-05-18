@@ -13,22 +13,30 @@ const viewSharedUsers = () => {
   const task: Task | null = useContext(TaskContext);
 
   const [count, setCount] = useState(0);
-
   const handleRefresh = () => {
     setCount(count + 1);
   };
 
   if (!task) {
     // Render nothing while navigating to avoid the "setState during render" warning
+    router.navigate("/(tabs)/tasks");
     return null;
   }
 
   return (
     <View>
-      <RolesTable key={count} item={task} />
+      <RolesTable
+        key={`task__roles__${count}`}
+        item={task}
+        onRefresh={handleRefresh}
+      />
       <View style={styles.inviteSection}>
         <View style={styles.inputSection}>
-          <InviteUserUI item={task} onRefresh={handleRefresh} />
+          <InviteUserUI
+            key={`task__inviteUI__${count}`}
+            item={task}
+            onRefresh={handleRefresh}
+          />
         </View>
       </View>
     </View>

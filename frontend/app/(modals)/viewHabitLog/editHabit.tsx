@@ -19,18 +19,6 @@ import {
 } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import { AuthContext } from "@/contexts/authContext";
-import { useRouteInfo, useRouter } from "expo-router/build/hooks";
-import React, { useContext, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import {
-  // TextInput,
-  Button,
-  Divider,
-  IconButton,
-  Text,
-  TextInput,
-  useTheme,
-} from "react-native-paper";
 // import { SegmentedButtons } from "react-native-paper";
 import { HabitContext } from "@/contexts/habitContext";
 

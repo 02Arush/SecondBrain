@@ -1,9 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import React, {
-  useContext,
-  useState,
-  useCallback,
-} from "react";
+import React, { useContext, useState, useCallback } from "react";
 import { HabitContext } from "@/contexts/habitContext";
 import { AuthContext } from "@/contexts/authContext";
 import constants, { isAnonymous } from "@/constants/constants";
@@ -25,15 +21,22 @@ const sharedUsers = () => {
   );
 
   const [count, setCount] = useState(0);
-
   const handleRefresh = () => {
-    setCount(count+1)
-  }
+    setCount(count + 1);
+  };
 
   return (
     <View style={styles.componentContainer}>
-      <RolesTable key={`rolesTable__${count}`} item={habit} onRefresh={handleRefresh}/>
-      <InviteUserUI key={`inviteUserUI__${count}`} item={habit} onRefresh={handleRefresh} />
+      <RolesTable
+        key={`habits__rolesTable__${count}`}
+        item={habit}
+        onRefresh={handleRefresh}
+      />
+      <InviteUserUI
+        key={`habits__inviteUserUI__${count}`}
+        item={habit}
+        onRefresh={handleRefresh}
+      />
     </View>
   );
 };
