@@ -6,12 +6,12 @@ import {
     getDateFromSimpleDate, getElapsedDays,
     stringToTimeFrame,
     timeFrameConverter
-} from "../types_and_utils";
+} from "../api/types_and_utils";
 import { SharableItem } from "./SharableItem";
 import { SimpleDate, timeFrame } from "./dateTypes";
 import { habitGoal } from "./miscTypes";
 
-import { getFlooredDate } from "../types_and_utils";
+import { getFlooredDate } from "../api/types_and_utils";
 import { email, sharedUser } from "./userTypes";
 // TODO: CREATE A COMMON TYPE FOR SHAREDUSER, BECAUSE STRING ARRAY MAY NOT BE ACCURATE
 

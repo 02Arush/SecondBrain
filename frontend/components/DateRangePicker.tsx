@@ -1,4 +1,4 @@
-import { DateRange, SimpleDate } from "@/api/models/dateTypes";
+import { DateRange, SimpleDate } from "@/models/dateTypes";
 import {
   getDateFromSimpleDate,
   getSimpleDateFromDate,

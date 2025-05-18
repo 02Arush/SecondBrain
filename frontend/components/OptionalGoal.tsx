@@ -1,4 +1,4 @@
-import { HabitGoal } from "@/api/models/habit";
+import { HabitGoal } from "@/models/habit";
 import { filterTextToInteger, stringToTimeFrame } from "@/api/types_and_utils";
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";

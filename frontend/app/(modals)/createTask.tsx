@@ -1,4 +1,4 @@
-import { SimpleDate } from "@/api/models/dateTypes";
+import { SimpleDate } from "@/models/dateTypes";
 import { getDateFromSimpleDate } from "@/api/types_and_utils";
 import DatePicker from "@/components/DatePicker";
 import OutlineModal from "@/components/OutlineModal";
@@ -15,7 +15,7 @@ import {
   useTheme
 } from "react-native-paper";
 
-import Task from "@/api/models/task";
+import Task from "@/models/task";
 import { deleteTask, getTask, updateTask } from "@/api/taskStorage";
 import { getSimpleDateFromDate } from "@/api/types_and_utils";
 import { CustomSurface as Surface } from "@/components/CustomSurface";

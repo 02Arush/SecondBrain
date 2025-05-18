@@ -17,14 +17,14 @@ import {
 } from 'firebase/auth';
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, setDoc, where } from 'firebase/firestore';
 import { Platform } from "react-native";
-import Habit from "./models/habit";
-import Task from "./models/task";
-import { email } from "./models/userTypes";
+import Habit from "../models/habit";
+import Task from "../models/task";
+import { email } from "../models/userTypes";
 import { getNicknameFromEmail, isValidEmail } from "./types_and_utils";
 
 import { changeUserHabitRole, createHabitInUserCollection, getHabitFromID, updateHabit } from "@/api/cloud_ops/habits";
 import { changeUserTaskRole, createTaskInUserCollection, getTaskItem, updateTask } from "./cloud_ops/tasks";
-import { SharableItem } from "./models/SharableItem";
+import { SharableItem } from "../models/SharableItem";
 
 
 const firebaseConfig = {

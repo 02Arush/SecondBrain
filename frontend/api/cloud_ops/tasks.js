@@ -1,11 +1,11 @@
 
 
 import { collections } from '@/api/db_ops';
-import Task from '@/api/models/task';
+import Task from '@/models/task';
 import { filterOptions } from "@/api/types_and_utils";
 import constants, { isAnonymous } from "@/constants/constants";
 import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc } from 'firebase/firestore';
-import { email } from '../models/userTypes';
+import { email } from '../../models/userTypes';
 
 /**
  * 

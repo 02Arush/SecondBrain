@@ -4,7 +4,7 @@ import { StyleSheet, View, useColorScheme } from "react-native";
 import { BarChart } from "react-native-chart-kit";
 import { useTheme } from "react-native-paper";
 
-import { DateRange } from "@/api/models/dateTypes";
+import { DateRange } from "@/models/dateTypes";
 import { getElapsedDays } from "@/api/types_and_utils";
 import DateRangePicker from "@/components/DateRangePicker";
 import SegmentedButtons from "@/components/SegmentedButtons";

@@ -8,7 +8,7 @@ import {
   Text,
   DataTable,
 } from "react-native-paper";
-import { SharableItem } from "@/api/models/SharableItem";
+import { SharableItem } from "@/models/SharableItem";
 import { AuthContext } from "@/contexts/authContext";
 
 import OutlineModal from "./OutlineModal";

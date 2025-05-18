@@ -5,9 +5,9 @@ import { useFocusEffect } from "expo-router";
 import { getInvitesForUser, invitationAction } from "@/api/db_ops";
 import { AuthContext } from "@/contexts/authContext";
 import { isAnonymous } from "@/constants/constants";
-import { sharedItemType } from "@/api/models/miscTypes";
-import { inviteType } from "@/api/models/miscTypes";
-import { friendRequest, isFriendRequest } from "@/api/models/userTypes";
+import { sharedItemType } from "@/models/miscTypes";
+import { inviteType } from "@/models/miscTypes";
+import { friendRequest, isFriendRequest } from "@/models/userTypes";
 import { createFriendship, deleteFriendRequest } from "@/api/cloud_ops/friends";
 
 const viewInvites = () => {

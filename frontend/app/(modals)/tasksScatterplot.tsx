@@ -1,5 +1,5 @@
-import { DataPoint } from "@/api/models/miscTypes";
-import Task from "@/api/models/task";
+import { DataPoint } from "@/models/miscTypes";
+import Task from "@/models/task";
 import { retrieveTasks } from "@/api/taskStorage";
 import {
   getEarliestAndLatestDeadline,

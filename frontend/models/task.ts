@@ -1,5 +1,5 @@
 import constants, { ROLE_POWERS } from "@/constants/constants"
-import {  ensureJSDate, filterOptions, getElapsedDays } from "../types_and_utils"
+import {  ensureJSDate, filterOptions, getElapsedDays } from "../api/types_and_utils"
 import { SharableItem } from "./SharableItem"
 type taskProperty = "Name" | "Description" | "Importance" | "Deadline"
 import {email, sharedUser} from "./userTypes"

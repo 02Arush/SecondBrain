@@ -1,8 +1,8 @@
 
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { collections, getUserData, getUserDataFromEmail, getUserInvitesCollection, updateUserDoc } from "../db_ops";
-import { email, friendReference, friendsList } from "./../models/userTypes";
-import { friendRequest } from "@/api/models/userTypes";
+import { email, friendReference, friendsList } from "../../models/userTypes";
+import { friendRequest } from "@/models/userTypes";
 
 
 const genFriendItem = (email: email): friendReference => {

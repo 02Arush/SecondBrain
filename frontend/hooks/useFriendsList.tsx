@@ -1,6 +1,6 @@
 import React, { useState, useContext, useCallback } from "react";
 import { AuthContext } from "@/contexts/authContext";
-import { friendsList } from "@/api/models/userTypes";
+import { friendsList } from "@/models/userTypes";
 import { useFocusEffect } from "expo-router";
 import { getFriendsOfUser } from "@/api/cloud_ops/friends";
 

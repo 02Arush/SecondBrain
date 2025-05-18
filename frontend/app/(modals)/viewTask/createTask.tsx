@@ -1,5 +1,5 @@
-import { SimpleDate } from "@/api/models/dateTypes";
-import Task from "@/api/models/task";
+import { SimpleDate } from "@/models/dateTypes";
+import Task from "@/models/task";
 import { deleteTask, updateTask } from "@/api/taskStorage";
 import {
   getDateFromSimpleDate,

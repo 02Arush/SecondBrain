@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { ActivityIndicator, DataTable, Icon, Divider } from "react-native-paper";
-import { displayedFriendItem, friendsList } from "@/api/models/userTypes";
+import { displayedFriendItem, friendsList } from "@/models/userTypes";
 import { getUserData } from "@/api/db_ops";
 
 const FriendsTable = ({ friendsList }: { friendsList: friendsList }) => {

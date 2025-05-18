@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { SharableItem } from "@/api/models/SharableItem";
+import { SharableItem } from "@/models/SharableItem";
 import { getInvitesForItem } from "@/api/db_ops";
 
 export function useFetchInvitedUsers(item: SharableItem) {

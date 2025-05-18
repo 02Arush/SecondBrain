@@ -4,7 +4,7 @@ import HabitItem from "@/components/HabitItem";
 import { useState, useEffect, useContext } from "react";
 import { Button, Text, useTheme, ActivityIndicator } from "react-native-paper";
 import { router, useFocusEffect } from "expo-router";
-import Habit from "@/api/models/habit";
+import Habit from "@/models/habit";
 import { getSyncedDailyCheckin, retrieveLocalHabitList } from "@/api/storage";
 import { getUserDataFromEmail } from "@/api/db_ops";
 import { retrieveHabitList as retrieveHabitListCloud } from "@/api/cloud_ops/habits";

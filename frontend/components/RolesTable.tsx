@@ -1,6 +1,6 @@
 import { changeRoleOfUser, deleteInvite, getInvitesForItem, getSharedUsersForItem } from "@/api/db_ops";
-import Habit from "@/api/models/habit";
-import Task from "@/api/models/task";
+import Habit from "@/models/habit";
+import Task from "@/models/task";
 import { ensureJSDate, getNicknameFromEmail } from "@/api/types_and_utils";
 import constants, { isAnonymous } from "@/constants/constants";
 import { AuthContext } from "@/contexts/authContext";
@@ -9,8 +9,8 @@ import { StyleSheet, View } from "react-native";
 import { DataTable, IconButton, Text } from "react-native-paper";
 import Select, { selectItem } from "./Select";
 
-import { userSelectMap } from "@/api/models/miscTypes";
-import { email, sharedUser } from "@/api/models/userTypes";
+import { userSelectMap } from "@/models/miscTypes";
+import { email, sharedUser } from "@/models/userTypes";
 import { useFetchInvitedUsers } from "@/hooks/useFetchInvitedUsers";
 
 type propTypes = {

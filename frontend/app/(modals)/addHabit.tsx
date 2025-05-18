@@ -1,4 +1,4 @@
-import { timeFrame } from "@/api/models/dateTypes";
+import { timeFrame } from "@/models/dateTypes";
 import OptionalGoal from "@/components/OptionalGoal";
 import { AuthContext } from "@/contexts/authContext";
 import { router } from "expo-router";
@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { Button, TextInput } from "react-native-paper";
-import Habit, { HabitGoal } from "../../api/models/habit";
+import Habit, { HabitGoal } from "../../models/habit";
 import { createHabit } from "../../api/storage";
 const addHabit = () => {
   const [habitName, setHabitName] = useState("");

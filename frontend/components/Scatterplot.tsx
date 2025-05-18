@@ -2,7 +2,7 @@ import { ensureJSDate } from "@/api/types_and_utils";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { DataPoint } from "@/api/models/miscTypes";
+import { DataPoint } from "@/models/miscTypes";
 import constants from "@/constants/constants";
 import { Button, Text, useTheme } from "react-native-paper";
 import OutlineModal from "./OutlineModal";

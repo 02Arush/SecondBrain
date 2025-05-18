@@ -1,5 +1,5 @@
-import Habit, { HabitGoal } from "@/api/models/habit";
-import { sharedUser } from "@/api/models/userTypes";
+import Habit, { HabitGoal } from "@/models/habit";
+import { sharedUser } from "@/models/userTypes";
 import { getHabit, updateHabit } from "@/api/storage";
 import { isDailyCheckin } from "@/api/types_and_utils";
 import { CustomSurface as Surface } from "@/components/CustomSurface";

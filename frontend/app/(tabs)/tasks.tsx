@@ -1,4 +1,4 @@
-import Task from "@/api/models/task";
+import Task from "@/models/task";
 import { retrieveTasks, setCompletedStatus } from "@/api/taskStorage";
 import { filterOptions as filters } from "@/api/types_and_utils";
 import Select from "@/components/Select";

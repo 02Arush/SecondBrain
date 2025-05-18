@@ -8,7 +8,7 @@ import {
   Divider,
   TextInput,
 } from "react-native-paper";
-import { SimpleDate } from "@/api/models/dateTypes";
+import { SimpleDate } from "@/models/dateTypes";
 import { deleteHabit, updateHabit } from "@/api/storage";
 import {
   filterTextToInteger,

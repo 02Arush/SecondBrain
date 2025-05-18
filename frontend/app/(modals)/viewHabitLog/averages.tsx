@@ -5,7 +5,7 @@ import {
 import React, { useContext, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { DataTable, Text, useTheme } from "react-native-paper";
-import { timeFrame } from "@/api/models/dateTypes";
+import { timeFrame } from "@/models/dateTypes";
 
 import Select from "@/components/Select";
 import { HabitContext } from "@/contexts/habitContext";

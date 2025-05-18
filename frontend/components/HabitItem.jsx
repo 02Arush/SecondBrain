@@ -1,4 +1,4 @@
-import Habit from "@/api/models/habit";
+import Habit from "@/models/habit";
 import { isDailyCheckin } from "@/api/types_and_utils";
 import { CustomSurface as Surface } from "@/components/CustomSurface";
 import { router } from "expo-router";

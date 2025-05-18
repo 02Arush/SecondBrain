@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import { getSignedInUser } from '@/api/db_ops';
 
 const HabitContext = createContext(new Habit("NULL_HABIT", "NULL_UNIT"));
-import Habit from '@/api/models/habit';
+import Habit from '@/models/habit';
 
 const HabitProvider = ({ initialHabit, children }) => {
 
