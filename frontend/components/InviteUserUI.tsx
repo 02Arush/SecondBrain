@@ -19,7 +19,7 @@ import { useFriendsList } from "@/hooks/useFriendsList";
 
 type propTypes = {
   item: SharableItem;
-  handleRefresh: () => void;
+  onRefresh: () => void;
 };
 
 enum InviteModalTabs {
@@ -27,7 +27,7 @@ enum InviteModalTabs {
   EMAIL = "email",
 }
 
-const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
+const InviteUserUI = ({ item, onRefresh: handleRefresh }: propTypes) => {
   const [showingAddEmail, setShowingAddEmail] = useState(false);
   const [emailRecipient, setEmailRecipient] = useState<string>("");
 
@@ -41,13 +41,12 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
   );
 
   const inviteTabSegments: Array<SegmentButton> = [
-    { value: "friends_list", label: "Friends List" },
-    { value: "email", label: "Email" },
+    { value: "friends_list", label: "Via Friends List" },
+    { value: "email", label: "Via Email" },
   ];
 
   const handleOpenInviteEmail = () => {
     setShowingAddEmail(true);
-    
   };
 
   const handleCloseShowingEmail = () => {
@@ -71,44 +70,22 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
 
   const FriendsListComponent = () => {
     const friendEmails = Object.keys(friendsList);
-    console.log("In friends list component")
-    console.log(invitedUsers)
-
-    console.log("and the friend emails")
-    console.log(friendEmails)
-
-    invitedUsers.forEach(invite => {
-      console.log("INVITE...")
-      console.log(invite)
-    })
 
     return (
       <DataTable>
         <DataTable.Header>
           <DataTable.Cell>Email</DataTable.Cell>
-          <DataTable.Cell>Send Invite</DataTable.Cell>
+          <DataTable.Cell style={{flexDirection: "row", justifyContent: "flex-end"}}>Send Invite</DataTable.Cell>
         </DataTable.Header>
 
         {friendEmails.map((friendEmail) => {
-
-          console.log("in map, getting invited users")
           let friendAlreadyInvited = false;
-          invitedUsers.forEach(invite => {
-
-            console.log("IN MAP...")
-            console.log(invite)
-            console.log("TYPE:")
-            console.log(typeof invite === "object")
-
+          invitedUsers.forEach((invite) => {
             if (typeof invite === "object") {
-              console.log(friendEmail)
-              console.log(invite["recipient"])
-
-              friendAlreadyInvited = friendAlreadyInvited || invite["recipient"] == friendEmail
+              friendAlreadyInvited =
+                friendAlreadyInvited || invite["recipient"] == friendEmail;
             }
-          })
-         
-
+          });
 
           return (
             <DataTable.Row key={`invite__${friendEmail}`}>
@@ -124,25 +101,27 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
       </DataTable>
     );
   };
-
   const InviteNewEmailComponent = ({
     emailRecipient,
     handleSetEmailRecipient,
+    showingAddEmail,
   }: {
     emailRecipient: string;
     handleSetEmailRecipient: (s: string) => void;
+    showingAddEmail: boolean;
   }) => {
+    if (!showingAddEmail) return null;
+
     return (
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
-          display: showingAddEmail ? "flex" : "none",
         }}
       >
         <TextInput
           value={emailRecipient}
-          onChangeText={(text) => handleSetEmailRecipient(text)}
+          onChangeText={handleSetEmailRecipient}
           keyboardType="email-address"
           dense
           label={"Email"}
@@ -172,13 +151,27 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
             )}
 
             {selectedInviteTab === InviteModalTabs.EMAIL && (
-              <InviteNewEmailComponent
-                emailRecipient={emailRecipient}
-                handleSetEmailRecipient={(s: string) => setEmailRecipient(s)}
-              />
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <TextInput
+                  value={emailRecipient}
+                  onChangeText={(text) => setEmailRecipient(text)}
+                  keyboardType="email-address"
+                  dense
+                  label={"Email"}
+                />
+                <IconButton
+                  disabled={emailRecipient.trim().length === 0}
+                  icon={"send-outline"}
+                  onPress={() => handleSubmitInviteEmail(emailRecipient)}
+                />
+              </View>
             )}
           </View>
-
           <Button onPress={handleCloseShowingEmail}>Close</Button>
         </View>
       </OutlineModal>

@@ -33,7 +33,7 @@ const sharedUsers = () => {
   return (
     <View style={styles.componentContainer}>
       <RolesTable key={`rolesTable__${count}`} item={habit} onRefresh={handleRefresh}/>
-      <InviteUserUI key={`inviteUserUI__${count}`} item={habit} handleRefresh={handleRefresh} />
+      <InviteUserUI key={`inviteUserUI__${count}`} item={habit} onRefresh={handleRefresh} />
     </View>
   );
 };

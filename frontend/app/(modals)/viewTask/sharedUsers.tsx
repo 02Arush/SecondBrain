@@ -28,7 +28,7 @@ const viewSharedUsers = () => {
       <RolesTable key={count} item={task} />
       <View style={styles.inviteSection}>
         <View style={styles.inputSection}>
-          <InviteUserUI item={task} handleRefresh={handleRefresh} />
+          <InviteUserUI item={task} onRefresh={handleRefresh} />
         </View>
       </View>
     </View>
