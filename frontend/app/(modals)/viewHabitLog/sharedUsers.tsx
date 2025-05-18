@@ -3,7 +3,6 @@ import React, {
   useContext,
   useState,
   useCallback,
-  SetStateAction,
 } from "react";
 import { HabitContext } from "@/contexts/habitContext";
 import { AuthContext } from "@/contexts/authContext";

@@ -12,11 +12,6 @@ import { useState, useCallback } from "react";
 const viewSharedUsers = () => {
   const task: Task | null = useContext(TaskContext);
 
-  // useEffect(() => {
-  //   if (!task || task == null || task == undefined) {
-  //   }
-  // }, [task]);
-
   const [count, setCount] = useState(0);
 
   const handleRefresh = () => {

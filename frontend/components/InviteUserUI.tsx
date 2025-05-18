@@ -1,14 +1,20 @@
 import { StyleSheet, View } from "react-native";
 import React, { useState, useContext, useEffect } from "react";
 import { createInvite } from "@/api/db_ops";
-
-import { Button, TextInput, IconButton, Text } from "react-native-paper";
+import {
+  Button,
+  TextInput,
+  IconButton,
+  Text,
+  DataTable,
+} from "react-native-paper";
 import { SharableItem } from "@/api/models/SharableItem";
 import { AuthContext } from "@/contexts/authContext";
 
 import OutlineModal from "./OutlineModal";
 import SegmentedButtons, { SegmentButton } from "./SegmentedButtons";
 import FriendsTable from "./profile/friendsTable";
+import { useFetchInvitedUsers } from "@/hooks/useFetchInvitedUsers";
 import { useFriendsList } from "@/hooks/useFriendsList";
 
 type propTypes = {
@@ -27,6 +33,7 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
 
   const { email } = useContext(AuthContext);
   const { friendsList } = useFriendsList();
+  const { invites: invitedUsers } = useFetchInvitedUsers(item);
 
   const [showingInvited, setShowingInvited] = useState(false);
   const [selectedInviteTab, setSelectedInviteTab] = useState<InviteModalTabs>(
@@ -40,14 +47,14 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
 
   const handleOpenInviteEmail = () => {
     setShowingAddEmail(true);
+    
   };
 
   const handleCloseShowingEmail = () => {
     setShowingAddEmail(false);
   };
 
-  const handleSubmitInviteEmail = async () => {
-    const recipient = emailRecipient;
+  const handleSubmitInviteEmail = async (recipient: string) => {
     const res = await createInvite(email, recipient, item);
     alert(res.message);
     setShowingAddEmail(false);
@@ -62,21 +69,69 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
     setSelectedInviteTab(s as InviteModalTabs);
   };
 
-  const InviteEmailField = () => {};
-
   const FriendsListComponent = () => {
-    const emails = Object.keys(friendsList)
-    return emails.map((email) => {
-      return <Text>{email}</Text>
+    const friendEmails = Object.keys(friendsList);
+    console.log("In friends list component")
+    console.log(invitedUsers)
+
+    console.log("and the friend emails")
+    console.log(friendEmails)
+
+    invitedUsers.forEach(invite => {
+      console.log("INVITE...")
+      console.log(invite)
     })
-    
+
+    return (
+      <DataTable>
+        <DataTable.Header>
+          <DataTable.Cell>Email</DataTable.Cell>
+          <DataTable.Cell>Send Invite</DataTable.Cell>
+        </DataTable.Header>
+
+        {friendEmails.map((friendEmail) => {
+
+          console.log("in map, getting invited users")
+          let friendAlreadyInvited = false;
+          invitedUsers.forEach(invite => {
+
+            console.log("IN MAP...")
+            console.log(invite)
+            console.log("TYPE:")
+            console.log(typeof invite === "object")
+
+            if (typeof invite === "object") {
+              console.log(friendEmail)
+              console.log(invite["recipient"])
+
+              friendAlreadyInvited = friendAlreadyInvited || invite["recipient"] == friendEmail
+            }
+          })
+         
+
+
+          return (
+            <DataTable.Row key={`invite__${friendEmail}`}>
+              <DataTable.Cell>{friendEmail}</DataTable.Cell>
+              <IconButton
+                disabled={friendAlreadyInvited}
+                icon={"send-outline"}
+                onPress={() => handleSubmitInviteEmail(friendEmail)}
+              />
+            </DataTable.Row>
+          );
+        })}
+      </DataTable>
+    );
   };
 
-  const FriendItemRow = () => {
-
-  }
-
-  const InviteNewEmailComponent = () => {
+  const InviteNewEmailComponent = ({
+    emailRecipient,
+    handleSetEmailRecipient,
+  }: {
+    emailRecipient: string;
+    handleSetEmailRecipient: (s: string) => void;
+  }) => {
     return (
       <View
         style={{
@@ -87,15 +142,15 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
       >
         <TextInput
           value={emailRecipient}
-          onChangeText={(text) => setEmailRecipient(text)}
+          onChangeText={(text) => handleSetEmailRecipient(text)}
           keyboardType="email-address"
           dense
           label={"Email"}
         />
-        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-          <IconButton icon={"close"} onPress={handleCloseShowingEmail} />
-          <IconButton icon={"check"} onPress={handleSubmitInviteEmail} />
-        </View>
+        <IconButton
+          icon={"send-outline"}
+          onPress={() => handleSubmitInviteEmail(emailRecipient)}
+        />
       </View>
     );
   };
@@ -111,13 +166,18 @@ const InviteUserUI = ({ item, handleRefresh }: propTypes) => {
             selectedSegment={selectedInviteTab}
             setSelectedSegment={handleSetModalInviteTab}
           />
-          {selectedInviteTab === InviteModalTabs.FRIENDS_LIST && (
-            <FriendsListComponent />
-          )}
+          <View style={{ padding: 16 }}>
+            {selectedInviteTab === InviteModalTabs.FRIENDS_LIST && (
+              <FriendsListComponent />
+            )}
 
-          {selectedInviteTab === InviteModalTabs.EMAIL && (
-            <InviteNewEmailComponent />
-          )}
+            {selectedInviteTab === InviteModalTabs.EMAIL && (
+              <InviteNewEmailComponent
+                emailRecipient={emailRecipient}
+                handleSetEmailRecipient={(s: string) => setEmailRecipient(s)}
+              />
+            )}
+          </View>
 
           <Button onPress={handleCloseShowingEmail}>Close</Button>
         </View>

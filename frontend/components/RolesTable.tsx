@@ -11,6 +11,7 @@ import Select, { selectItem } from "./Select";
 
 import { userSelectMap } from "@/api/models/miscTypes";
 import { email, sharedUser } from "@/api/models/userTypes";
+import { useFetchInvitedUsers } from "@/hooks/useFetchInvitedUsers";
 
 type propTypes = {
   item: Habit | Task;
@@ -54,25 +55,13 @@ const RolesTable = ({ item }: propTypes) => {
     fetchSharedUserData();
   };
 
-  const [invitedUsers, setInvitedUsers] = useState<Array<any>>([]);
-
-  const fetchInvitedUsers = async () => {
-    if (!isAnonymous(email)) {
-      const res = await getInvitesForItem(item);
-      setInvitedUsers(res.data);
-    }
-  };
-
-  useEffect(() => {
-    fetchInvitedUsers();
-  }, [item]);
-
+  const {invites: invitedUsers, handleRefresh: handleRefreshInvitedUsers} = useFetchInvitedUsers(item);
   const handleDeleteInvite = async (invite: any) => {
     const { recipient, itemID } = invite;
 
     const res = await deleteInvite(recipient, itemID);
     alert(res.message);
-    fetchInvitedUsers();
+    handleRefreshInvitedUsers()
   };
 
   const TableRow = (
