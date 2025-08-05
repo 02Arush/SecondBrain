@@ -21,7 +21,7 @@ import { getFriendsOfUser } from "@/api/cloud_ops/friends";
 import Register from "../../components/profile/register";
 import Settings from "../../components/profile/settings";
 
-export default function auth() {
+export default function account() {
   const { email, setEmail } = useContext(AuthContext);
   const theme = useTheme();
 
